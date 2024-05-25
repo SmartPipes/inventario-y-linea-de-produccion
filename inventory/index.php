@@ -41,10 +41,11 @@
     <div class="container">
         <h1>Sistema de Inventario y Linea de Producción de SmartPipes</h1>
         <img src="img/SmartPipesLogo.png" alt="Logo">
-        <p>Cumming Soon</p>
+        <p>Coming Soon</p>
         <?php
             echo "<p>Fecha y hora actuales: " . date("Y-m-d H:i:s") . "</p>";
         ?>
     </div>
 </body>
 </html>
+

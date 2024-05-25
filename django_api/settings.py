@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-*=t0x0bsgrgjhl14k^gh-icl@ix&stl+r(4p57ttew!-w7i(nc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['smartpipes.cloud', 'www.smartpipes.cloud']
 
 
 # Application definition
