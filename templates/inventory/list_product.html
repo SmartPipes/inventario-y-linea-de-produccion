@@ -5,32 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>List of Products</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: left;
+            margin: 10px;
+            flex: 1 1 calc(25% - 20px); /* Ajusta el porcentaje para el número de columnas deseado */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 200px; /* Ancho mínimo para una tarjeta */
+        }
+        .product-image {
+            height: 50px;
+            width: 50px;
+            object-fit: cover;
+            margin-left: 10px; /* Añadir espacio entre la imagen y el texto */
+        }
+        .product-info {
+            font-size: 14px;
+            flex-grow: 1;
+        }
+        .product-info h5 {
+            font-size: 16px;
+            margin: 0 0 5px 0;
+        }
+        .product-info p {
+            margin: 2px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h2>List of Products</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Image</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.description }}</td>
-                    <td>{{ product.price }}</td>
-                    <td>{{ product.get_status_display }}</td>
-                    <td>{{ product.image_icon }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="d-flex flex-wrap">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-info">
+                    <h5>{{ product.name }}</h5>
+                    <p>Precio: ${{ product.price }}</p>
+                    <p>Disponible: {{ product.stock }} Unidades</p>
+                </div>
+                <img src="/static/img/products/{{ product.image_icon }}" alt="{{ product.name }}" class="img-fluid product-image">
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </body>
 </html>
