@@ -1,17 +1,15 @@
-from django.conf import settings
-from django.shortcuts import render
-from django.views.generic import ListView
-from inventory.models import Product
+from rest_framework import viewsets
+from .models import Product, RawMaterial, Inventory
+from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer
 
-class ListProduct(ListView):
-    model = Product
-    template_name = "inventory/list_product.html"
-    context_object_name = "products"
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
-    def get_queryset(self):
-        return Product.objects.all()
+class RawMaterialViewSet(viewsets.ModelViewSet):
+    queryset = RawMaterial.objects.all()
+    serializer_class = RawMaterialSerializer
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['MEDIA_URL'] = settings.MEDIA_URL
-        return context
+class InventoryViewSet(viewsets.ModelViewSet):
+    queryset = Inventory.objects.all()
+    serializer_class = InventorySerializer

@@ -3,174 +3,177 @@ from django.db import models
 class Category(models.Model):
     category_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=30)
-    description = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
+    description = models.CharField(max_length=255, blank=True)
 
     class Meta:
         db_table = 'inv_category'
 
+    def __str__(self):
+        return self.name
+
 class Product(models.Model):
     STATUS_CHOICES = [
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive'),
     ]
 
     product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image_icon = models.CharField(max_length=150, blank=True, null=True)
-    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='active')
-
-    def __str__(self):
-        return self.name
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES)
+    image_icon = models.CharField(max_length=150, blank=True)
 
     class Meta:
         db_table = 'inv_product'
 
-class ProductImage(models.Model):
-    image_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=150)
-    description = models.CharField(max_length=200)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.name
+
+
+class RawMaterial(models.Model):
+    raw_material_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=200, blank=True)
+    image_icon = models.CharField(max_length=150, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'inv_raw_material'
 
     def __str__(self):
         return self.name
 
-    class Meta:
-        db_table = 'inv_productimage'
-
-class AttachedFile(models.Model):
-    file_id = models.AutoField(primary_key=True)
-    file_path = models.CharField(max_length=100)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user_uploader = models.IntegerField()
-
-    def __str__(self):
-        return self.file_path
-
-    class Meta:
-        db_table = 'inv_attachedfile'
-
 class Supplier(models.Model):
-    RATING_CHOICES = [
-        ('Excellent', 'Excellent'),
-        ('Good', 'Good'),
-        ('Fair', 'Fair'),
-        ('Poor', 'Poor'),
-    ]
-
     supplier_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=80)
     RFC = models.CharField(max_length=13)
-    email = models.CharField(max_length=120)
-    phone = models.CharField(max_length=10, blank=True, null=True)
-    address = models.CharField(max_length=200, blank=True, null=True)
-    rating = models.CharField(max_length=9, choices=RATING_CHOICES)
-
-    def __str__(self):
-        return self.name
+    email = models.EmailField(max_length=120, blank=True)
+    phone = models.CharField(max_length=10, blank=True)
+    address = models.CharField(max_length=200, blank=True)
+    rating = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D'), ('E', 'E')])
 
     class Meta:
         db_table = 'inv_supplier'
 
-class ProductSupplier(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.name
+
+class RawMaterialSupplier(models.Model):
+    raw_material_supplier_id = models.AutoField(primary_key=True)
+    raw_material = models.ForeignKey(RawMaterial, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        unique_together = (('product', 'supplier'),)
-        db_table = 'inv_productsupplier'
+        db_table = 'inv_raw_material_supplier'
+        unique_together = (('raw_material', 'supplier'),)
 
 class Warehouse(models.Model):
     warehouse_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
-    address = models.CharField(max_length=200)
-    phone = models.CharField(max_length=10, blank=True, null=True)
-
-    def __str__(self):
-        return self.name
+    address = models.CharField(max_length=200, blank=True)
+    phone = models.CharField(max_length=10, blank=True)
+    status = models.CharField(max_length=8, choices=[('Active', 'Active'), ('Inactive', 'Inactive')])
 
     class Meta:
         db_table = 'inv_warehouse'
 
-class Inventory(models.Model):
-    ITEM_TYPE_CHOICES = [
-        ('Product', 'Product'),
-        ('RawMaterial', 'RawMaterial'),
-    ]
-
-    item_id = models.AutoField(primary_key=True)
-    item_type = models.CharField(max_length=12, choices=ITEM_TYPE_CHOICES)
-    item_id_in_type = models.IntegerField()
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    stock = models.IntegerField()
-
-    def __str__(self):
-        return f'{self.item_type} {self.item_id_in_type} in {self.warehouse}'
-
-    class Meta:
-        db_table = 'inv_inventory'
-
-class RestockRequest(models.Model):
-    REQUEST_STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Approved', 'Approved'),
-        ('Rejected', 'Rejected'),
-    ]
-
-    request_id = models.AutoField(primary_key=True)
-    quantity = models.IntegerField()
-    requested_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=REQUEST_STATUS_CHOICES)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    requested_by = models.IntegerField()
-
-    def __str__(self):
-        return f'Request {self.request_id} for {self.product}'
-
-    class Meta:
-        db_table = 'inv_restockrequest'
-
-class OperationsLog(models.Model):
-    operation_id = models.AutoField(primary_key=True)
-    quantity = models.SmallIntegerField()
-    datetime = models.DateTimeField(auto_now_add=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    OpLogUser = models.IntegerField()
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'Operation {self.operation_id} for {self.product}'
-
-    class Meta:
-        db_table = 'inv_operationlog'
-
-class UserWarehouseAssignment(models.Model):
-    assignment_id = models.AutoField(primary_key=True)
-    assigned_date = models.DateField()
-    removed_date = models.DateField(blank=True, null=True)
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    manager_user = models.IntegerField()
-
-    def __str__(self):
-        return f'Assignment {self.assignment_id} in {self.warehouse}'
-
-    class Meta:
-        db_table = 'inv_userwarehouseassignment'
-
-class RawMaterial(models.Model):
-    rawMaterial_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
-    description = models.CharField(max_length=200)
-    image_icon = models.CharField(max_length=150, blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-
     def __str__(self):
         return self.name
 
+class Inventory(models.Model):
+    inventory_id = models.AutoField(primary_key=True)
+    item_id = models.IntegerField()
+    item_type = models.CharField(max_length=12, choices=[('Product', 'Product'), ('RawMaterial', 'RawMaterial')])
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    stock = models.IntegerField()
+
     class Meta:
-        db_table = 'inv_rawmaterial'
+        db_table = 'inv_inventory'
+        unique_together = (('item_id', 'item_type', 'warehouse'),)
+
+    @property
+    def product(self):
+        if self.item_type == 'Product':
+            return Product.objects.get(pk=self.item_id)
+        return None
+
+    @property
+    def raw_material(self):
+        if self.item_type == 'RawMaterial':
+            return RawMaterial.objects.get(pk=self.item_id)
+        return None
+
+class RestockRequest(models.Model):
+    restock_request_id = models.AutoField(primary_key=True)
+    quantity = models.IntegerField()
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=9, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')])
+    raw_material = models.ForeignKey(RawMaterial, on_delete=models.CASCADE)
+    requested_by = models.IntegerField()  # Assuming this is a foreign key to a User model
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'inv_restock_request'
+
+class OperationLog(models.Model):
+    operation_log_id = models.AutoField(primary_key=True)
+    TYPE_OPERATION_CHOICES = [('Add', 'Add'), ('Remove', 'Remove')]
+    quantity = models.SmallIntegerField()
+    datetime = models.DateTimeField(auto_now_add=True)
+    type_operation = models.CharField(max_length=6, choices=TYPE_OPERATION_CHOICES)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    op_log_user = models.IntegerField()  # Assuming this is a foreign key to a User model
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'inv_operation_log'
+
+class UserWarehouseAssignment(models.Model):
+    user_warehouse_assignment_id = models.AutoField(primary_key=True)
+    assigned_date = models.DateField()
+    removed_date = models.DateField(null=True, blank=True)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    manager_user = models.IntegerField()  # Assuming this is a foreign key to a User model
+
+    class Meta:
+        db_table = 'inv_user_warehouse_assignment'
+
+class ProductImage(models.Model):
+    product_image_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=150)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'inv_product_image'
+
+class AttachedFile(models.Model):
+    attached_file_id = models.AutoField(primary_key=True)
+    file_path = models.CharField(max_length=100)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user_uploader = models.IntegerField()  # Assuming this is a foreign key to a User model
+
+    class Meta:
+        db_table = 'inv_attached_file'
+
+class RestockRequestsWarehouse(models.Model):
+    restock_requests_warehouse_id = models.AutoField(primary_key=True)
+    request = models.ForeignKey(RestockRequest, on_delete=models.CASCADE)
+    request_warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='restock_request_warehouse')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=9, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')])
+    requested_from = models.IntegerField()  # Assuming this is a foreign key to a User model
+
+    class Meta:
+        db_table = 'inv_restock_requests_warehouse'
+
+class RestockRequestsWarehouseRawMaterial(models.Model):
+    restock_requests_warehouse_raw_material_id = models.AutoField(primary_key=True)
+    request_warehouse = models.ForeignKey(RestockRequestsWarehouse, on_delete=models.CASCADE)
+    raw_material = models.ForeignKey(RawMaterial, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+
+    class Meta:
+        db_table = 'inv_restock_requests_warehouse_raw_material'
+        unique_together = (('request_warehouse', 'raw_material'),)

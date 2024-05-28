@@ -1,8 +1,12 @@
-from django.urls import path
-from inventory.views import ListProduct
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ProductViewSet, RawMaterialViewSet, InventoryViewSet
 
-app_name = "inventory"
+router = DefaultRouter()
+router.register(r'products', ProductViewSet)
+router.register(r'raw-materials', RawMaterialViewSet)
+router.register(r'inventory', InventoryViewSet)
 
 urlpatterns = [
-    path('list/product/', ListProduct.as_view(), name='list_product'),
+    path('', include(router.urls)),
 ]

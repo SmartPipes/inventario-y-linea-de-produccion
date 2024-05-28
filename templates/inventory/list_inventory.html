@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory List</title>
+</head>
+<body>
+    <h1>Inventory List</h1>
+    <table border="1">
+        <tr>
+            <th>Inventory ID</th>
+            <th>Item ID</th>
+            <th>Item Type</th>
+            <th>Warehouse ID</th>
+            <th>Stock</th>
+            <th>Item Name</th>
+            <th>Item Description</th>
+            <th>Item Price</th>
+            <th>Price Type</th>
+        </tr>
+        {% for item in inventory %}
+        <tr>
+            <td>{{ item.inventory_id }}</td>
+            <td>{{ item.item_id }}</td>
+            <td>{{ item.item_type }}</td>
+            <td>{{ item.warehouse_id }}</td>
+            <td>{{ item.stock }}</td>
+            <td>{{ item.item_name }}</td>
+            <td>{{ item.item_description }}</td>
+            <td>{{ item.item_price }}</td>
+            <td>{{ item.price_type }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
