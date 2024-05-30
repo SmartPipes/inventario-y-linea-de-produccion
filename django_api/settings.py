@@ -41,8 +41,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'inventory',
     'production_line',
-    'tickets'
+    'tickets',
+    'users',
+    'sales',
+    'delivery'
 ]
+
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

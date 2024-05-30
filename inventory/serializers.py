@@ -1,5 +1,40 @@
 from rest_framework import serializers
-from .models import Product, RawMaterial, Inventory
+from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = State
+        fields = '__all__'
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = '__all__'
+
+class WarehouseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Warehouse
+        fields = '__all__'
+
+class SupplierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Supplier
+        fields = '__all__'
+
+class OperationLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OperationLog
+        fields = '__all__'
+
+class RestockRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RestockRequest
+        fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,10 +51,11 @@ class InventorySerializer(serializers.ModelSerializer):
     item_description = serializers.SerializerMethodField()
     item_price = serializers.SerializerMethodField()
     price_type = serializers.SerializerMethodField()
+    image_icon = serializers.SerializerMethodField()
 
     class Meta:
         model = Inventory
-        fields = ['inventory_id', 'item_id', 'item_type', 'warehouse', 'stock', 'item_name', 'item_description', 'item_price', 'price_type']
+        fields = ['inventory_id', 'item_id', 'item_type', 'warehouse', 'stock', 'item_name', 'item_description', 'item_price', 'price_type', 'image_icon']
 
     def get_item_name(self, obj):
         if obj.item_type == 'Product':
@@ -54,4 +90,13 @@ class InventorySerializer(serializers.ModelSerializer):
             return 'sale_price'
         elif obj.item_type == 'RawMaterial':
             return 'purchase_price'
+        return None
+
+    def get_image_icon(self, obj):
+        if obj.item_type == 'Product':
+            product = Product.objects.get(pk=obj.item_id)
+            return product.image_icon
+        elif obj.item_type == 'RawMaterial':
+            raw_material = RawMaterial.objects.get(pk=obj.item_id)
+            return raw_material.image_icon
         return None

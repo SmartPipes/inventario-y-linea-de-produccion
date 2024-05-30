@@ -5,7 +5,6 @@ export function InventoryCard({item}) {
           <h3>{item.item_name}</h3>
           <p>{item.item_type}</p>
           <p>{item.stock}</p>
-          <p>{item.stock}</p>
           <hr />
         </div>
   )
