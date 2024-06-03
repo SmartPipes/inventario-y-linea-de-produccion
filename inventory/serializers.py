@@ -93,10 +93,13 @@ class InventorySerializer(serializers.ModelSerializer):
         return None
 
     def get_image_icon(self, obj):
+        request = self.context.get('request')
         if obj.item_type == 'Product':
             product = Product.objects.get(pk=obj.item_id)
-            return product.image_icon
+            if product.image_icon:
+                return request.build_absolute_uri(product.image_icon.url)
         elif obj.item_type == 'RawMaterial':
             raw_material = RawMaterial.objects.get(pk=obj.item_id)
-            return raw_material.image_icon
+            if raw_material.image_icon:
+                return request.build_absolute_uri(raw_material.image_icon.url)
         return None

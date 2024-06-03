@@ -66,7 +66,7 @@ class RawMaterial(models.Model):
     raw_material_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=200, blank=True)
-    image_icon = models.CharField(max_length=150, blank=True)
+    image_icon = models.ImageField(upload_to='product_icons/', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     class Meta:
@@ -86,7 +86,7 @@ class Product(models.Model):
     description = models.CharField(max_length=200, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES)
-    image_icon = models.CharField(max_length=150, blank=True)
+    image_icon = models.ImageField(upload_to='product_icons/', blank=True, null=True)
 
     class Meta:
         db_table = 'inv_product'
