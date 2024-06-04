@@ -11,7 +11,7 @@ export const Navbar = () => {
   
   const links = [
     { page: "Home", href: "/" },
-    { page: "Production Line", href: "/production-line" },
+    { page: "Production Line", href: "/production-orders" },
     { page: "Inventory", href: "/inventory" },
     { page: "User", href: "/user", icon: faUser }
     
