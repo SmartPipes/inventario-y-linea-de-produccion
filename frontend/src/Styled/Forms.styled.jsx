@@ -1,12 +1,12 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 const FormContainer = styled.form`
-display: flex;
-flex-direction: column;
-background: #FAFBF3;
-padding: 2rem;
-border-radius: 8px;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    background: #FAFBF3;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const Input = styled.input`
@@ -26,7 +26,8 @@ const Label = styled.label`
 
 const ButtonContainer = styled.div`
     display: flex;
-    justify-content: flex-end;
+    justify-content: center; /* Centrar el botón horizontalmente */
+    padding: 10px;
 `;
 
 const Button = styled.button`
@@ -43,4 +44,4 @@ const Button = styled.button`
     }
 `;
 
-export {FormContainer, Label, Input, ButtonContainer, Button};
+export { FormContainer, Label, Input, ButtonContainer, Button };

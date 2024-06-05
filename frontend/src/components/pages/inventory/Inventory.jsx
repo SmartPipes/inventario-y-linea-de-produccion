@@ -1,11 +1,10 @@
 import React from 'react';
-// import InventoryTable from '../components/InventoryTable';
+import InventoryList from './InventoryList';
 
 export const InventoryPage = () => {
     return (
         <div>
-            Inventory Data
+            <InventoryList />
         </div>
     );
 };
-
