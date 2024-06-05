@@ -50,11 +50,26 @@ export const NavMenu = styled.div`
 export const NavSearchContainer = styled.div`
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 10px 20px;
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
     position: relative;
+    justify-content: space-between;
+
+    @media (max-width: 768px) {
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+`;
+
+export const SearchIcon = styled.div`
+    display: none;
+    cursor: pointer;
+    margin-left: 10px; // Añade margen izquierdo al ícono de búsqueda
+    @media (max-width: 768px) {
+        display: block;
+        order: 3;
+    }
 `;
 
 export const NavSearch = styled.div`
@@ -65,6 +80,14 @@ export const NavSearch = styled.div`
     padding: 5px;
     width: 50%;
     margin: 0 auto;
+    position: relative;
+
+    @media (max-width: 768px) {
+        display: ${props => (props.isSearchOpen ? 'flex' : 'none')};
+        width: 100%;
+        order: 4;
+        margin-top: 10px;
+    }
 
     input {
         border: none;
@@ -131,7 +154,7 @@ export const FilterTag = styled.div`
 
 export const FilterDropdown = styled.div`
     position: absolute;
-    top: 100%;
+    top: calc(100% + 5px);
     left: 0;
     background-color: white;
     border: 1px solid #ddd;
@@ -139,11 +162,17 @@ export const FilterDropdown = styled.div`
     display: flex;
     flex-direction: column;
     z-index: 1000;
+    width: 100%;
 `;
 
 export const NavPagination = styled.div`
     display: flex;
     align-items: center;
+    @media (max-width: 768px) {
+        order: 2;
+        margin-left: auto;
+    }
+
     button {
         padding: 5px 10px;
         cursor: pointer;
@@ -172,5 +201,8 @@ export const NewButton = styled.button`
     svg {
         margin-right: 5px;
     }
-`;
 
+    @media (max-width: 768px) {
+        order: 1;
+    }
+`;

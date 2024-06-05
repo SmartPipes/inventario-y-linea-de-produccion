@@ -4,12 +4,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faSearch, faFilter, faPlus, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { 
     NavContainer, NavItem, NavLogo, NavSearchContainer, NavSearch, NavFilters, 
-    NavPagination, NavMenu, HamburgerMenu, FilterGroup, FilterOption, FilterTag, FilterDropdown, NewButton 
+    NavPagination, NavMenu, HamburgerMenu, FilterGroup, FilterOption, FilterTag, FilterDropdown, NewButton, SearchIcon 
 } from '../../../Styled/InventoryNavBar.styled';
 
 const InventoryNavBar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [availableFilters] = useState(['Productos', 'Tipo de producto', 'Se puede vender']);
 
@@ -17,8 +18,13 @@ const InventoryNavBar = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
-    const toggleFilterDropdown = () => {
+    const toggleFilterDropdown = (event) => {
+        event.stopPropagation();
         setIsFilterDropdownOpen(!isFilterDropdownOpen);
+    };
+
+    const toggleSearch = () => {
+        setIsSearchOpen(!isSearchOpen);
     };
 
     const addFilter = (filter) => {
@@ -28,10 +34,10 @@ const InventoryNavBar = () => {
         setIsFilterDropdownOpen(false);
     };
 
-    const removeFilter = (filter) => {
+    const removeFilter = (filter, event) => {
+        event.stopPropagation();
         setSelectedFilters(selectedFilters.filter(f => f !== filter));
     };
-
     return (
         <>
             <NavContainer>
@@ -51,25 +57,28 @@ const InventoryNavBar = () => {
                 <NewButton>
                     <FontAwesomeIcon icon={faPlus} /> Nuevo
                 </NewButton>
-                <NavSearch onClick={toggleFilterDropdown}>
+                <SearchIcon onClick={toggleSearch}>
+                    <FontAwesomeIcon icon={faSearch} size="lg" />
+                </SearchIcon>
+                <NavSearch isSearchOpen={isSearchOpen} onClick={toggleFilterDropdown}>
                     <FontAwesomeIcon icon={faSearch} />
                     {selectedFilters.map(filter => (
                         <FilterTag key={filter}>
-                            <FontAwesomeIcon icon={faFilter} /> {filter} <span onClick={() => removeFilter(filter)}>x</span>
-                        </FilterTag>
+                        <FontAwesomeIcon icon={faFilter} /> {filter} <span onClick={(event) => removeFilter(filter, event)}>x</span>
+                    </FilterTag>
                     ))}
                     <input type="text" placeholder="Buscar..." />
                     <button><FontAwesomeIcon icon={faCaretDown} /></button>
+                    {isFilterDropdownOpen && (
+                        <FilterDropdown>
+                            {availableFilters.map(filter => (
+                                <FilterOption key={filter} onClick={() => addFilter(filter)}>
+                                    {filter}
+                                </FilterOption>
+                            ))}
+                        </FilterDropdown>
+                    )}
                 </NavSearch>
-                {isFilterDropdownOpen && (
-                    <FilterDropdown>
-                        {availableFilters.map(filter => (
-                            <FilterOption key={filter} onClick={() => addFilter(filter)}>
-                                {filter}
-                            </FilterOption>
-                        ))}
-                    </FilterDropdown>
-                )}
                 <NavPagination>
                     <button>◀</button>
                     <span>1-2 / 2</span>
