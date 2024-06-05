@@ -20,4 +20,10 @@ text-transform: uppercase;
 padding-bottom: 1rem;
 `;
 
-export  {GlobalStyles, Titles, SubTitle};
+//Smaller than the normal subtitle
+const SubTitle2 = styled.h4`
+color: #364936;
+text-transform: uppercase;
+`;
+
+export  {GlobalStyles, Titles, SubTitle, SubTitle2};

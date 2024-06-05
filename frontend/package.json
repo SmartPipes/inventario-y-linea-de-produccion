@@ -19,7 +19,9 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.5",
     "react-hot-toast": "^2.4.1",
+    "react-modal": "^3.16.1",
     "react-router-dom": "^6.23.1",
+    "react-select": "^5.8.0",
     "styled-components": "^6.1.11"
   },
   "devDependencies": {

@@ -6,9 +6,10 @@ background: #97B25E;
 padding: 1rem 2rem;
 position: relative;
 width: 18%;
-height: 100vh;
+height: 88.6vh;
 align-items: center;
 box-shadow: 4px 0 8px 0 rgba(0, 0, 0, 0.2), 6px 0 20px 0 rgba(0, 0, 0, 0.19);
+overflow-y: auto;
 `;
 
 const PlacedOrderBoxes = styled.div`
@@ -17,13 +18,16 @@ padding: 2rem;
 margin-bottom: 2rem;
 border-radius: 8px;
 display: flex;
-
+color: #364936;
+font-weight: 500;
+cursor: pointer;
 `;
 
 
 
 const OrderContainer = styled.div`
 display: flex;
+
 `;
 
 const MainContent = styled.div`
@@ -32,6 +36,7 @@ const MainContent = styled.div`
     background: #f4f4f4;
     align-items: center;
     justify-content: center;
+    overflow-y: auto;
 `;
 
 

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-const FormContainer = styled.form`
+const FormContainer = styled.div`
 display: flex;
 flex-direction: column;
 background: #FAFBF3;
@@ -43,4 +43,10 @@ const Button = styled.button`
     }
 `;
 
-export {FormContainer, Label, Input, ButtonContainer, Button};
+const Error = styled.p`
+    color: red;
+    font-size: 0.9rem;
+    margin-top: -7px;
+`;
+
+export {FormContainer, Label, Input, ButtonContainer, Button, Error};
