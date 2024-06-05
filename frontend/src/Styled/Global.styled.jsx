@@ -11,7 +11,6 @@ body{
 const Titles = styled.h1`
 color: #364936;
 text-transform: uppercase;
-padding-bottom: 2rem;
 `;
 
 const SubTitle = styled.h3`

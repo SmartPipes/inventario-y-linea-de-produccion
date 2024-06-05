@@ -1,10 +1,14 @@
 import React from 'react';
 import InventoryList from './InventoryList';
+import InventoryNavBar from './InventoryNavBar';
 
-export const InventoryPage = () => {
+const InventoryPage = () => {
     return (
         <div>
+            <InventoryNavBar />
             <InventoryList />
         </div>
     );
 };
+
+export default InventoryPage;

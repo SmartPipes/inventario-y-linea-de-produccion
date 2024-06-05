@@ -19,7 +19,6 @@ const InventoryList = () => {
 
     return (
         <div>
-            <Titles style={{ textAlign: 'center' }}>INVENTORY LIST</Titles>
             <InventoryContainer>
                 {items.map(item => (
                     <InventoryItemCard key={item.inventory_id} item={item} />
