@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faSearch, faFilter, faPlus, faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 import { 
-    NavContainer, NavItem, NavLogo, NavSearchContainer, NavSearch, NavFilters, 
-    NavPagination, NavMenu, HamburgerMenu, FilterGroup, FilterOption, FilterTag, FilterDropdown, NewButton, SearchIcon 
+    NavContainer, NavItem, NavLogo, NavSearchContainer, NavSearch, 
+    NavPagination, NavMenu, HamburgerMenu, FilterOption, FilterTag, FilterDropdown, SubFilterDropdown, NewButton, SearchIcon 
 } from '../../../Styled/InventoryNavBar.styled';
 
-const InventoryNavBar = () => {
+const InventoryNavBar = ({ applyFilters }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+    const [isSubFilterDropdownOpen, setIsSubFilterDropdownOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState([]);
-    const [availableFilters] = useState(['Productos', 'Tipo de producto', 'Se puede vender']);
+    const [availableFilters] = useState(['Products', 'Raw Material', 'Precio ASC', 'Warehouse']);
+    const [warehouses, setWarehouses] = useState([]);
+
+    useEffect(() => {
+        fetchWarehouses();
+    }, []);
+
+    const fetchWarehouses = async () => {
+        const response = await axios.get('https://smartpipes.cloud/api/inventory/warehouse/');
+        setWarehouses(response.data);
+    };
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -21,6 +33,7 @@ const InventoryNavBar = () => {
     const toggleFilterDropdown = (event) => {
         event.stopPropagation();
         setIsFilterDropdownOpen(!isFilterDropdownOpen);
+        setIsSubFilterDropdownOpen(false);
     };
 
     const toggleSearch = () => {
@@ -28,16 +41,36 @@ const InventoryNavBar = () => {
     };
 
     const addFilter = (filter) => {
-        if (!selectedFilters.includes(filter)) {
-            setSelectedFilters([...selectedFilters, filter]);
+        if (filter === 'Warehouse') {
+            setIsSubFilterDropdownOpen(!isSubFilterDropdownOpen);
+        } else {
+            if (!selectedFilters.includes(filter)) {
+                const newFilters = [...selectedFilters, filter];
+                setSelectedFilters(newFilters);
+                applyFilters(newFilters);
+            }
+            setIsFilterDropdownOpen(false);
         }
+    };
+
+    const addSubFilter = (subFilter) => {
+        const filterName = `Warehouse: ${subFilter}`;
+        if (!selectedFilters.includes(filterName)) {
+            const newFilters = [...selectedFilters, filterName];
+            setSelectedFilters(newFilters);
+            applyFilters(newFilters);
+        }
+        setIsSubFilterDropdownOpen(false);
         setIsFilterDropdownOpen(false);
     };
 
     const removeFilter = (filter, event) => {
         event.stopPropagation();
-        setSelectedFilters(selectedFilters.filter(f => f !== filter));
+        const newFilters = selectedFilters.filter(f => f !== filter);
+        setSelectedFilters(newFilters);
+        applyFilters(newFilters);
     };
+
     return (
         <>
             <NavContainer>
@@ -60,15 +93,15 @@ const InventoryNavBar = () => {
                 <SearchIcon onClick={toggleSearch}>
                     <FontAwesomeIcon icon={faSearch} size="lg" />
                 </SearchIcon>
-                <NavSearch isSearchOpen={isSearchOpen} onClick={toggleFilterDropdown}>
+                <NavSearch isSearchOpen={isSearchOpen}>
                     <FontAwesomeIcon icon={faSearch} />
                     {selectedFilters.map(filter => (
                         <FilterTag key={filter}>
-                        <FontAwesomeIcon icon={faFilter} /> {filter} <span onClick={(event) => removeFilter(filter, event)}>x</span>
-                    </FilterTag>
+                            <FontAwesomeIcon icon={faFilter} /> {filter} <span onClick={(event) => removeFilter(filter, event)}>x</span>
+                        </FilterTag>
                     ))}
                     <input type="text" placeholder="Buscar..." />
-                    <button><FontAwesomeIcon icon={faCaretDown} /></button>
+                    <button onClick={toggleFilterDropdown}><FontAwesomeIcon icon={faCaretDown} /></button>
                     {isFilterDropdownOpen && (
                         <FilterDropdown>
                             {availableFilters.map(filter => (
@@ -76,6 +109,15 @@ const InventoryNavBar = () => {
                                     {filter}
                                 </FilterOption>
                             ))}
+                            {isSubFilterDropdownOpen && (
+                                <SubFilterDropdown>
+                                    {warehouses.map(warehouse => (
+                                        <FilterOption key={warehouse.warehouse_id} onClick={() => addSubFilter(warehouse.name)}>
+                                            {warehouse.name}
+                                        </FilterOption>
+                                    ))}
+                                </SubFilterDropdown>
+                            )}
                         </FilterDropdown>
                     )}
                 </NavSearch>

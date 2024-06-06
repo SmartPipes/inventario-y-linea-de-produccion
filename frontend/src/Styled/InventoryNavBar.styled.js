@@ -65,7 +65,7 @@ export const NavSearchContainer = styled.div`
 export const SearchIcon = styled.div`
     display: none;
     cursor: pointer;
-    margin-left: 10px; // Añade margen izquierdo al ícono de búsqueda
+    margin-left: 10px;
     @media (max-width: 768px) {
         display: block;
         order: 3;
@@ -105,29 +105,6 @@ export const NavSearch = styled.div`
     }
 `;
 
-export const NavFilters = styled.div`
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-
-    button {
-        padding: 5px 10px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-    }
-`;
-
-export const FilterGroup = styled.div`
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-
-    input {
-        margin-right: 5px;
-    }
-`;
-
 export const FilterOption = styled.div`
     padding: 5px 10px;
     background-color: #eee;
@@ -163,6 +140,18 @@ export const FilterDropdown = styled.div`
     flex-direction: column;
     z-index: 1000;
     width: 100%;
+`;
+
+export const SubFilterDropdown = styled.div`
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
 `;
 
 export const NavPagination = styled.div`
