@@ -11,37 +11,37 @@ export const InventoryContainer = styled.div`
 export const InventorySubContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start; /* Alinea las tarjetas a la izquierda */
+    justify-content: flex-start;
     width: 100%;
-    max-width: 1600px; /* Ajusta según sea necesario */
-    gap: 20px; /* Espacio entre tarjetas */
+    max-width: 1600px;
+    gap: 20px;
     box-sizing: border-box;
 
-    & > div {
-        flex: 1 1 calc(25% - 20px); /* Ajusta para 4 tarjetas por fila con gap */
-        max-width: calc(25% - 20px); /* Ajusta para 4 tarjetas por fila con gap */
-        min-width: 250px; /* Ajusta el valor mínimo de flex-basis */
+    & > .inventory-card {
+        flex: 1 1 calc(25% - 20px);
+        max-width: calc(25% - 20px);
+        min-width: 250px;
         box-sizing: border-box;
     }
 
     @media (max-width: 1200px) {
-        & > div {
-            flex: 1 1 calc(33.333% - 20px); /* Ajusta para 3 tarjetas por fila */
-            max-width: calc(33.333% - 20px); /* Ajusta para 3 tarjetas por fila */
+        & > .inventory-card {
+            flex: 1 1 calc(33.333% - 20px);
+            max-width: calc(33.333% - 20px);
         }
     }
 
     @media (max-width: 1024px) {
-        & > div {
-            flex: 1 1 calc(50% - 20px); /* 2 tarjetas por fila */
-            max-width: calc(50% - 20px); /* 2 tarjetas por fila */
+        & > .inventory-card {
+            flex: 1 1 calc(50% - 20px);
+            max-width: calc(50% - 20px);
         }
     }
 
     @media (max-width: 768px) {
-        & > div {
-            flex: 1 1 100%; /* 1 tarjeta por fila */
-            max-width: 100%; /* 1 tarjeta por fila */
+        & > .inventory-card {
+            flex: 1 1 100%;
+            max-width: 100%;
         }
     }
 `;
