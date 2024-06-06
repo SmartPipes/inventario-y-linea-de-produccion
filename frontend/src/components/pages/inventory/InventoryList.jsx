@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import InventoryItemCard from './InventoryItemCard';
 import axios from 'axios';
 import { Titles } from '../../../Styled/Global.styled';
-import { InventoryContainer } from '../../../Styled/Inventory.styled';
+import { InventoryContainer, InventorySubContainer } from '../../../Styled/Inventory.styled';
 
 const InventoryList = () => {
     const [items, setItems] = useState([]);
@@ -19,10 +19,13 @@ const InventoryList = () => {
 
     return (
         <div>
+            <Titles style={{ textAlign: 'center' }}>INVENTORY LIST</Titles>
             <InventoryContainer>
-                {items.map(item => (
-                    <InventoryItemCard key={item.inventory_id} item={item} />
-                ))}
+                <InventorySubContainer>
+                    {items.map(item => (
+                        <InventoryItemCard key={item.inventory_id} item={item} />
+                    ))}
+                </InventorySubContainer>
             </InventoryContainer>
         </div>
     );
