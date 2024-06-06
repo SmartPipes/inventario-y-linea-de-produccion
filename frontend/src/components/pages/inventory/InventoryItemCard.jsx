@@ -1,22 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Card from './Card';  // Ajusta la ruta según tu estructura de directorios
+import Card from './Card';
 
 const InventoryItemCard = ({ item }) => {
     return (
-        <Card title={item.item_name} image={item.image_icon}>
-            <p>Precio: ${item.item_price ? item.item_price.toFixed(2) : 'N/A'}</p>
-            <p>Disponible: {item.stock.toFixed(2)} Unidades</p>
-        </Card>
+        <Card 
+            inventory_id={item.inventory_id}
+            item_id={item.item_id}
+            item_name={item.item_name} 
+            image_icon={item.image_icon} 
+            item_price={item.item_price} 
+            stock={item.stock} 
+        />
     );
 };
 
 InventoryItemCard.propTypes = {
     item: PropTypes.shape({
+        inventory_id: PropTypes.number.isRequired,
+        item_id: PropTypes.number.isRequired,
         item_name: PropTypes.string.isRequired,
-        item_price: PropTypes.number,
-        stock: PropTypes.number.isRequired,
         image_icon: PropTypes.string.isRequired,
+        item_price: PropTypes.number.isRequired,
+        stock: PropTypes.number.isRequired,
     }).isRequired,
 };
 

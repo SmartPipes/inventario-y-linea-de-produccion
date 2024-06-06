@@ -13,10 +13,15 @@ color: #364936;
 text-transform: uppercase;
 `;
 
+const Labels = styled.h3`
+color: #364936;
+text-transform: uppercase;
+`;
+
 const SubTitle = styled.h3`
 color: white;
 text-transform: uppercase;
 padding-bottom: 1rem;
 `;
 
-export  {GlobalStyles, Titles, SubTitle};
+export  {GlobalStyles, Titles, SubTitle,Labels};

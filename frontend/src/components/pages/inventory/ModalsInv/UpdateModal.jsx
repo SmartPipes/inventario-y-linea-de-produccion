@@ -2,6 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { Titles } from '../../../../Styled/Global.styled';
 
 const ModalOverlay = styled.div`
     position: fixed;
@@ -31,8 +32,6 @@ const ModalHeader = styled.div`
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
 `;
 
 const ModalBody = styled.div`
@@ -53,7 +52,7 @@ const UpdateModal = ({ isOpen, onClose, children }) => {
         <ModalOverlay>
             <ModalContent>
                 <ModalHeader>
-                    <h2>Update Information</h2>
+                    <Titles>Update Information</Titles>
                     <CloseButton onClick={onClose}>×</CloseButton>
                 </ModalHeader>
                 <ModalBody>

@@ -1,14 +1,18 @@
-// src/components/Card.js
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody } from '../../../Styled/Inventory.styled';
 import UpdateModal from './ModalsInv/UpdateModal';
 import { FormGroup } from '../../../Styled/ModalStyled';
+import { Labels } from '../../../Styled/Global.styled';
 
-const Card = ({ title, image, children }) => {
+const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock, children }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [cardTitle, setCardTitle] = useState(title);
-    const [cardImage, setCardImage] = useState(image);
+    const [cardTitle, setCardTitle] = useState(item_name);
+    const [cardPrice, setCardPrice] = useState(item_price);
+    const [cardStock, setCardStock] = useState(stock);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -19,11 +23,21 @@ const Card = ({ title, image, children }) => {
     };
 
     const handleTitleChange = (e) => {
-        setCardTitle(e.target.value);
+        const newTitle = e.target.value;
+        setCardTitle(newTitle);
+        saveChanges({ name: newTitle }, 'product');
     };
 
-    const handleImageChange = (e) => {
-        setCardImage(e.target.value);
+    const handlePriceChange = (e) => {
+        const newPrice = parseFloat(e.target.value);
+        setCardPrice(newPrice);
+        saveChanges({ price: newPrice }, 'product');
+    };
+
+    const handleStockChange = (e) => {
+        const newStock = parseInt(e.target.value, 10);
+        setCardStock(newStock);
+        saveChanges({ stock: newStock }, 'inventory');
     };
 
     return (
@@ -33,19 +47,40 @@ const Card = ({ title, image, children }) => {
                     <CardHeader>
                         <CardTitle>{cardTitle}</CardTitle>
                     </CardHeader>
+                    <p>Precio: ${cardPrice}</p>
+                    <p>Disponible: {cardStock} Unidades</p>
                     {children}
                 </CardBody>
-                <CardImage src={cardImage} alt={cardTitle} />
+                <CardImage src={image_icon} alt={cardTitle} />
             </InventoryCard>
             <UpdateModal isOpen={isModalOpen} onClose={handleCloseModal}>
                 <form>
                     <FormGroup>
-                        <label>Title</label>
-                        <input type="text" value={cardTitle} onChange={handleTitleChange} placeholder="Enter new title" />
+                        <Labels>Título</Labels>
+                        <input
+                            type="text"
+                            value={cardTitle}
+                            onChange={handleTitleChange}
+                            placeholder="Ingresa el nuevo título"
+                        />
                     </FormGroup>
                     <FormGroup>
-                        <label>Image URL</label>
-                        <input type="text" value={cardImage} onChange={handleImageChange} placeholder="Enter new image URL" />
+                        <Labels>Precio</Labels>
+                        <input
+                            type="number"
+                            value={cardPrice}
+                            onChange={handlePriceChange}
+                            placeholder="Ingresa el nuevo precio"
+                        />
+                    </FormGroup>
+                    <FormGroup>
+                        <Labels>Existencia</Labels>
+                        <input
+                            type="number"
+                            value={cardStock}
+                            onChange={handleStockChange}
+                            placeholder="Ingresa la nueva existencia"
+                        />
                     </FormGroup>
                     {children}
                 </form>
@@ -55,9 +90,13 @@ const Card = ({ title, image, children }) => {
 };
 
 Card.propTypes = {
-    title: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
-    children: PropTypes.node.isRequired,
+    inventory_id: PropTypes.number.isRequired,
+    item_id: PropTypes.number.isRequired,
+    item_name: PropTypes.string.isRequired,
+    image_icon: PropTypes.string.isRequired,
+    item_price: PropTypes.number.isRequired,
+    stock: PropTypes.number.isRequired,
+    children: PropTypes.node,
 };
 
 export default Card;

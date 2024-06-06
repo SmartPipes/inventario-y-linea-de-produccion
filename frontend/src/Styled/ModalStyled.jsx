@@ -40,8 +40,6 @@ export const ModalHeader = styled.div`
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
 
     h2 {
         margin: 0;
@@ -95,7 +93,7 @@ export const CloseButton = styled.button`
 `;
 
 export const FormGroup = styled.div`
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 
     label {
         display: block;
