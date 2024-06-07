@@ -32,7 +32,7 @@ class Phase(models.Model):
 
 class ProductionLine(models.Model):
     productionLine_id = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
     description = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
     production_line_creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_production_lines')
@@ -42,7 +42,7 @@ class ProductionLine(models.Model):
         db_table = 'pro_ProductionLines'
 
     def __str__(self):
-        return self.nombre
+        return self.name  # Cambiado de 'nombre' a 'name'
 
 class ProductionPhase(models.Model):
     productionLine = models.ForeignKey(ProductionLine, on_delete=models.CASCADE)

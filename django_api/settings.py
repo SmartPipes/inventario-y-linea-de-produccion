@@ -130,8 +130,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'smartpipes',
-        'USER': 'root',
-        'PASSWORD': '',
+        'USER': 'adminsp',
+        'PASSWORD': '8RsXtYhno1z4huxwnIbJ',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -191,11 +191,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# cors authoritation
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:8080",
     "http://localhost:5173",
     'https://smartpipes.cloud',
     'https://www.smartpipes.cloud',
+    "http://178.16.142.77:5173",
 ]
+

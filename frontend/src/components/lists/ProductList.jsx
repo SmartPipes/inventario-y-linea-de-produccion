@@ -19,7 +19,7 @@ const ProductList = () => {
     }, [setButtonProps]);
 
     const fetchProducts = async () => {
-        const response = await axios.get('http://127.0.0.1:8080/api/inventory/products/');
+        const response = await axios.get('https://smartpipes.cloud/api/inventory/products/');
         setProducts(response.data);
     };
 
