@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody } from '../../../Styled/Inventory.styled';
@@ -6,17 +6,30 @@ import UpdateModal from './ModalsInv/UpdateModal';
 import { FormGroup } from '../../../Styled/ModalStyled';
 import { Labels } from '../../../Styled/Global.styled';
 
-// Configuración global de axios para incluir el token en cada solicitud
 axios.defaults.baseURL = 'https://smartpipes.cloud/api/inventory/';
-axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE3Nzc3OTk1LCJpYXQiOjE3MTc2OTE1OTUsImp0aSI6IjhmYWVhNDcxZjlmYTQ4MDM4NTBkZjhhZjQ2N2VhZTkyIiwidXNlcl9pZCI6Mn0.OIpuwLQOeVb_OMZMI1MG0t2Me6yy7R8Jn-i6eo92urM';
+axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE3ODgxNTUwLCJpYXQiOjE3MTc3OTUxNTAsImp0aSI6ImExZWI2MTNmYWQxZjQ2ZjE5Nzc2MGE5NjQzMmNmYmIzIiwidXNlcl9pZCI6Mn0.cP1VNPuu0my1Tbiq6PQgTAgGRcreof0JVmzcMTMbYCE';
 
-const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock, children }) => {
+const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock, item_type, children }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [cardTitle, setCardTitle] = useState(item_name);
     const [cardPrice, setCardPrice] = useState(item_price);
     const [cardStock, setCardStock] = useState(stock);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [rawMaterialSuppliers, setRawMaterialSuppliers] = useState([]);
+
+    useEffect(() => {
+        const fetchRawMaterialSuppliers = async () => {
+            try {
+                const response = await axios.get('raw-material-suppliers/');
+                setRawMaterialSuppliers(response.data);
+            } catch (err) {
+                console.error('Error fetching raw material suppliers:', err);
+                setError(err);
+            }
+        };
+        fetchRawMaterialSuppliers();
+    }, []);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -29,35 +42,85 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
     const handleTitleChange = (e) => {
         const newTitle = e.target.value;
         setCardTitle(newTitle);
-        saveChanges({ name: newTitle, description: "Descripción actualizada", price: cardPrice, status: "Active" }, 'products');
+        if (item_type === 'RawMaterial') {
+            saveChanges({ name: newTitle, description: "Descripción actualizada", image_icon: image_icon, category: 1 }, 'raw-materials', item_id);
+        } else {
+            saveChanges({ name: newTitle, description: "Descripción actualizada", price: cardPrice, status: "Active" }, 'products', item_id);
+        }
     };
 
     const handlePriceChange = (e) => {
         const newPrice = parseFloat(e.target.value);
+        if (isNaN(newPrice) || newPrice < 0) {
+            alert('Please enter a valid price');
+            return;
+        }
         setCardPrice(newPrice);
-        saveChanges({ name: cardTitle, description: "Descripción actualizada", price: newPrice, status: "Active" }, 'products');
+    
+        const rawMaterialData = {
+            purchase_price: newPrice.toString(),
+            raw_material: item_id, // Assuming item_id is the raw_material id
+            supplier: 1 // Assuming supplier id is 1, replace with actual supplier id if available
+        };
+    
+        if (item_type === 'RawMaterial') {
+            console.log('Datos enviados para raw-material-suppliers:', rawMaterialData);
+            saveChanges(rawMaterialData, 'raw-material-suppliers', inventory_id); // Pass the correct id
+        } else {
+            const productData = {
+                name: cardTitle,
+                description: "Descripción actualizada",
+                price: newPrice,
+                status: "Active"
+            };
+            console.log('Datos enviados para products:', productData);
+            saveChanges(productData, 'products', item_id);
+        }
     };
+    
 
     const handleStockChange = (e) => {
         const newStock = parseInt(e.target.value, 10);
+        if (isNaN(newStock) || newStock < 0) {
+            alert('Please enter a valid stock quantity');
+            return;
+        }
         setCardStock(newStock);
-        saveChanges({ stock: newStock, item_id: item_id, item_type: "product", warehouse: "default" }, 'inventory');
+        saveChanges({ stock: newStock, item_id: item_id, item_type: item_type, warehouse: "default" }, 'inventory', inventory_id);
     };
 
-    const saveChanges = async (data, type) => {
+    const saveChanges = async (data, type, id) => {
         setIsLoading(true);
         setError(null);
         try {
-            const url = type === 'products' ? `products/${item_id}/` : `inventory/${inventory_id}/`;
+            let url;
+            switch (type) {
+                case 'products':
+                    url = `products/${id}/`;
+                    break;
+                case 'raw-materials':
+                    url = `raw-materials/${id}/`;
+                    break;
+                case 'raw-material-suppliers':
+                    url = `raw-material-suppliers/${id}/`;
+                    break;
+                default:
+                    url = `inventory/${id}/`;
+                    break;
+            }
+            console.log('URL:', url);
+            console.log('Data:', data);
             const response = await axios.put(url, data);
             console.log('Respuesta del servidor:', response.data);
         } catch (err) {
+            console.error('Error al guardar cambios:', err);
             setError(err);
-            console.error('Error al actualizar:', err.response ? err.response.data : err.message);
+            alert(`Error al guardar cambios: ${err.response?.data?.message || err.message}`);
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     return (
         <>
@@ -101,8 +164,6 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
                             placeholder="Ingresa la nueva existencia"
                         />
                     </FormGroup>
-                    {isLoading && <p>Actualizando...</p>}
-                    {error && <p>Error al actualizar: {error.message}</p>}
                     {children}
                 </form>
             </UpdateModal>
@@ -117,6 +178,7 @@ Card.propTypes = {
     image_icon: PropTypes.string.isRequired,
     item_price: PropTypes.number.isRequired,
     stock: PropTypes.number.isRequired,
+    item_type: PropTypes.string.isRequired,
     children: PropTypes.node,
 };
 
