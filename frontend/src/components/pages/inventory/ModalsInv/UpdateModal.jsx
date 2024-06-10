@@ -1,5 +1,4 @@
-// src/components/UpdateModal.js 
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Titles } from '../../../../Styled/Global.styled';
@@ -14,7 +13,7 @@ const ModalOverlay = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Asegúrate de que el z-index sea lo suficientemente alto */
+    z-index: 1000;
 `;
 
 const ModalContent = styled.div`
@@ -23,7 +22,7 @@ const ModalContent = styled.div`
     border-radius: 8px;
     max-width: 500px;
     width: 100%;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Ajusta la sombra según sea necesario */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 `;
 
@@ -46,11 +45,19 @@ const CloseButton = styled.button`
 `;
 
 const UpdateModal = ({ isOpen, onClose, children }) => {
+    const modalRef = useRef();
+
+    const handleClickOutside = (event) => {
+        if (modalRef.current && !modalRef.current.contains(event.target)) {
+            onClose();
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
-        <ModalOverlay>
-            <ModalContent>
+        <ModalOverlay onClick={handleClickOutside}>
+            <ModalContent ref={modalRef}>
                 <ModalHeader>
                     <Titles>Update Information</Titles>
                     <CloseButton onClick={onClose}>×</CloseButton>

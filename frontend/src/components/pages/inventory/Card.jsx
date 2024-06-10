@@ -7,28 +7,34 @@ import { FormGroup } from '../../../Styled/ModalStyled';
 import { Labels } from '../../../Styled/Global.styled';
 
 axios.defaults.baseURL = 'https://smartpipes.cloud/api/inventory/';
-axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE3ODgxNTUwLCJpYXQiOjE3MTc3OTUxNTAsImp0aSI6ImExZWI2MTNmYWQxZjQ2ZjE5Nzc2MGE5NjQzMmNmYmIzIiwidXNlcl9pZCI6Mn0.cP1VNPuu0my1Tbiq6PQgTAgGRcreof0JVmzcMTMbYCE';
+axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE4MDYzMjM1LCJpYXQiOjE3MTc5NzY4MzUsImp0aSI6IjJiYzk2Y2FiZTJkYzRjMzdhYzg2ZmJmZDg5NmZhNzA0IiwidXNlcl9pZCI6Mn0.Nl8Fgwjl3V8Y5kG39S_d0T9y-LEDHxBObrQ3gR1tpUo';
 
 const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock, item_type, children }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [cardTitle, setCardTitle] = useState(item_name);
     const [cardPrice, setCardPrice] = useState(item_price);
     const [cardStock, setCardStock] = useState(stock);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
     const [rawMaterialSuppliers, setRawMaterialSuppliers] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [rawMaterials, setRawMaterials] = useState([]);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchRawMaterialSuppliers = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get('raw-material-suppliers/');
-                setRawMaterialSuppliers(response.data);
+                const rawMaterialSuppliersResponse = await axios.get('raw-material-suppliers/');
+                const productsResponse = await axios.get('products/');
+                const rawMaterialsResponse = await axios.get('raw-materials/');
+
+                setRawMaterialSuppliers(rawMaterialSuppliersResponse.data);
+                setProducts(productsResponse.data);
+                setRawMaterials(rawMaterialsResponse.data);
             } catch (err) {
-                console.error('Error fetching raw material suppliers:', err);
+                console.error('Error fetching data:', err);
                 setError(err);
             }
         };
-        fetchRawMaterialSuppliers();
+        fetchData();
     }, []);
 
     const handleOpenModal = () => {
@@ -43,7 +49,7 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
         const newTitle = e.target.value;
         setCardTitle(newTitle);
         if (item_type === 'RawMaterial') {
-            saveChanges({ name: newTitle, description: "Descripción actualizada", image_icon: image_icon, category: 1 }, 'raw-materials', item_id);
+            saveChanges({ name: newTitle, description: "Descripción actualizada", category: 1 }, 'raw-materials', item_id);
         } else {
             saveChanges({ name: newTitle, description: "Descripción actualizada", price: cardPrice, status: "Active" }, 'products', item_id);
         }
@@ -52,20 +58,30 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
     const handlePriceChange = (e) => {
         const newPrice = parseFloat(e.target.value);
         if (isNaN(newPrice) || newPrice < 0) {
-            alert('Please enter a valid price');
             return;
         }
         setCardPrice(newPrice);
     
-        const rawMaterialData = {
-            purchase_price: newPrice.toString(),
-            raw_material: item_id, // Assuming item_id is the raw_material id
-            supplier: 1 // Assuming supplier id is 1, replace with actual supplier id if available
-        };
-    
         if (item_type === 'RawMaterial') {
+            const rawMaterial = rawMaterials.find(rm => rm.raw_material_id === item_id);
+            if (!rawMaterial) {
+                console.error('Raw material not found for item_id:', item_id);
+                return;
+            }
+            const supplier = rawMaterialSuppliers.find(s => s.raw_material === rawMaterial.raw_material_id);
+            if (!supplier) {
+                console.error('Supplier not found for raw_material_id:', rawMaterial.raw_material_id);
+                return;
+            }
+    
+            const rawMaterialData = {
+                purchase_price: newPrice.toString(),
+                raw_material: rawMaterial.raw_material_id,
+                supplier: supplier.supplier // Ajustar este campo si necesario
+            };
+    
             console.log('Datos enviados para raw-material-suppliers:', rawMaterialData);
-            saveChanges(rawMaterialData, 'raw-material-suppliers', inventory_id); // Pass the correct id
+            saveChanges(rawMaterialData, 'raw-material-suppliers', supplier.id);
         } else {
             const productData = {
                 name: cardTitle,
@@ -82,16 +98,22 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
     const handleStockChange = (e) => {
         const newStock = parseInt(e.target.value, 10);
         if (isNaN(newStock) || newStock < 0) {
-            alert('Please enter a valid stock quantity');
             return;
         }
         setCardStock(newStock);
-        saveChanges({ stock: newStock, item_id: item_id, item_type: item_type, warehouse: "default" }, 'inventory', inventory_id);
+    
+        const inventoryData = {
+            item_id: item_id,
+            item_type: item_type,
+            stock: newStock
+        };
+    
+        console.log('Datos enviados para inventory:', inventoryData);
+        saveChanges(inventoryData, 'inventory', inventory_id);
     };
+    
 
     const saveChanges = async (data, type, id) => {
-        setIsLoading(true);
-        setError(null);
         try {
             let url;
             switch (type) {
@@ -104,6 +126,9 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
                 case 'raw-material-suppliers':
                     url = `raw-material-suppliers/${id}/`;
                     break;
+                case 'inventory':
+                    url = `inventory/${id}/`;
+                    break;
                 default:
                     url = `inventory/${id}/`;
                     break;
@@ -113,14 +138,9 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
             const response = await axios.put(url, data);
             console.log('Respuesta del servidor:', response.data);
         } catch (err) {
-            console.error('Error al guardar cambios:', err);
-            setError(err);
-            alert(`Error al guardar cambios: ${err.response?.data?.message || err.message}`);
-        } finally {
-            setIsLoading(false);
+            console.error('Error al guardar cambios:', err.response ? err.response.data : err.message);
         }
     };
-    
 
     return (
         <>

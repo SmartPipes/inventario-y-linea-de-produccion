@@ -11,6 +11,7 @@ const InventoryItemCard = ({ item }) => {
             image_icon={item.image_icon} 
             item_price={item.item_price} 
             item_type={item.item_type}
+            rawMaterial_id={item.rawMaterial_id}
             stock={item.stock} 
         />
     );
@@ -20,6 +21,7 @@ InventoryItemCard.propTypes = {
     item: PropTypes.shape({
         inventory_id: PropTypes.number.isRequired,
         item_id: PropTypes.number.isRequired,
+        rawMaterial_id: PropTypes.number.isRequired,
         item_type: PropTypes.string.isRequired,
         item_name: PropTypes.string.isRequired,
         image_icon: PropTypes.string.isRequired,
