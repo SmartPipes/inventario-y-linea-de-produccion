@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, RawMaterialViewSet, InventoryViewSet, CategoryViewSet, StateViewSet, CityViewSet, WarehouseViewSet, SupplierViewSet, OperationLogViewSet, RestockRequestViewSet
+from .views import ProductViewSet, RawMaterialViewSet, InventoryViewSet, CategoryViewSet, StateViewSet, CityViewSet, WarehouseViewSet, SupplierViewSet, OperationLogViewSet, RestockRequestViewSet, RawMaterialSupplierViewSet
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
@@ -13,6 +13,7 @@ router.register(r'warehouse', WarehouseViewSet)
 router.register(r'supplier', SupplierViewSet)
 router.register(r'operation_log', OperationLogViewSet)
 router.register(r'restockrequest', RestockRequestViewSet)
+router.register(r'raw-material-suppliers', RawMaterialSupplierViewSet)  # Nuevo endpoint
 
 urlpatterns = [
     path('', include(router.urls)),

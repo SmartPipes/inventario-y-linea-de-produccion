@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest
-from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer
+from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, RawMaterialSupplier
+from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, RawMaterialSupplierSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import connection
@@ -87,3 +87,7 @@ class RestockRequestViewSet(viewsets.ModelViewSet):
     queryset = RestockRequest.objects.all()
     serializer_class = RestockRequestSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+class RawMaterialSupplierViewSet(viewsets.ModelViewSet):
+    queryset = RawMaterialSupplier.objects.all()
+    serializer_class = RawMaterialSupplierSerializer

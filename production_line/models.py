@@ -10,6 +10,7 @@ class Factory(models.Model):
     address = models.CharField(max_length=200)
     phone = models.CharField(max_length=10, blank=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
 
     class Meta:
         db_table = 'pro_Factories'
@@ -23,6 +24,7 @@ class Phase(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
 
     class Meta:
         db_table = 'pro_Phases'
@@ -37,12 +39,13 @@ class ProductionLine(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     production_line_creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_production_lines')
     factory = models.ForeignKey(Factory, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
 
     class Meta:
         db_table = 'pro_ProductionLines'
 
     def __str__(self):
-        return self.name  # Cambiado de 'nombre' a 'name'
+        return self.name
 
 class ProductionPhase(models.Model):
     productionLine = models.ForeignKey(ProductionLine, on_delete=models.CASCADE)
