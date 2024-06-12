@@ -32,4 +32,9 @@ color: #364936;
 text-transform: uppercase;
 `;
 
-export  {GlobalStyles, Titles, SubTitle, SubTitle2,ModalTitle};
+const Labels = styled.h3`
+color: #364936;
+text-transform: uppercase;
+`;
+
+export  {GlobalStyles, Titles, SubTitle, SubTitle2,ModalTitle, Labels};

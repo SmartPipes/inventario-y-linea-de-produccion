@@ -5,7 +5,7 @@ import {Home} from './components/pages/Home'
 import {ProductionLine} from './components/pages/production/ProductionLine'
 import {ProductionPhase} from './components/pages/production/ProductionPhase.jsx'
 import { Factory } from './components/pages/production/Factory.jsx'
-import {InventoryPage} from './components/pages/InventoryPage.jsx'
+import InventoryPage from './components/pages/inventory/Inventory.jsx';
 import { Production } from './components/pages/production/Production.jsx'
 import {User} from './components/pages/User.jsx'
 import { RouterProvider, createBrowserRouter  } from 'react-router-dom'
@@ -17,7 +17,7 @@ const router = createBrowserRouter([{
     { path: "" , element: <Home/> },
     { path: "/production/production-lines" , element: <ProductionLine/> },
     { path: "/production/production-phases", element: <ProductionPhase/>},
-    { path: "inventory" , element: <InventoryPage/>},
+    { path: "inventory", element: <InventoryPage /> },
     { path: "/production/factories" , element: <Factory/>},
     { path: "production" , element: <Production/>},
     // LEAVE THIS USER AS THE LAST ALWAYS
