@@ -11,11 +11,7 @@ body{
 const Titles = styled.h1`
 color: #364936;
 text-transform: uppercase;
-`;
-
-const Labels = styled.h3`
-color: #364936;
-text-transform: uppercase;
+padding-bottom: 2rem;
 `;
 
 const SubTitle = styled.h3`
@@ -24,4 +20,16 @@ text-transform: uppercase;
 padding-bottom: 1rem;
 `;
 
-export  {GlobalStyles, Titles, SubTitle,Labels};
+//Smaller than the normal subtitle
+const SubTitle2 = styled.h4`
+color: #364936;
+text-transform: uppercase;
+`;
+
+//Subtitle but without the padding bottom
+const ModalTitle = styled.h2`
+color: #364936;
+text-transform: uppercase;
+`;
+
+export  {GlobalStyles, Titles, SubTitle, SubTitle2,ModalTitle};
