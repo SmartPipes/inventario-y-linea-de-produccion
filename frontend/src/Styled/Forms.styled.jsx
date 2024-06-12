@@ -18,6 +18,14 @@ const Input = styled.input`
     width: 100%;
 `;
 
+const SelectStyled = styled.div`
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    width: 100%;
+`;
+
 const Label = styled.label`
     margin-bottom: 0.5rem;
     font-size: 1rem;
@@ -31,16 +39,18 @@ const ButtonContainer = styled.div`
 
 const Button = styled.button`
     padding: 0.5rem 1rem;
-    background: #97b25e;
+    background: ${(props) => props.isdisabledBtn ? '#EE4E4E' : '#97b25e'};
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
+    margin-left: 10px;
 
     &:hover {
-        background: #364936;
+        background: ${(props) => props.isdisabledBtn ? '#FF0000' : '#364936'};
     }
+
 `;
 
 const Error = styled.p`
@@ -49,4 +59,4 @@ const Error = styled.p`
     margin-top: -7px;
 `;
 
-export {FormContainer, Label, Input, ButtonContainer, Button, Error};
+export {FormContainer, Label, Input, ButtonContainer, Button, Error, SelectStyled};

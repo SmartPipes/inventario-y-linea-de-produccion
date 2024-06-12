@@ -1,24 +1,28 @@
 import {React, useState, useEffect} from 'react'
-import { FormContainer, Label, Input, Button,ButtonContainer, Error } from '../../../Styled/Forms.styled'
-import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes } from '../../../Styled/Production.styled';
+import { FormContainer, Label, Input, Button,ButtonContainer, Error, SelectStyled  } from '../../../Styled/Forms.styled'
+import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes, BtnEdit } from '../../../Styled/Production.styled';
 import { Titles, SubTitle, SubTitle2 } from '../../../Styled/Global.styled'
 import {useForm, Controller} from 'react-hook-form'
 import {API_URL_FACTORIES, API_URL_CITIES } from '../Config'
 import {apiClient} from '../../../ApiClient'
 import ModalComponent from '../../modals/ProductionModals';
 import Select from 'react-select'
+import { ProductionNavBar } from './ProductionNavBar';
+import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Factory = () => {
 const [city, setCities] = useState([]);
 const [selectedFactory, setSelectedFactory] = useState(null); //to know what factory was selected for the modal
 const [factories, setFactories] = useState([]);
+const [isEditing, setIsEditing] = useState(false); // to know that its in editing mode
+const [selectedFactoryID, setSelectedFactoryID] = useState(null); // to know what is being edited
 
     useEffect(() => {
       getCities();
       getFactories();
       },[]);
-    
-
+  
 
     const {
         control,
@@ -34,7 +38,18 @@ const [factories, setFactories] = useState([]);
           ...data,
           city: data.city.value
         };
-      
+
+        if (isEditing) {//update
+          console.log(data);
+          await apiClient.put(`${API_URL_FACTORIES}${selectedFactoryID}/`, transformedData);
+            reset();
+            setIsEditing(false);
+            setSelectedFactoryID(null);
+            await getFactories();
+            setValue('city', '');
+
+        } else {//create
+
         try {
           // Realizar la solicitud POST
           await apiClient.post(API_URL_FACTORIES, transformedData);
@@ -48,6 +63,7 @@ const [factories, setFactories] = useState([]);
         } catch (error) {
           console.error('Error adding factory:', error);
         }
+      }
       };
       
 
@@ -89,24 +105,69 @@ const [factories, setFactories] = useState([]);
 
 
   // For the modal of the factories
-  const openModal = (name, address, phone, city) => {
-    setSelectedFactory({ name, address, phone, city });
+  const openModal = (name, address, phone, city, status, cityID, factoryID) => {
+    setSelectedFactory({ name, address, phone, city, status, cityID, factoryID });
   };
 
   const closeModal = () => {
     setSelectedFactory(null);
   };
 
-  return (
+    //disables the factory
+    const disableFactory = async(id) => {
+      const disable = {...factories.find(factory =>factory.factory_id === id), status: "Inactive"}
+      delete disable.factory_id;
+      delete disable.created_at;
+      delete disable.updated_at;
+      await apiClient.put(API_URL_FACTORIES+id+"/" , disable);
+      getFactories();
+    }
+  
+    //enables the factory again
+    const enableFactory = async (id) => {
+      const enable = { ...factories.find(factory => factory.factory_id === id), status: "Active" };
+      delete enable.factory_id;
+      delete enable.created_at;
+      delete enable.updated_at;
+      await apiClient.put(API_URL_FACTORIES + id + "/", enable);
+      getFactories();
+    };
+  
+  //Enables editting mode
+    const startEditing = () => {
+      setSelectedFactoryID(selectedFactory.factoryID)
+      console.log(selectedFactory.factoryID);
+      setIsEditing(true);
+      closeModal();
+      if (selectedFactory) {
+        //Values that the form is goign to be populated with
+        setValue("name", selectedFactory.name);
+        setValue("address", selectedFactory.address);
+        setValue("phone", selectedFactory.phone);
+        setValue("city", {value:selectedFactory.cityID , label:selectedFactory.city});
+      }
+  
+    };
+  
+    //exits editing mode
+    const cancelEdit = () => {
+      reset();
+      setIsEditing(false);
+      setSelectedFactory(null);
+    };
+
+  return ( 
     <OrderContainer>
        <SideBar>
         <SubTitle>Factories</SubTitle>
         {factories.map((item) => (
-            <PlacedOrderBoxes key={item.factory_id} onClick={() => openModal(item.name, item.address, item.phone, getCityLabel(item.city) )}>{item.name}</PlacedOrderBoxes>
+            <PlacedOrderBoxes isdisabled={item.status} key={item.factory_id} onClick={() => openModal(item.name, item.address, item.phone, getCityLabel(item.city), item.status, item.city, item.factory_id )}>{item.name}</PlacedOrderBoxes>
         ))}
       </SideBar>
     <MainContent>
-        <Titles>Add a Factory</Titles>
+    <ProductionNavBar/>
+
+        <Titles>{isEditing ? `Editing`:'Add a Factory'}</Titles>
         <FormContainer>
         <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-control">
@@ -147,7 +208,9 @@ const [factories, setFactories] = useState([]);
             </div>
             <div className="form-control">
                 <Label>Select a City</Label>
+                <SelectStyled>
                 <Controller name="city" control={control} rules={{required: true}} render={({field}) => ( <Select {...field}  options = {city}/>)}/>
+                </SelectStyled>
                 {errors.city && (
                     <Error>This is a required field.</Error>
                 )}
@@ -155,7 +218,9 @@ const [factories, setFactories] = useState([]);
             <div className="form-control">
               <label></label>
               <ButtonContainer>
-              <Button type="submit">Add Factory</Button>
+              {isEditing &&(
+                <BtnEdit onClick={cancelEdit}>Cancel</BtnEdit>)}
+              <Button type="submit">{isEditing ? "Update Factory" : "Add Factory"}</Button>
               </ButtonContainer>
             </div>
           </form>
@@ -163,6 +228,8 @@ const [factories, setFactories] = useState([]);
     </MainContent>
     {selectedFactory && ( //Show modal only if a factory is selected
         <ModalComponent onClose={closeModal}>
+          {(selectedFactory.status === 'Active' &&
+              <BtnEdit onClick={() => {startEditing()}}>  <FontAwesomeIcon icon={faPenToSquare} /></BtnEdit>)}
           <h2>{selectedFactory.name}</h2>
           <SubTitle2>Address:</SubTitle2>
           <p>{selectedFactory.address}</p>
@@ -170,6 +237,14 @@ const [factories, setFactories] = useState([]);
           <p>{selectedFactory.phone}</p>
           <SubTitle2>City:</SubTitle2>
           <p>{selectedFactory.city}</p>
+          <ButtonContainer>
+        {selectedFactory.status === "Active" && (
+          <Button isdisabledBtn={true} onClick={() => { disableFactory(selectedFactory.factoryID); closeModal(); }}>Disable</Button>
+        )}
+        {selectedFactory.status === "Inactive" && (
+          <Button onClick={() => { enableFactory(selectedFactory.factoryID); closeModal(); }}>Enable</Button>
+        )}
+      </ButtonContainer>
 
         </ModalComponent>
       )}

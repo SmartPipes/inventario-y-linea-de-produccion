@@ -22,21 +22,23 @@ const  NavLinkWrapper = styled.div`
 const StyledNavLink = styled(NavLink)`
 text-decoration: none;
 transition: .2s;
-color: #FAFBF3;
+color: ${(props) => props.isproduction ? '#364936' : '#FAFBF3'};
 margin-left: 2rem;
 &:hover {
     color: #97B25E;
+    
 }
 
 
 &.${(props) => props.activeclassname}{
-    background: #97B25E;
-    padding: 0.5rem 1rem;
-    border-radius: 30px;
+    background: ${(props) => props.isproduction ? '' : '#97B25E'};
+    padding: ${(props) => props.isproduction ? '': '0.5rem 1rem'};
+    border-radius: ${(props) => props.isproduction ? '': '30px'};
+    color: ${(props) => props.isproduction ? '#97B25E': '#FAFBF3'}; 
     &:hover {
-        color: #FAFBF3;
+        color: ${(props) => props.isproduction ? '#97B25E': '#FAFBF3'};
     &.${(props) => props.activeclassname}{
-        color: #FAFBF3; 
+        color: ${(props) => props.isproduction ? '#97B25E': '#FAFBF3'}; 
     }
 }
 

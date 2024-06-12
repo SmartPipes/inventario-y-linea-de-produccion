@@ -1,15 +1,19 @@
 import {React, useState, useEffect} from 'react'
 import { FormContainer, Label, Input, Button,ButtonContainer, Error } from '../../../Styled/Forms.styled'
-import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes } from '../../../Styled/Production.styled';
+import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes, BtnEdit} from '../../../Styled/Production.styled';
 import { Titles, SubTitle } from '../../../Styled/Global.styled'
 import {useForm} from 'react-hook-form'
 import {API_URL_PHASES } from '../Config'
 import {apiClient} from '../../../ApiClient'
 import ModalComponent from '../../modals/ProductionModals';
-
+import { ProductionNavBar } from './ProductionNavBar';
+import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export const ProductionPhase = () => {
 const [phases, setPhases] = useState([]);
 const [selectedPhase, setSelectedPhase] = useState(null); //to know what phase was selected
+const [isEditing, setIsEditing] = useState(false); // to know that its in editing mode
+const [selectedPhaseID, setSelectedPhaseID] = useState(null); // to know what is being edited
 
     useEffect(() => {
       getPhases();
@@ -20,11 +24,22 @@ const [selectedPhase, setSelectedPhase] = useState(null); //to know what phase w
         register,
         handleSubmit,
         formState: { errors },
-        reset
+        reset,
+        setValue
       } = useForm();
     
       const onSubmit = (data) => {
-         apiClient.post(API_URL_PHASES , data);
+        if (isEditing) {//update
+          console.log(data);
+          apiClient.put(`${API_URL_PHASES}${selectedPhaseID}/`, data);
+            reset();
+            setIsEditing(false);
+            setSelectedPhaseID(null);
+            getPhases();
+
+        } else {//create
+          apiClient.post(API_URL_PHASES , data);
+        }
          getPhases();
         reset();
       };
@@ -45,11 +60,50 @@ const [selectedPhase, setSelectedPhase] = useState(null); //to know what phase w
       }
 
   // For the modal of the phases
-  const openModal = (name, description) => {
-    setSelectedPhase({ name, description });
+  const openModal = (name, description, id, status) => {
+    setSelectedPhase({ name, description, id, status });
   };
 
   const closeModal = () => {
+    setSelectedPhase(null);
+  };
+
+  //disables the phase
+  const disablePhase = async(id) => {
+    const disable = {...phases.find(phase =>phase.phase_id === id), status: "Inactive"}
+    delete disable.phase_id;
+    delete disable.created_at;
+    delete disable.updated_at;
+    await apiClient.put(API_URL_PHASES+id+"/" , disable);
+    getPhases();
+  }
+
+  //enables the phase again
+  const enablePhase = async (id) => {
+    const enable = { ...phases.find(phase => phase.phase_id === id), status: "Active" };
+    delete enable.phase_id;
+    delete enable.created_at;
+    delete enable.updated_at;
+    await apiClient.put(API_URL_PHASES + id + "/", enable);
+    getPhases();
+  };
+
+//Enables editting mode
+  const startEditing = () => {
+    setSelectedPhaseID(selectedPhase.id)
+    setIsEditing(true);
+    closeModal();
+    if (selectedPhase) {
+      setValue("name", selectedPhase.name);
+      setValue("description", selectedPhase.description);
+    }
+
+  };
+
+  //exits editing mode
+  const cancelEdit = () => {
+    reset();
+    setIsEditing(false);
     setSelectedPhase(null);
   };
 
@@ -58,11 +112,12 @@ const [selectedPhase, setSelectedPhase] = useState(null); //to know what phase w
        <SideBar>
         <SubTitle>Phases</SubTitle>
         {phases.map((item) => (
-            <PlacedOrderBoxes key={item.phase_id} onClick={() => openModal(item.name, item.description)}>{item.name}</PlacedOrderBoxes>
+            <PlacedOrderBoxes isdisabled={item.status} key={item.phase_id} onClick={() => openModal(item.name, item.description, item.phase_id, item.status)}>{item.name}</PlacedOrderBoxes>
         ))}
       </SideBar>
     <MainContent>
-        <Titles>Add a New Phase for Production Lines!</Titles>
+    <ProductionNavBar/>
+        <Titles>{isEditing ? `Editing`:'Add a New Phase for Production Lines!'}</Titles>
         <FormContainer>
         <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-control">
@@ -91,17 +146,33 @@ const [selectedPhase, setSelectedPhase] = useState(null); //to know what phase w
             <div className="form-control">
               <label></label>
               <ButtonContainer>
-              <Button type="submit">Add Phase</Button>
+                {isEditing &&(
+                <BtnEdit onClick={cancelEdit}>Cancel</BtnEdit>)}
+              <Button type="submit">{isEditing ? "Update Phase" : "Add Phase"}</Button>
               </ButtonContainer>
             </div>
           </form>
         </FormContainer>
     </MainContent>
     {selectedPhase && ( //Show modal only if a phase is selected
-        <ModalComponent onClose={closeModal}>
-          <h2>{selectedPhase.name}</h2>
-          <p>{selectedPhase.description}</p>
-        </ModalComponent>
+      <ModalComponent onClose={closeModal}>
+      {(selectedPhase.status === 'Active' &&
+      <BtnEdit onClick={() => {startEditing()}}>  <FontAwesomeIcon icon={faPenToSquare} /></BtnEdit>)}
+
+      <h2>
+        {selectedPhase.name}
+      </h2>
+      <h3 style={{ color: '#EE4E4E' }}>{selectedPhase.status === "Inactive" ? "Inactive" : ""}</h3>
+      <p>{selectedPhase.description}</p>
+      <ButtonContainer>
+        {selectedPhase.status === "Active" && (
+          <Button isdisabledBtn={true} onClick={() => { disablePhase(selectedPhase.id); closeModal(); }}>Disable</Button>
+        )}
+        {selectedPhase.status === "Inactive" && (
+          <Button onClick={() => { enablePhase(selectedPhase.id); closeModal(); }}>Enable</Button>
+        )}
+      </ButtonContainer>
+    </ModalComponent>
       )}
     </OrderContainer>
   )

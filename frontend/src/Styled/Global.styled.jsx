@@ -26,4 +26,10 @@ color: #364936;
 text-transform: uppercase;
 `;
 
-export  {GlobalStyles, Titles, SubTitle, SubTitle2};
+//Subtitle but without the padding bottom
+const ModalTitle = styled.h2`
+color: #364936;
+text-transform: uppercase;
+`;
+
+export  {GlobalStyles, Titles, SubTitle, SubTitle2,ModalTitle};

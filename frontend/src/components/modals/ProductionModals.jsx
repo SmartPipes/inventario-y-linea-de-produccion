@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -20,6 +20,10 @@ const ModalContent = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: #364936;
   position:relative;
+  ${(props) => props.fixedSize && css`
+  width: 900px; /* Set your fixed width here */
+  
+`}
 `;
 
 const CloseButton = styled.button`
@@ -33,10 +37,10 @@ const CloseButton = styled.button`
   
 `;
 
-const ModalComponent = ({ onClose, children }) => {
+const ModalComponent = ({ onClose, children, fixedSize }) => {
   return (
     <ModalOverlay>
-      <ModalContent>
+      <ModalContent fixedSize={fixedSize}>
         <CloseButton onClick={onClose}>&times;</CloseButton>
         {children}
       </ModalContent>
