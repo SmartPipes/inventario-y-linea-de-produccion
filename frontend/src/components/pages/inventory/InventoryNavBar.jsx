@@ -5,7 +5,7 @@ import { faBars, faSearch, faFilter, faPlus, faCaretDown } from '@fortawesome/fr
 import axios from 'axios';
 import { 
     NavContainer, NavItem, NavLogo, NavSearchContainer, NavSearch, 
-    NavPagination, NavMenu, HamburgerMenu, FilterOption, FilterTag, FilterDropdown, SubFilterDropdown, NewButton, SearchIcon 
+    NavPagination, NavMenu, HamburgerMenu, FilterOption, FilterTag, FilterDropdown, SubFilterDropdown, NewButton, SearchIcon, DropdownContainer, DropdownMenu, DropdownItem
 } from '../../../Styled/InventoryNavBar.styled';
 
 const InventoryNavBar = ({ applyFilters }) => {
@@ -16,6 +16,7 @@ const InventoryNavBar = ({ applyFilters }) => {
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [availableFilters] = useState(['Products', 'Raw Material', 'Precio ASC', 'Warehouse']);
     const [warehouses, setWarehouses] = useState([]);
+    const [isConfigOpen, setIsConfigOpen] = useState(false);
 
     useEffect(() => {
         fetchWarehouses();
@@ -38,6 +39,10 @@ const InventoryNavBar = ({ applyFilters }) => {
 
     const toggleSearch = () => {
         setIsSearchOpen(!isSearchOpen);
+    };
+
+    const toggleConfig = () => {
+        setIsConfigOpen(!isConfigOpen);
     };
 
     const addFilter = (filter) => {
@@ -83,7 +88,15 @@ const InventoryNavBar = ({ applyFilters }) => {
                     <NavItem><Link to="/inventory/operaciones">Operaciones</Link></NavItem>
                     <NavItem><Link to="/inventory/productos">Productos</Link></NavItem>
                     <NavItem><Link to="/inventory/reportes">Reportes</Link></NavItem>
-                    <NavItem><Link to="/inventory/configuracion">Configuración</Link></NavItem>
+                    <DropdownContainer>
+                        <NavItem onClick={toggleConfig}>Configuración</NavItem>
+                        <DropdownMenu isOpen={isConfigOpen}>
+                            <DropdownItem isLabel>Gestión del almacén</DropdownItem>
+                            <DropdownItem><Link to="/inventory/almacenes">Almacenes</Link></DropdownItem>
+                            <DropdownItem isLabel>Productos</DropdownItem>
+                            <DropdownItem><Link to="/inventory/categorias-productos">Categorías de productos</Link></DropdownItem>
+                        </DropdownMenu>
+                    </DropdownContainer>
                 </NavMenu>
             </NavContainer>
             <NavSearchContainer>
