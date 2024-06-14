@@ -1,12 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Logo from './Logo';
-import { NavLinkWrapper, NavbarWrapper, StyledNavLink} from '../Styled/Navbar.styled';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { NavLinkWrapper, NavbarWrapper, StyledNavLink, HamburgerMenu, NavMenu } from '../Styled/Navbar.styled';import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faBars } from '@fortawesome/free-solid-svg-icons';
 
 
 export const Navbar = () => {
-
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   
   const links = [
@@ -17,9 +16,17 @@ export const Navbar = () => {
     
   ];
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <NavbarWrapper>
       <Logo />
+      <HamburgerMenu onClick={toggleMenu}>
+        <FontAwesomeIcon icon={faBars} size="lg" />
+      </HamburgerMenu>
+      <NavMenu isOpen={isMenuOpen}>
       <NavLinkWrapper>
         {links.map((link) => (
           <StyledNavLink activeclassname="active" key={link.page} to={link.href}>
@@ -28,6 +35,7 @@ export const Navbar = () => {
         </StyledNavLink>
         ))}
       </NavLinkWrapper>
+      </NavMenu>
     </NavbarWrapper>
   );
 };
