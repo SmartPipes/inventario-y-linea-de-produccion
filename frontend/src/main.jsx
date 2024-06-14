@@ -7,7 +7,7 @@ import {ProductionPhase} from './components/pages/production/ProductionPhase.jsx
 import { Factory } from './components/pages/production/Factory.jsx'
 import InventoryPage from './components/pages/inventory/Inventory.jsx';
 import { Production } from './components/pages/production/Production.jsx'
-import {User} from './components/pages/User.jsx'
+import {User} from './components/pages/User/User.jsx'
 import { RouterProvider, createBrowserRouter  } from 'react-router-dom'
 
 const router = createBrowserRouter([{
