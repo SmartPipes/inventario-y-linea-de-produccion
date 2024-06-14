@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Logo from './Logo';
 import { NavLinkWrapper, NavbarWrapper, StyledNavLink, HamburgerMenu, NavMenu } from '../Styled/Navbar.styled';import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faBars } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
 
 
 export const Navbar = () => {
@@ -9,9 +10,10 @@ export const Navbar = () => {
 
   
   const links = [
-    { page: "Home", href: "/" },
+    { page: "Sales", href: "/sales" },
     { page: "Production", href: "/production" },
     { page: "Inventory", href: "/inventory" },
+    { page: "Delivery", href: "/delivery" },
     { page: "User", href: "/user", icon: faUser }
     
   ];
@@ -22,7 +24,9 @@ export const Navbar = () => {
 
   return (
     <NavbarWrapper>
-      <Logo />
+      <Link to="/">
+      <Logo/>
+      </Link>
       <HamburgerMenu onClick={toggleMenu}>
         <FontAwesomeIcon icon={faBars} size="lg" />
       </HamburgerMenu>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import InventoryNavBar from './InventoryNavBar';
 import InventoryList from './InventoryList';
+import { MainContent } from '../../../Styled/Production.styled';
 
 const InventoryPage = () => {
     const [selectedFilters, setSelectedFilters] = useState([]);
@@ -10,10 +11,10 @@ const InventoryPage = () => {
     };
 
     return (
-        <div>
+        <MainContent>
             <InventoryNavBar applyFilters={applyFilters} />
             <InventoryList selectedFilters={selectedFilters} />
-        </div>
+        </MainContent>
     );
 };
 

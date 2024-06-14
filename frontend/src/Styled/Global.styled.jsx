@@ -6,6 +6,7 @@ body{
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
+    background: #f4f4f4;
 }
 `;
 const Titles = styled.h1`
