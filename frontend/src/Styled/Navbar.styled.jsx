@@ -27,25 +27,22 @@ const NavLinkWrapper = styled.div`
 
 const StyledNavLink = styled(NavLink)`
   text-decoration: none;
-  transition: .2s;
+  transition: color 0.3s, background-color 0.4s, padding 0.3s, border-radius 0.3s;
   color: ${(props) => props.isproduction ? '#364936' : '#FAFBF3'};
   margin-left: 2rem;
+  padding: ${(props) => props.isproduction ? '0' : '0.5rem 1rem'};
+  border-radius: ${(props) => props.isproduction ? '0' : '30px'};
 
   &:hover {
     color: #97B25E;
   }
 
   &.${(props) => props.activeclassname} {
-    background:  ${(props) => props.isproduction ? '' : '#97B25E'};
-    padding: ${(props) => props.isproduction ? '': '0.5rem 1rem'};
-    border-radius: ${(props) => props.isproduction ? '': '30px'};
-    color: ${(props) => props.isproduction ? '#97B25E': '#FAFBF3'}; 
-
+    background: ${(props) => props.isproduction ? '' : '#97B25E'};
+    color: ${(props) => props.isproduction ? '#97B25E' : '#FAFBF3'}; 
 
     &:hover {
-       color: ${(props) => props.isproduction ? '#97B25E': '#FAFBF3'};
-        &.${(props) => props.activeclassname}{
-        color: ${(props) => props.isproduction ? '#97B25E': '#FAFBF3'}; 
+      color: ${(props) => props.isproduction ? '#97B25E' : '#FAFBF3'};
     }
   }
 
@@ -55,6 +52,8 @@ const StyledNavLink = styled(NavLink)`
     text-align: center;
   }
 `;
+
+
 
 const HamburgerMenu = styled.div`
   display: none;
