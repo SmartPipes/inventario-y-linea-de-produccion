@@ -13,6 +13,7 @@ export const NavContainer = styled.nav`
 export const NavLogo = styled.div`
     font-size: 24px;
     font-weight: bold;
+    color: #364936;
 `;
 
 export const NavItem = styled.div`

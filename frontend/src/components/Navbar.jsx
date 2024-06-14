@@ -24,7 +24,7 @@ export const Navbar = () => {
         {links.map((link) => (
           <StyledNavLink activeclassname="active" key={link.page} to={link.href}>
           {link.icon ? <FontAwesomeIcon icon={link.icon} width="20px" color="#FAFBF3" style={{ marginLeft: '8px' }} /> : link.page}
-          {link.page != "User" && <FontAwesomeIcon icon={faCaretDown} width="12px" color="#FAFBF3" style={{ marginLeft: '4px' }} />}
+
         </StyledNavLink>
         ))}
       </NavLinkWrapper>
