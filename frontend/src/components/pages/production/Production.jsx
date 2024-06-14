@@ -59,7 +59,9 @@ export const Production = () => {
   const getProducts = async () => {
     try{
         const response = await apiClient.get(API_URL_PRODUCTS);
-        const transformedProducts = response.data.map(products => ({
+        const transformedProducts = response.data
+        .filter(products => products.status === "Active")
+        .map(products => ({
           value: products.product_id,
           label: products.name
         }));
@@ -73,7 +75,9 @@ export const Production = () => {
   const getFactories = async () => {
     try {
         const response = await apiClient.get(API_URL_FACTORIES);
-        const transformedFactories = response.data.map(factory => ({
+        const transformedFactories = response.data
+        .filter(factory => factory.status === "Active")
+        .map(factory => ({
           value: factory.factory_id,
           label: factory.name
         }));
@@ -87,7 +91,9 @@ export const Production = () => {
 const getWarehouses = async () => {
     try {
         const response = await apiClient.get(API_URL_WAREHOUSES);
-        const transformedWarehouse = response.data.map(warehouse => ({
+        const transformedWarehouse = response.data
+        .filter(warehouse => warehouse.status === "Active")
+        .map(warehouse => ({
           value: warehouse.warehouse_id,
           label: warehouse.name
         }));

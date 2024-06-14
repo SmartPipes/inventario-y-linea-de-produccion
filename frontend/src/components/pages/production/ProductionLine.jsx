@@ -134,30 +134,35 @@ const userID = 2;
       }
       }
 
-      const getPhases = async() => {
+      const getPhases = async () => {
         try {
           const response = await apiClient.get(API_URL_PHASES);
-              if (Array.isArray(response.data)) {
-                const transformedPhases = response.data.map(phase => ({
-                  value: phase.phase_id,
-                  label: phase.name
-                }));
-                setPhases(transformedPhases);
-              } else {
-                console.error('Data fetched is not an array:', response.data);
-                setPhases([]);
-              }
+          if (Array.isArray(response.data)) {
+            const transformedPhases = response.data
+              .filter(phase => phase.status === "Active")
+              .map(phase => ({
+                value: phase.phase_id,
+                label: phase.name
+              }));
+            setPhases(transformedPhases);
+          } else {
+            console.error('Data fetched is not an array:', response.data);
+            setPhases([]);
+          }
         } catch (error) {
           console.error('Error fetching data:', error);
         }
-      }
+      };
+      
 
 
         // get the existatnt factories
         const getFactories = async () => {
           try {
               const response = await apiClient.get(API_URL_FACTORIES);
-              const transformedFactories = response.data.map(factory => ({
+              const transformedFactories = response.data
+              .filter(factory => factory.status === "Active")
+              .map(factory => ({
                 value: factory.factory_id,
                 label: factory.name
               }));
