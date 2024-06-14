@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const NavContainer = styled.nav`
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start; /* Alinea todo a la izquierda */
     padding: 10px 20px;
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
@@ -18,11 +18,19 @@ export const NavLogo = styled.div`
 
 export const NavItem = styled.div`
     margin: 0 10px;
+    position: relative;
+    padding: 8px 12px; /* Establece el padding inicial */
+    cursor: pointer; /* Añade esta línea */
     a {
         text-decoration: none;
         color: #333;
     }
+    &:hover {
+        background-color: #e0e0e0;
+        border-radius: 4px;
+    }
 `;
+
 
 export const HamburgerMenu = styled.div`
     display: none;
@@ -55,7 +63,7 @@ export const NavSearchContainer = styled.div`
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
     position: relative;
-    justify-content: space-between;
+    justify-content: flex-start; /* Alinea todo a la izquierda */
 
     @media (max-width: 768px) {
         justify-content: space-between;
@@ -113,7 +121,7 @@ export const FilterOption = styled.div`
     cursor: pointer;
     border-radius: 4px;
     &:hover {
-        background-color: #ddd;
+        background-color: #ccc;
     }
 `;
 
@@ -196,3 +204,38 @@ export const NewButton = styled.button`
         order: 1;
     }
 `;
+
+export const DropdownContainer = styled.div`
+    position: relative;
+    display: inline-block;
+`;
+
+export const DropdownMenu = styled.div`
+    display: ${props => (props.isOpen ? 'block' : 'none')};
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 240px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+`;
+
+export const DropdownItem = styled.div`
+    color: ${props => (props.isLabel ? 'grey' : 'black')};
+    padding: 8px 16px;
+    text-decoration: none;
+    display: block;
+    cursor: ${props => (props.isLabel ? 'default' : 'pointer')};
+    font-weight: ${props => (props.isLabel ? 'bold' : 'normal')};
+    font-size: 14px; /* Ajusta el tamaño de fuente aquí */
+    &:hover {
+        background-color: ${props => (props.isLabel ? 'transparent' : '#e0e0e0')};
+    }
+    a {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+    }
+`;
+
