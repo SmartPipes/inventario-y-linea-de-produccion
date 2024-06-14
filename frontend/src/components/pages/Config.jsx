@@ -19,6 +19,7 @@ export const API_URL_WAREHOUSES = BASE_API_URL+"inventory/warehouse/";
 //production orders
 export const API_URL_ORDERS = BASE_API_URL+"production-line/production-orders/";
 //production 
-
+export const API_URL_INV = BASE_API_URL+"inventory/inventory/"
+export const API_URL_RAWM = BASE_API_URL+"inventory/raw-material-suppliers/"
 
 export const API_URL = 'https://smartpipes.cloud/api/token/';

@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody } from '../../../Styled/Inventory.styled';
 import UpdateModal from './ModalsInv/UpdateModal';
 import { FormGroup } from '../../../Styled/ModalStyled';
 import { Labels } from '../../../Styled/Global.styled';
-
-axios.defaults.baseURL = 'https://smartpipes.cloud/api/inventory/';
-axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE4MjU5MjQzLCJpYXQiOjE3MTgxNzI4NDMsImp0aSI6IjMyYmFmMmMzNTZlNzQ1ODQ4MjdlMDM4OGFhZjkzZTgwIiwidXNlcl9pZCI6M30.vURsq9G88lsKh2md37_RHiR2WNqIBAwfje5aB0yembk';
+import { apiClient } from '../../../ApiClient';
+import { API_URL_INV, API_URL_PRODUCTS, API_URL_RAWM } from '../Config';
 
 const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock, item_type, children }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,9 +22,9 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const rawMaterialSuppliersResponse = await axios.get('raw-material-suppliers/');
-                const productsResponse = await axios.get('products/');
-                const rawMaterialsResponse = await axios.get('raw-materials/');
+                const rawMaterialSuppliersResponse = await apiClient.get(API_URL_RAWM);
+                const productsResponse = await apiClient.get(API_URL_PRODUCTS);
+                const rawMaterialsResponse = await apiClient.get(`${API_URL_INV}raw-materials/`);
 
                 setRawMaterialSuppliers(rawMaterialSuppliersResponse.data);
                 setProducts(productsResponse.data);
@@ -153,19 +151,19 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
             let url;
             switch (type) {
                 case 'products':
-                    url = `products/${id}/`;
+                    url = `${API_URL_PRODUCTS}${id}/`;
                     break;
                 case 'raw-materials':
-                    url = `raw-materials/${id}/`;
+                    url = `${API_URL_INV}raw-materials/${id}/`;
                     break;
                 case 'raw-material-suppliers':
-                    url = `raw-material-suppliers/${id}/`;
+                    url = `${API_URL_RAWM}${id}/`;
                     break;
                 case 'inventory':
-                    url = `inventory/${id}/`;
+                    url = `${API_URL_INV}${id}/`;
                     break;
                 default:
-                    url = `inventory/${id}/`;
+                    url = `${API_URL_INV}${id}/`;
                     break;
             }
 
@@ -180,7 +178,7 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
 
             console.log('FormData being sent:', formData); // Added for debugging
 
-            const response = await axios.put(url, formData, {
+            const response = await apiClient.put(url, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
@@ -189,7 +187,7 @@ const Card = ({ inventory_id, item_id, item_name, image_icon, item_price, stock,
             console.log('Respuesta PUT:', response.data);
 
             // Realizar una solicitud GET para verificar si los datos se han actualizado
-            const getResponse = await axios.get(url);
+            const getResponse = await apiClient.get(url);
             console.log('Respuesta GET:', getResponse.data);
         } catch (err) {
             console.error('Error al guardar cambios:', err.response ? err.response.data : err);
