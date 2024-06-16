@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { FormContainer, FormGroup, Button, ButtonGroup, ActionButtonGroup, SelectedImage, Labels, Input, Select, SubmitButton, Title, ActionButton, SelectedImageWrapper, IconWrapper, EditIcon, DeleteIcon, FormRow, Column } from '../../../Styled/InventoryForm.styled';
 import { API_URL_PRODUCTS, API_URL_RAWM, API_URL_SUPPLIERS, API_URL_CATEGORIES, API_URL_RAW_MATERIALS } from '../Config';
 import { apiClient } from '../../../ApiClient';
-import NavBarMenu from '../inventory/NavBarMenu'; // Asegúrate de ajustar la ruta de importación según la ubicación real del archivo NavBarMenu.jsx
 
 const NewItemPage = () => {
     const location = useLocation();
@@ -226,98 +225,141 @@ const NewItemPage = () => {
     };
 
     return (
-        <>
-            <NavBarMenu />
-            <FormContainer>
-                <Title>{isEditMode ? 'Editar' : 'Nuevo'} {formType === 'Product' ? 'Producto' : 'Material'}</Title>
-                <ButtonGroup>
-                    <Button
-                        type="button"
-                        isSelected={formType === 'Product'}
-                        onClick={() => handleFormTypeChange('Product')}
-                    >
-                        Producto
-                    </Button>
-                    <Button
-                        type="button"
-                        isSelected={formType === 'RawMaterial'}
-                        onClick={() => handleFormTypeChange('RawMaterial')}
-                    >
-                        Material
-                    </Button>
-                </ButtonGroup>
-                <ActionButtonGroup>
-                    <ActionButton>Actualizar cantidad</ActionButton>
-                    <ActionButton>Reabastecer</ActionButton>
-                    <ActionButton>Imprimir etiquetas</ActionButton>
-                </ActionButtonGroup>
-                <form onSubmit={handleSubmit}>
-                    <FormRow>
-                        <Column>
-                            <FormGroup>
-                                <Labels>Nombre</Labels>
-                                <Input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                />
-                            </FormGroup>
-                            <FormGroup>
-                                <Labels>Descripción</Labels>
-                                <Input
-                                    type="text"
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    required
-                                />
-                            </FormGroup>
-                        </Column>
-                        <Column>
-                            <FormGroup>
-                                <Labels>Imagen</Labels>
-                                <Input
-                                    type="file"
-                                    onChange={handleImageChange}
-                                    ref={fileInputRef}
-                                    style={{ display: 'none' }}
-                                />
-                                <SelectedImageWrapper>
-                                    <SelectedImage src={selectedImage || 'https://smartpipes.cloud/staticfiles/img/placeholder.png'} alt="Selected" onClick={handleImageClick} />
-                                    <IconWrapper>
-                                        {selectedImage ? (
-                                            <DeleteIcon onClick={handleImageDelete} />
-                                        ) : (
-                                            <EditIcon onClick={handleImageClick} />
-                                        )}
-                                    </IconWrapper>
-                                </SelectedImageWrapper>
-                            </FormGroup>
-                            <FormGroup>
-                                <Labels>Precio</Labels>
-                                <Input
-                                    type="number"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
-                                    required
-                                />
-                            </FormGroup>
-                            <FormGroup>
-                                <Labels>Estado</Labels>
-                                <Select
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                >
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </Select>
-                            </FormGroup>
-                        </Column>
-                    </FormRow>
-                    <SubmitButton type="submit">{isEditMode ? 'Actualizar' : 'Crear'}</SubmitButton>
-                </form>
-            </FormContainer>
-        </>
+        <FormContainer>
+            <Title>{isEditMode ? 'Editar' : 'Nuevo'} {formType === 'Product' ? 'Producto' : 'Material'}</Title>
+            <ButtonGroup>
+                <Button
+                    type="button"
+                    isSelected={formType === 'Product'}
+                    onClick={() => handleFormTypeChange('Product')}
+                >
+                    Producto
+                </Button>
+                <Button
+                    type="button"
+                    isSelected={formType === 'RawMaterial'}
+                    onClick={() => handleFormTypeChange('RawMaterial')}
+                >
+                    Material
+                </Button>
+            </ButtonGroup>
+            <ActionButtonGroup>
+                <ActionButton>Actualizar cantidad</ActionButton>
+                <ActionButton>Reabastecer</ActionButton>
+                <ActionButton>Imprimir etiquetas</ActionButton>
+            </ActionButtonGroup>
+            <form onSubmit={handleSubmit}>
+                <FormRow>
+                    <Column>
+                        <FormGroup>
+                            <Labels>Nombre</Labels>
+                            <Input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </FormGroup>
+                        <FormGroup>
+                            <Labels>Descripción</Labels>
+                            <Input
+                                type="text"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                            />
+                        </FormGroup>
+                    </Column>
+                    <Column>
+                        <FormGroup>
+                            <Labels>Imagen</Labels>
+                            <Input
+                                type="file"
+                                onChange={handleImageChange}
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                            />
+                            <SelectedImageWrapper>
+                                <SelectedImage src={selectedImage || 'https://smartpipes.cloud/staticfiles/img/placeholder.png'} alt="Selected" onClick={handleImageClick} />
+                                <IconWrapper>
+                                    {selectedImage ? (
+                                        <DeleteIcon onClick={handleImageDelete} />
+                                    ) : (
+                                        <EditIcon onClick={handleImageClick} />
+                                    )}
+                                </IconWrapper>
+                            </SelectedImageWrapper>
+                        </FormGroup>
+                        {formType === 'Product' ? (
+                            <>
+                                <FormGroup>
+                                    <Labels>Precio</Labels>
+                                    <Input
+                                        type="number"
+                                        value={price}
+                                        onChange={(e) => setPrice(e.target.value)}
+                                        required
+                                    />
+                                </FormGroup>
+                            </>
+                        ) : (
+                            <>
+                                <FormGroup>
+                                    <Labels>Categoría</Labels>
+                                    <Select
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">Seleccione una categoría</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.category_id} value={cat.category_id}>
+                                                {cat.name}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </FormGroup>
+                                <FormGroup>
+                                    <Labels>Proveedor</Labels>
+                                    <Select
+                                        value={supplier}
+                                        onChange={(e) => setSupplier(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">Seleccione un proveedor</option>
+                                        {suppliers.map((sup) => (
+                                            <option key={sup.supplier_id} value={sup.supplier_id}>
+                                                {sup.name}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </FormGroup>
+                                <FormGroup>
+                                    <Labels>Costo</Labels>
+                                    <Input
+                                        type="number"
+                                        value={cost}
+                                        onChange={(e) => setCost(e.target.value)}
+                                        required
+                                    />
+                                </FormGroup>
+                            </>
+                        )}
+                        <FormGroup>
+                            <Labels>Estado</Labels>
+                            <Select
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
+                            >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </Select>
+                        </FormGroup>
+                    </Column>
+                </FormRow>
+                <SubmitButton type="submit">{isEditMode ? 'Actualizar' : 'Crear'}</SubmitButton>
+            </form>
+        </FormContainer>
     );
 };
 
