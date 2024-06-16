@@ -31,7 +31,6 @@ export const NavItem = styled.div`
     }
 `;
 
-
 export const HamburgerMenu = styled.div`
     display: none;
     cursor: pointer;
@@ -166,6 +165,8 @@ export const SubFilterDropdown = styled.div`
 export const NavPagination = styled.div`
     display: flex;
     align-items: center;
+    justify-content: center;
+    margin-left: auto;
     @media (max-width: 768px) {
         order: 2;
         margin-left: auto;
@@ -174,9 +175,24 @@ export const NavPagination = styled.div`
     button {
         padding: 5px 10px;
         cursor: pointer;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin: 0 5px;
     }
+
     span {
         margin: 0 5px;
+    }
+
+    .active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    &:hover {
+        background-color: #e0e0e0;
     }
 `;
 
@@ -238,4 +254,3 @@ export const DropdownItem = styled.div`
         display: block;
     }
 `;
-

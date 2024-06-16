@@ -131,3 +131,36 @@ export const Button = styled.button`
         background: #364936;
     }
 `;
+
+// Estilos para la paginación
+export const Pagination = styled.ul`
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+`;
+
+export const PageItem = styled.li`
+    margin: 0 5px;
+`;
+
+export const PageLink = styled.button`
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: white;
+    color: black;
+    text-decoration: none;
+
+    &.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+`;
