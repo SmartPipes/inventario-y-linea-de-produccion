@@ -63,7 +63,8 @@ export const Production = () => {
         .filter(products => products.status === "Active")
         .map(products => ({
           value: products.product_id,
-          label: products.name
+          label: products.name,
+          img: products.image_icon
         }));
         setProducts(transformedProducts)
     }catch (error) {
@@ -104,6 +105,13 @@ const getWarehouses = async () => {
     }
 }
 
+const formatOptionLabel = ({ label, img }) => (
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <img src={img} alt={label} style={{ width: 30, marginRight: 10 }} />
+    <span>{label}</span>
+  </div>
+);
+
   return (
       <MainContent>
           <ProductionNavBar/>
@@ -126,7 +134,7 @@ const getWarehouses = async () => {
             <div className="form-control">
               <Label>Product</Label>
               <SelectStyled>
-                <Controller name="product" control={control} rules={{required: true}} render={({field}) => ( <Select {...field} isMulti options = {products}/>)}/>
+                <Controller name="product" control={control} rules={{required: true}} render={({field}) => ( <Select {...field} isMulti options = {products} formatOptionLabel={formatOptionLabel}/>)}/>
                 </SelectStyled>
                 {errors.product && (
                     <Error>This is a required field.</Error>
