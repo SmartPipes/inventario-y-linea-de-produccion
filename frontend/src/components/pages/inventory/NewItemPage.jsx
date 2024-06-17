@@ -1,9 +1,11 @@
+// NewItemPage.js
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { FormContainer, FormGroup, Button, ButtonGroup, ActionButtonGroup, SelectedImage, Labels, Input, Select, SubmitButton, Title, ActionButton, SelectedImageWrapper, IconWrapper, EditIcon, DeleteIcon, FormRow, Column } from '../../../Styled/InventoryForm.styled';
 import { API_URL_PRODUCTS, API_URL_RAWM, API_URL_SUPPLIERS, API_URL_CATEGORIES, API_URL_RAW_MATERIALS } from '../Config';
 import { apiClient } from '../../../ApiClient';
+import QuantityModal from './QuantityModal';
+import { Alert, AlertIcon, AlertTitle, AlertDescription, Box } from '@chakra-ui/react'
 
 const NewItemPage = () => {
     const location = useLocation();
@@ -20,7 +22,10 @@ const NewItemPage = () => {
     const [supplier, setSupplier] = useState('');
     const [cost, setCost] = useState('');
     const [isEditMode, setIsEditMode] = useState(false);
+    const [isModalVisible, setModalVisible] = useState(false);
     const fileInputRef = useRef(null);
+    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+
 
     useEffect(() => {
         fetchCategories();
@@ -52,17 +57,17 @@ const NewItemPage = () => {
         if (data.item_type === 'RawMaterial') {
             const rawMaterialResponse = await apiClient.get(`${API_URL_RAW_MATERIALS}${data.item_id}/`);
             const rawMaterialData = rawMaterialResponse.data;
-            setDescription(rawMaterialData.description || ''); // Asegúrate de obtener la descripción correcta
+            setDescription(rawMaterialData.description || '');
             setCategory(rawMaterialData.category);
 
             const rawMaterialSupplierResponse = await apiClient.get(`${API_URL_RAWM}?raw_material=${data.item_id}`);
-            const rawMaterialSupplierData = rawMaterialSupplierResponse.data[0]; 
+            const rawMaterialSupplierData = rawMaterialSupplierResponse.data[0];
             setSupplier(rawMaterialSupplierData.supplier);
             setCost(rawMaterialSupplierData.purchase_price);
         } else {
             const productResponse = await apiClient.get(`${API_URL_PRODUCTS}${data.item_id}/`);
             const productData = productResponse.data;
-            setDescription(productData.description || ''); // Asegúrate de obtener la descripción correcta
+            setDescription(productData.description || '');
         }
 
         setFormType(data.item_type === 'RawMaterial' ? 'RawMaterial' : 'Product');
@@ -125,7 +130,7 @@ const NewItemPage = () => {
 
                 if (response.status === 201 || response.status === 200) {
                     resetForm();
-                    alert(`Producto ${isEditMode ? 'actualizado' : 'creado'} exitosamente`);
+                    setShowSuccessAlert(true);
                 } else {
                     console.error(`${isEditMode ? 'Error actualizando' : 'Error creando'} producto:`, response.data);
                     alert(`${isEditMode ? 'Error actualizando' : 'Error creando'} producto: ` + response.data.message);
@@ -135,7 +140,6 @@ const NewItemPage = () => {
                 alert(`${isEditMode ? 'Error actualizando' : 'Error creando'} producto`);
             }
         } else {
-            // Crear o actualizar el raw material
             formData.append('category', category);
             console.log(`${isEditMode ? "Updating" : "Creating"} Raw Material with data:`, {
                 name,
@@ -161,7 +165,6 @@ const NewItemPage = () => {
                 if (rawMaterialResponse.status === 201 || rawMaterialResponse.status === 200) {
                     const rawMaterialId = isEditMode ? location.state.item_id : rawMaterialResponse.data.raw_material_id;
 
-                    // Crear o actualizar el raw material supplier
                     const rawMaterialSupplierData = {
                         purchase_price: cost,
                         raw_material: rawMaterialId,
@@ -181,7 +184,7 @@ const NewItemPage = () => {
 
                         if (rawMaterialSupplierUpdateResponse.status === 200) {
                             resetForm();
-                            alert('Materia prima y proveedor actualizados exitosamente');
+                            setShowSuccessAlert(true);
                         } else {
                             console.error('Error actualizando proveedor de materia prima:', rawMaterialSupplierUpdateResponse.data);
                             alert('Error actualizando proveedor de materia prima: ' + rawMaterialSupplierUpdateResponse.data.message);
@@ -195,7 +198,7 @@ const NewItemPage = () => {
 
                         if (rawMaterialSupplierCreateResponse.status === 201) {
                             resetForm();
-                            alert('Materia prima y proveedor creados exitosamente');
+                            setShowSuccessAlert(true);
                         } else {
                             console.error('Error creando proveedor de materia prima:', rawMaterialSupplierCreateResponse.data);
                             alert('Error creando proveedor de materia prima: ' + rawMaterialSupplierCreateResponse.data.message);
@@ -224,6 +227,15 @@ const NewItemPage = () => {
         setCost('');
     };
 
+    const handleModalApply = (quantity) => {
+        console.log(`Nueva cantidad aplicada: ${quantity}`);
+        setModalVisible(false);
+    };
+
+    const handleAlertClick = () => {
+        setShowSuccessAlert(false);
+    };
+
     return (
         <FormContainer>
             <Title>{isEditMode ? 'Editar' : 'Nuevo'} {formType === 'Product' ? 'Producto' : 'Material'}</Title>
@@ -244,7 +256,9 @@ const NewItemPage = () => {
                 </Button>
             </ButtonGroup>
             <ActionButtonGroup>
-                <ActionButton>Actualizar cantidad</ActionButton>
+                <ActionButton onClick={() => setModalVisible(true)}>
+                    Actualizar cantidad
+                </ActionButton>
                 <ActionButton>Reabastecer</ActionButton>
                 <ActionButton>Imprimir etiquetas</ActionButton>
             </ActionButtonGroup>
@@ -359,6 +373,29 @@ const NewItemPage = () => {
                 </FormRow>
                 <SubmitButton type="submit">{isEditMode ? 'Actualizar' : 'Crear'}</SubmitButton>
             </form>
+            {showSuccessAlert && (
+                <Box my={4} style={{
+                    position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', zIndex: 9999, // Asegura que el alert esté encima de otros elementos
+                }}
+                    onClick={handleAlertClick} // Manejador de clic para cerrar el alert
+                >
+                    <Alert status="success" variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" height="auto" maxWidth="400px" mx="auto" cursor="pointer">
+                        <AlertIcon boxSize="40px" mr={0} />
+                        <AlertTitle mt={4} mb={1} fontSize="lg">
+                            {isEditMode ? 'Actualización Exitosa!' : 'Creación Exitosa!'}
+                        </AlertTitle>
+                        <AlertDescription maxWidth="sm">
+                            {`El ${formType === 'Product' ? 'producto' : 'material'} ha sido ${isEditMode ? 'actualizado' : 'creado'} exitosamente.`}
+                        </AlertDescription>
+                    </Alert>
+                </Box>
+            )}
+
+            <QuantityModal
+                isVisible={isModalVisible}
+                onClose={() => setModalVisible(false)}
+                onApply={handleModalApply}
+            />
         </FormContainer>
     );
 };
