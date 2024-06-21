@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import DeliveryTeamViewSet, DeliveryOrderViewSet, DeliveryOrderDetailViewSet
+from .views import ThirdPartyServiceViewSet, DeliveryOrderViewSet, DeliveryOrderDetailViewSet
 
 router = DefaultRouter()
-router.register(r'delivery-teams', DeliveryTeamViewSet)
+router.register(r'third-party-service', ThirdPartyServiceViewSet)
 router.register(r'delivery-orders', DeliveryOrderViewSet)
 router.register(r'delivery-order-details', DeliveryOrderDetailViewSet)
 

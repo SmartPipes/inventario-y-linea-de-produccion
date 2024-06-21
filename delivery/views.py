@@ -1,10 +1,10 @@
 from rest_framework import viewsets
-from .models import DeliveryTeam, DeliveryOrder, DeliveryOrderDetail
-from .serializers import DeliveryTeamSerializer, DeliveryOrderSerializer, DeliveryOrderDetailSerializer
+from .models import ThirdPartyService, DeliveryOrder, DeliveryOrderDetail
+from .serializers import ThirdPartyServiceSerializer, DeliveryOrderSerializer, DeliveryOrderDetailSerializer
 
-class DeliveryTeamViewSet(viewsets.ModelViewSet):
-    queryset = DeliveryTeam.objects.all()
-    serializer_class = DeliveryTeamSerializer
+class ThirdPartyServiceViewSet(viewsets.ModelViewSet):
+    queryset = ThirdPartyService.objects.all()
+    serializer_class = ThirdPartyServiceSerializer
 
 class DeliveryOrderViewSet(viewsets.ModelViewSet):
     queryset = DeliveryOrder.objects.all()

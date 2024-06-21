@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import User, Division, DivisionUser
-from .serializers import UserSerializer, DivisionSerializer, DivisionUserSerializer
+from .models import User, Division, DivisionUser, PaymentMethod
+from .serializers import UserSerializer, DivisionSerializer, DivisionUserSerializer, PaymentMethodSerializer
 
 class DivisionViewSet(viewsets.ModelViewSet):
     queryset = Division.objects.all()
@@ -13,3 +13,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class DivisionUserViewSet(viewsets.ModelViewSet):
     queryset = DivisionUser.objects.all()
     serializer_class = DivisionUserSerializer
+    
+class PaymentMethodsViewSet(viewsets.ModelViewSet):
+    queryset = PaymentMethod.objects.all()
+    serializer_class = PaymentMethodSerializer
+

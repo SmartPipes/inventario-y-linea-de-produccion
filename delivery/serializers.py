@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import DeliveryTeam, DeliveryOrder, DeliveryOrderDetail
+from .models import ThirdPartyService, DeliveryOrder, DeliveryOrderDetail
 
-class DeliveryTeamSerializer(serializers.ModelSerializer):
+class ThirdPartyServiceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DeliveryTeam
+        model = ThirdPartyService
         fields = '__all__'
 
 class DeliveryOrderSerializer(serializers.ModelSerializer):

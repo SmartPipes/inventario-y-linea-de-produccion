@@ -22,6 +22,4 @@ class SaleDetailViewSet(viewsets.ModelViewSet):
     queryset = SaleDetail.objects.all()
     serializer_class = SaleDetailSerializer
 
-class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.all()
-    serializer_class = InvoiceSerializer
+

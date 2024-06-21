@@ -1,41 +1,49 @@
 from django.db import models
-from users.models import User  # Asegúrate de que la aplicación 'users' esté instalada
-from inventory.models import Product  # Asegúrate de que la aplicación 'inventory' esté instalada
+from users.models import User  # Ensure the 'users' app is installed
+from inventory.models import Product  # Ensure the 'inventory' app is installed
 
 class Cart(models.Model):
     cart_id = models.AutoField(primary_key=True)
     cart_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled')])
-    sale = models.ForeignKey('Sale', on_delete=models.SET_NULL, null=True, blank=True, related_name='carts')
+    client_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='carts')
 
     class Meta:
-        db_table = 'sal_Carts'
-
+        db_table = 'sal_carts'
+    
     def __str__(self):
-        return f"Cart {self.cart_id} - {self.status}"
-
-class Payment(models.Model):
-    payment_id = models.AutoField(primary_key=True)
-    payment_method = models.CharField(max_length=50)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='payments')
-
-    class Meta:
-        db_table = 'sal_Payments'
-
-    def __str__(self):
-        return f"Payment {self.payment_id} - {self.payment_method}"
+        return f"Cart {self.cart_id}"
 
 class Sale(models.Model):
     sale_id = models.AutoField(primary_key=True)
     sale_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sales')
+    client_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='sales')
 
     class Meta:
-        db_table = 'sal_Sales'
+        db_table = 'sal_sales'
 
     def __str__(self):
         return f"Sale {self.sale_id} - {self.total}"
+
+class Payment(models.Model):
+    PAYMENT_CHOICES = [
+        ('Debito', 'Debit'),
+        ('Credito', 'Credit'),
+        ('PayPal', 'PayPal'),
+    ]
+    
+    payment_id = models.AutoField(primary_key=True)
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
+    payment_date = models.DateTimeField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_id = models.CharField(max_length=100)
+    sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='payments')
+
+    class Meta:
+        db_table = 'sal_payments'
+
+    def __str__(self):
+        return f"Payment {self.payment_id} - {self.payment_method}"
 
 class CartDetail(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_details')
@@ -43,7 +51,7 @@ class CartDetail(models.Model):
     quantity = models.PositiveIntegerField()
 
     class Meta:
-        db_table = 'sal_CartDetails'
+        db_table = 'sal_cart_details'
         unique_together = (('cart', 'product'),)
 
     def __str__(self):
@@ -53,22 +61,11 @@ class SaleDetail(models.Model):
     sale_detail_id = models.AutoField(primary_key=True)
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='sale_details')
     quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # The price of the item at the time of purchase
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sale_details')
 
     class Meta:
-        db_table = 'sal_SalesDetails'
+        db_table = 'sal_sale_details'
 
     def __str__(self):
         return f"Sale {self.sale.sale_id} - Product {self.product.name}"
-
-class Invoice(models.Model):
-    invoice_id = models.AutoField(primary_key=True)
-    invoice_date = models.DateTimeField(auto_now_add=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_detail = models.ForeignKey(SaleDetail, on_delete=models.CASCADE, related_name='invoices')
-
-    class Meta:
-        db_table = 'sal_Invoices'
-
-    def __str__(self):
-        return f"Invoice {self.invoice_id} - {self.total}"

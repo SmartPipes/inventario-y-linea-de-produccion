@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Division, DivisionUser
+from .models import User, Division, DivisionUser, PaymentMethod
 
 class DivisionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,4 +14,9 @@ class UserSerializer(serializers.ModelSerializer):
 class DivisionUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = DivisionUser
+        fields = '__all__'
+
+class PaymentMethodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentMethod
         fields = '__all__'
