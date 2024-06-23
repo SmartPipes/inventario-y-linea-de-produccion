@@ -34,10 +34,10 @@ class Payment(models.Model):
     
     payment_id = models.AutoField(primary_key=True)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
-    payment_date = models.DateTimeField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_id = models.CharField(max_length=100)
-    sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='payments')
+    payment_date = models.DateTimeField(auto_now_add=True, null=True, blank = False)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=False)
+    transaction_id = models.CharField(max_length=100, null=True, blank = False)
+    sale_id = models.ForeignKey(Sale, on_delete=models.SET_NULL, null=True, blank=False, related_name='payments')
 
     class Meta:
         db_table = 'sal_payments'
@@ -61,7 +61,7 @@ class SaleDetail(models.Model):
     sale_detail_id = models.AutoField(primary_key=True)
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='sale_details')
     quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # The price of the item at the time of purchase
+    price = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank = False)  # The price of the item at the time of purchase
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sale_details')
 
     class Meta:

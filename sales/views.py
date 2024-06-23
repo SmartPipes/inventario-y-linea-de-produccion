@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Cart, Payment, Sale, CartDetail, SaleDetail, Invoice
-from .serializers import CartSerializer, PaymentSerializer, SaleSerializer, CartDetailSerializer, SaleDetailSerializer, InvoiceSerializer
+from .models import Cart, Payment, Sale, CartDetail, SaleDetail
+from .serializers import CartSerializer, PaymentSerializer, SaleSerializer, CartDetailSerializer, SaleDetailSerializer
 
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()

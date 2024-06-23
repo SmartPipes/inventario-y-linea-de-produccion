@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cart, Payment, Sale, CartDetail, SaleDetail, Invoice
+from .models import Cart, Payment, Sale, CartDetail, SaleDetail
 
 class CartSerializer(serializers.ModelSerializer):
     class Meta:

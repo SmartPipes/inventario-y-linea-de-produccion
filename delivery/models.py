@@ -30,7 +30,7 @@ class DeliveryOrder(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     delivery_address = models.CharField(max_length=255)
     notes = models.TextField(blank=True)  # Allow notes to be optional
-    third_party_service = models.ForeignKey(ThirdPartyService, on_delete=models.CASCADE, related_name='delivery_orders')
+    third_party_service = models.ForeignKey(ThirdPartyService, on_delete=models.SET_NULL, null=True, blank=False, related_name='delivery_orders')
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='delivery_orders')
     client = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='delivery_orders')
 
