@@ -68,3 +68,29 @@ class DivisionUser(models.Model):
 
     def __str__(self):
         return f"{self.division.name} - {self.user.email}"
+    
+class PaymentMethod(models.Model):
+    PAYMENT_CHOICES = [
+        ('Debito', 'Debit'),
+        ('Credito', 'Credit'),
+        ('PayPal', 'PayPal'),
+    ]
+
+    payment_type = models.CharField(max_length=10, choices=PAYMENT_CHOICES)
+    provider = models.CharField(max_length=50)
+    account_number = models.CharField(max_length=20)
+    expire_date = models.DateField()
+    name_on_account = models.CharField(max_length=100)
+    added_date = models.DateTimeField(auto_now_add=True)
+    is_default = models.BooleanField(default=False)
+    client_id = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'use_PaymentMethods'
+        constraints = [
+            models.UniqueConstraint(fields=['client_id', 'account_number'], name='unique_client_account')
+        ]
+
+    def __str__(self):
+        return f'{self.name_on_account} - {self.payment_type}'
+
