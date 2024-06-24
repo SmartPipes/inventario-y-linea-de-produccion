@@ -40,7 +40,8 @@ class ProductionLine(models.Model):
     production_line_creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_production_lines')
     factory = models.ForeignKey(Factory, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
-
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, null=True,blank=False)
+                                  
     class Meta:
         db_table = 'pro_ProductionLines'
 
@@ -97,3 +98,4 @@ class FactoryManager(models.Model):
     class Meta:
         db_table = 'pro_FactoryManagers'
         unique_together = (('factory', 'manager'),)
+    
