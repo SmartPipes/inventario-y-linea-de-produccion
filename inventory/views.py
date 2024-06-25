@@ -1,9 +1,10 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, RawMaterialSupplier, ProductRawMaterialList
-from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, RawMaterialSupplierSerializer, ProductRawMaterialListSerializer
+from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, RawMaterialSupplierSerializer, ProductRawMaterialListSerializer, InventorySummarySerializer
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Sum
 from django.db import connection
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -16,10 +17,23 @@ class RawMaterialViewSet(viewsets.ModelViewSet):
     serializer_class = RawMaterialSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-class InventoryViewSet(viewsets.ModelViewSet):
-    queryset = Inventory.objects.all()
-    serializer_class = InventorySerializer
+class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = Inventory.objects.none()  # Esto es necesario para que el router pueda registrar este ViewSet
+    serializer_class = InventorySummarySerializer
+
+    def list(self, request):
+        queryset = Inventory.objects.values('item_id', 'item_type').annotate(
+            stock=Sum('stock')
+        )
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = InventorySummarySerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = InventorySummarySerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
