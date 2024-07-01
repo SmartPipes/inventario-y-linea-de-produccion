@@ -10,4 +10,5 @@ router.register(r'payment-methods', PaymentMethodsViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('users/get-user-info/', UserViewSet.as_view({'post': 'get_user_info'}), name='get-user-info'),
 ]
