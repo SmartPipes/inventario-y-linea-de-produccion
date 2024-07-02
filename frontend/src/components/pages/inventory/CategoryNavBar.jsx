@@ -4,23 +4,24 @@ import NavBarActions from './NavBarActions';
 import NavBarFilters from './NavBarFilters';
 import { NavBarContainer, NavBarActionsFiltersContainer } from '../../../Styled/InventoryNavBar.styled';
 
-const InventoryNavBar = ({ applyFilters, currentPage, totalPages, setCurrentPage }) => {
+const CategoryNavBar = ({ applyFilters, currentPage, totalPages, setCurrentPage, onSearchChange }) => {
     return (
         <NavBarContainer>
-            <NavBarMenu title="Inventario" />
+            <NavBarMenu title="Categorías" />
             <NavBarActionsFiltersContainer>
-                <NavBarActions newItemPath="/inventory/new-item" />
+                <NavBarActions newItemPath="/inventory/new-category" />
                 <NavBarFilters 
                     applyFilters={applyFilters}
                     currentPage={currentPage}
                     totalPages={totalPages}
                     setCurrentPage={setCurrentPage}
-                    searchPlaceholder="Buscar en inventario..."
-                    filters={['Products', 'Raw Material', 'Precio ASC', 'Warehouse']}
+                    searchPlaceholder="Buscar en categorías..."
+                    filters={[]}
+                    onSearchChange={onSearchChange}
                 />
             </NavBarActionsFiltersContainer>
         </NavBarContainer>
     );
 };
 
-export default InventoryNavBar;
+export default CategoryNavBar;

@@ -164,3 +164,49 @@ export const PageLink = styled.button`
         background-color: #e0e0e0;
     }
 `;
+
+export const TableContainer = styled.div`
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+`;
+
+export const Table = styled.table`
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f4f4f4;
+    }
+`;
+
+export const SearchBar = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 0;
+`;
+
+export const SearchInput = styled.input`
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 300px;
+    box-sizing: border-box;
+`;
+
+export const AddButton = styled(Button)`
+    background: #97b25e;
+    margin-right: auto;
+    margin-bottom: 20px;
+
+    &:hover {
+        background: #bbb;
+    }
+`;

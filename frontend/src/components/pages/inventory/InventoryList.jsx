@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import InventoryItemCard from './InventoryItemCard';
-import InventoryNavBar from './InventoryNavBar'; // Import InventoryNavBar aquí
+import InventoryNavBar from './InventoryNavBar';
 import { InventoryContainer, InventorySubContainer } from '../../../Styled/Inventory.styled';
 import { apiClient } from '../../../ApiClient';
 import { API_URL_INV, API_URL_WAREHOUSES } from '../Config';
+import NavBarActions from './NavBarActions';
 
 const InventoryList = () => {
     const [items, setItems] = useState([]);

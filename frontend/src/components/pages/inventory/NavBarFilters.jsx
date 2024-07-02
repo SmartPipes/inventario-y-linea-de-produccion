@@ -6,17 +6,19 @@ import {
     NavSearchContainer, NavSearch, SearchIcon, FilterTag, FilterDropdown, SubFilterDropdown, FilterOption, NavPagination 
 } from '../../../Styled/InventoryNavBar.styled';
 
-const NavBarFilters = ({ applyFilters, currentPage, totalPages, setCurrentPage }) => {
+const NavBarFilters = ({ applyFilters, currentPage, totalPages, setCurrentPage, searchPlaceholder = "Buscar...", filters = ['Products', 'Raw Material', 'Precio ASC', 'Warehouse'], onSearchChange }) => {
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
     const [isSubFilterDropdownOpen, setIsSubFilterDropdownOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState([]);
-    const [availableFilters] = useState(['Products', 'Raw Material', 'Precio ASC', 'Warehouse']);
+    const [availableFilters, setAvailableFilters] = useState(filters);
     const [warehouses, setWarehouses] = useState([]);
 
     useEffect(() => {
-        fetchWarehouses();
-    }, []);
+        if (availableFilters.includes('Warehouse')) {
+            fetchWarehouses();
+        }
+    }, [availableFilters]);
 
     const fetchWarehouses = async () => {
         const response = await axios.get('https://smartpipes.cloud/api/inventory/warehouse/');
@@ -82,7 +84,11 @@ const NavBarFilters = ({ applyFilters, currentPage, totalPages, setCurrentPage }
                         <FontAwesomeIcon icon={faCaretDown} /> {filter} <span onClick={(event) => removeFilter(filter, event)}>x</span>
                     </FilterTag>
                 ))}
-                <input type="text" placeholder="Buscar..." />
+                <input
+                    type="text"
+                    placeholder={searchPlaceholder}
+                    onChange={(e) => onSearchChange(e.target.value)} // Añadir esta línea
+                />
                 <button onClick={toggleFilterDropdown}><FontAwesomeIcon icon={faCaretDown} /></button>
                 {isFilterDropdownOpen && (
                     <FilterDropdown>

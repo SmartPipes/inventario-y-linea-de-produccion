@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '../../../Styled/InventoryForm.styled';
 
-const NavBarActions = () => {
+const NavBarActions = ({ newItemPath }) => {
     const navigate = useNavigate();
 
     const handleNewButtonClick = () => {
-        navigate('/inventory/new-item');
+        navigate(newItemPath);
     };
 
     return (

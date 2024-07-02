@@ -8,6 +8,7 @@ export const NavContainer = styled.nav`
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
     position: relative;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan */
 `;
 
 export const NavLogo = styled.div`
@@ -62,7 +63,9 @@ export const NavSearchContainer = styled.div`
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
     position: relative;
-    justify-content: flex-start; /* Alinea todo a la izquierda */
+    justify-content: space-between; /* Distribuir espacio entre elementos */
+    gap: 20px; /* Espacio entre el botón y la barra de búsqueda */
+    width: 100%;
 
     @media (max-width: 768px) {
         justify-content: space-between;
@@ -86,8 +89,8 @@ export const NavSearch = styled.div`
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 5px;
-    width: 50%;
-    margin: 0 auto;
+    flex-grow: 1; /* Asegura que la barra de búsqueda ocupe el máximo espacio disponible */
+    margin-right: 20px;
     position: relative;
 
     @media (max-width: 768px) {
@@ -253,4 +256,69 @@ export const DropdownItem = styled.div`
         text-decoration: none;
         display: block;
     }
+`;
+
+export const NavBarContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+`;
+
+export const NavBarActionsFiltersContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    width: 100%;
+
+    @media (max-width: 768px) {
+        flex-wrap: wrap;
+    }
+`;
+
+// Estilos para la tabla de warehouses
+export const TableContainer = styled.div`
+    width: 100%;
+    overflow-x: auto;
+`;
+
+export const Table = styled.table`
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Asegura que la tabla tenga un ancho fijo */
+`;
+
+export const TableHead = styled.thead`
+    background-color: #f5f5f5;
+`;
+
+export const TableBody = styled.tbody``;
+
+export const TableRow = styled.tr`
+    &:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+`;
+
+export const TableCell = styled.td`
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    white-space: nowrap; /* Evita que el texto se envuelva */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Ajusta el ancho máximo según sea necesario */
+`;
+
+export const TableHeaderCell = styled.th`
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    background-color: #f5f5f5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Ajusta el ancho máximo según sea necesario */
 `;

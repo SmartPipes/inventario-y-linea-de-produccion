@@ -6,7 +6,7 @@ import {
     NavContainer, NavItem, NavLogo, HamburgerMenu, NavMenu, DropdownContainer, DropdownMenu, DropdownItem 
 } from '../../../Styled/InventoryNavBar.styled';
 
-const NavBarMenu = () => {
+const NavBarMenu = ({ title }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isConfigOpen, setIsConfigOpen] = useState(false);
 
@@ -20,7 +20,7 @@ const NavBarMenu = () => {
 
     return (
         <NavContainer>
-            <NavLogo>Inventario</NavLogo>
+            <NavLogo>{title}</NavLogo>
             <HamburgerMenu onClick={toggleMenu}>
                 <FontAwesomeIcon icon={faBars} size="lg" />
             </HamburgerMenu>
@@ -33,9 +33,11 @@ const NavBarMenu = () => {
                     <NavItem onClick={toggleConfig}>Configuración</NavItem>
                     <DropdownMenu isOpen={isConfigOpen}>
                         <DropdownItem isLabel>Gestión del almacén</DropdownItem>
-                        <DropdownItem><Link to="/inventory/almacenes">Almacenes</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/warehouses">Almacenes</Link></DropdownItem>
+                        <DropdownItem isLabel>Gestión de proveedores</DropdownItem>
+                        <DropdownItem><Link to="/inventory/suppliers">Proveedores</Link></DropdownItem>
                         <DropdownItem isLabel>Productos</DropdownItem>
-                        <DropdownItem><Link to="/inventory/categorias-productos"></Link>Categorías de productos</DropdownItem>
+                        <DropdownItem><Link to="/inventory/categories">Categorías de productos</Link></DropdownItem>
                     </DropdownMenu>
                 </DropdownContainer>
             </NavMenu>
