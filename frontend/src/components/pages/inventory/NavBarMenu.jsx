@@ -26,7 +26,7 @@ const NavBarMenu = ({ title }) => {
             </HamburgerMenu>
             <NavMenu isOpen={isMenuOpen}>
                 <NavItem><Link to="/inventory/informacion-general">Información general</Link></NavItem>
-                <NavItem><Link to="/inventory/operaciones">Operaciones</Link></NavItem>
+                <NavItem><Link to="/inventory/operation-log">Operaciones</Link></NavItem>
                 <NavItem><Link to="/inventory">Productos</Link></NavItem>
                 <NavItem><Link to="/inventory/reportes">Reportes</Link></NavItem>
                 <DropdownContainer>
@@ -38,6 +38,7 @@ const NavBarMenu = ({ title }) => {
                         <DropdownItem><Link to="/inventory/suppliers">Proveedores</Link></DropdownItem>
                         <DropdownItem isLabel>Productos</DropdownItem>
                         <DropdownItem><Link to="/inventory/categories">Categorías de productos</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/request-restock">Solicitudes de reabastecimiento</Link></DropdownItem>
                     </DropdownMenu>
                 </DropdownContainer>
             </NavMenu>

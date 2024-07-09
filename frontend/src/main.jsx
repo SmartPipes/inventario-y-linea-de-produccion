@@ -6,7 +6,7 @@ import { ProductionLine } from './components/pages/production/ProductionLine';
 import { ProductionPhase } from './components/pages/production/ProductionPhase.jsx';
 import { Factory } from './components/pages/production/Factory.jsx';
 import InventoryPage from './components/pages/inventory/Inventory.jsx';
-import NewItemPage from './components/pages/inventory/NewItemPage.jsx'; 
+import NewItemPage from './components/pages/inventory/NewItemPage.jsx';
 import { Production } from './components/pages/production/Production.jsx';
 import { Sales } from './components/pages/Sales/Sales.jsx';
 import { Delivery } from './components/pages/Delivery/Delivery.jsx';
@@ -15,6 +15,8 @@ import WarehousePage from './components/pages/inventory/WarehousePage.jsx';
 import SupplierPage from './components/pages/inventory/SupplierPage.jsx';
 import CategoryPage from './components/pages/inventory/CategoryPage.jsx';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import OperationLogPage from './components/pages/inventory/OperationLogPage.jsx';
+import RestockRequestPage from './components/pages/inventory/RestockRequestPage.jsx';
 
 const router = createBrowserRouter([{
   path: "/",
@@ -26,8 +28,10 @@ const router = createBrowserRouter([{
     { path: "inventory", element: <InventoryPage /> },
     { path: "inventory/new-item", element: <NewItemPage /> },
     { path: "inventory/categories", element: <CategoryPage /> },
+    { path: "inventory/request-restock", element: <RestockRequestPage /> },
     { path: "inventory/warehouses", element: <WarehousePage /> },
     { path: "inventory/suppliers", element: <SupplierPage /> },
+    { path: "inventory/operation-log", element: <OperationLogPage /> },
     { path: "/production/factories", element: <Factory /> },
     { path: "production", element: <Production /> },
     { path: "sales", element: <Sales /> },

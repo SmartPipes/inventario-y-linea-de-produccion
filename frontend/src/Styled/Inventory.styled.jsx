@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Button as AntButton } from 'antd';
 
 export const InventoryContainer = styled.div`
     display: flex;
@@ -208,5 +209,19 @@ export const AddButton = styled(Button)`
 
     &:hover {
         background: #bbb;
+    }
+`;
+
+export const StyledButton = styled(AntButton)`
+    background-color: #364936 !important; /* Color verde oscuro */
+    border-color: #364936 !important;
+    color: white !important;
+    &:hover {
+        background-color: #2e3d32 !important; /* Color verde oscuro más claro al pasar el mouse */
+        border-color: #2e3d32 !important;
+    }
+    &:focus {
+        background-color: #2e3d32 !important;
+        border-color: #2e3d32 !important;
     }
 `;
