@@ -23,7 +23,7 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = InventorySummarySerializer
 
     def list(self, request):
-        queryset = Inventory.objects.values('item_id', 'item_type').annotate(
+        queryset = Inventory.objects.values('item_id', 'item_type', 'warehouse').annotate(
             stock=Sum('stock')
         )
 
@@ -34,6 +34,7 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         serializer = InventorySummarySerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
+
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

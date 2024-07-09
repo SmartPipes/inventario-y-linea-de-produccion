@@ -69,6 +69,7 @@ class InventorySerializer(serializers.ModelSerializer):
         model = Inventory
         fields = ['inventory_id', 'item_id', 'item_type', 'warehouse', 'stock', 'item_name', 'item_description', 'item_price', 'price_type', 'image_icon']
 
+
 class InventorySummarySerializer(serializers.Serializer):
     item_id = serializers.IntegerField()
     item_type = serializers.CharField(max_length=12)
@@ -78,6 +79,7 @@ class InventorySummarySerializer(serializers.Serializer):
     item_price = serializers.SerializerMethodField()
     price_type = serializers.SerializerMethodField()
     image_icon = serializers.SerializerMethodField()
+    warehouse = serializers.SerializerMethodField()
 
     def get_item_name(self, obj):
         if obj['item_type'] == 'Product':
@@ -125,3 +127,6 @@ class InventorySummarySerializer(serializers.Serializer):
             if raw_material.image_icon:
                 return request.build_absolute_uri(raw_material.image_icon.url)
         return None
+
+    def get_warehouse(self, obj):
+        return obj['warehouse']
