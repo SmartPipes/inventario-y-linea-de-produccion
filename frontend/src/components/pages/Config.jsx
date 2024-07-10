@@ -25,6 +25,6 @@ export const API_URL_CATEGORIES = BASE_API_URL+"inventory/category/";
 export const API_URL_RAWM = BASE_API_URL+"inventory/raw-material-suppliers/";
 export const API_URL_SUPPLIERS = BASE_API_URL+"inventory/supplier/";
 export const API_URL_RAW_MATERIALS = BASE_API_URL+"inventory/raw-materials/";
-export const API_URL_OPERATION_LOG = BASE_API_URL+'inventory/operation_log/';
+export const API_URL_OPERATION_LOG = BASE_API_URL+'inventory/operation-log/';
 export const API_URL_RESTOCKREQUEST = BASE_API_URL+'inventory/restockrequest/';
 export const API_URL = BASE_API_URL+'token/';
