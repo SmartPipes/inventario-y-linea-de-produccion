@@ -16,6 +16,7 @@ export const API_URL_PL_PH = BASE_API_URL+'production-line/production-phases/';
 export const API_URL_ORDERS = BASE_API_URL+"production-line/production-orders/";
 //production 
 export const API_URL_INV = BASE_API_URL+"inventory/inventory/"
+export const API_URL_INVENTORYSUM = BASE_API_URL+"inventory/inventory-total-stock/"
 //INVENTORY PRODUCTS
 export const API_URL_PRODUCTS = BASE_API_URL+"inventory/products/";
 //inventory warehouse
