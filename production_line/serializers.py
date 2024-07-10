@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Factory, Phase, ProductionLine, ProductionPhase, ProductionOrder, ProductionOrderDetail, ProductionOrderPhase, FactoryManager
+from .models import Factory, Phase, ProductionLine, ProductionPhase, ProductionOrder, ProductionOrderDetail, ProductionOrderPhase, FactoryManager, ProductionOrderWarehouseRetrievalDetail
 
 class FactorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,4 +39,9 @@ class ProductionOrderPhaseSerializer(serializers.ModelSerializer):
 class FactoryManagerSerializer(serializers.ModelSerializer):
     class Meta:
         model = FactoryManager
+        fields = '__all__'
+        
+class ProductionOrderWarehouseRetrievalDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductionOrderWarehouseRetrievalDetail
         fields = '__all__'

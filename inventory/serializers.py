@@ -130,3 +130,9 @@ class InventorySummarySerializer(serializers.Serializer):
 
     def get_warehouse(self, obj):
         return obj['warehouse']
+        
+
+class InventoryTotalStockSerializer(serializers.Serializer):
+    item_id = serializers.IntegerField()
+    item_type = serializers.CharField(max_length=12)
+    total_stock = serializers.IntegerField()

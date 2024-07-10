@@ -123,7 +123,7 @@ class OperationLog(models.Model):
     quantity = models.SmallIntegerField()
     datetime = models.DateTimeField(auto_now_add=True)
     type_operation = models.CharField(max_length=6, choices=TYPE_OPERATION_CHOICES)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)  # Nueva relación con Inventory
     op_log_user = models.ForeignKey(User, on_delete=models.CASCADE)  # Relacionada con la tabla User
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
 

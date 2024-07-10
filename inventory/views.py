@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, RawMaterialSupplier, ProductRawMaterialList
-from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, RawMaterialSupplierSerializer, ProductRawMaterialListSerializer, InventorySummarySerializer
+from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, RawMaterialSupplierSerializer, ProductRawMaterialListSerializer, InventorySummarySerializer, InventoryTotalStockSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
@@ -112,3 +112,9 @@ class ProductRawMaterialListSet(viewsets.ModelViewSet):
     queryset = ProductRawMaterialList.objects.all()
     serializer_class = ProductRawMaterialListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+class InventoryTotalStockViewSet(viewsets.ViewSet):
+    def list(self, request):
+        queryset = Inventory.objects.values('item_id', 'item_type').annotate(total_stock=Sum('stock')).order_by('item_id')
+        serializer = InventoryTotalStockSerializer(queryset, many=True)
+        return Response(serializer.data)

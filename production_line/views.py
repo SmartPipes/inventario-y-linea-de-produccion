@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Factory, Phase, ProductionLine, ProductionPhase, ProductionOrder, ProductionOrderDetail, ProductionOrderPhase, FactoryManager
-from .serializers import FactorySerializer, PhaseSerializer, ProductionLineSerializer, ProductionPhaseSerializer, ProductionOrderSerializer, ProductionOrderDetailSerializer, ProductionOrderPhaseSerializer, FactoryManagerSerializer
+from .models import Factory, Phase, ProductionLine, ProductionPhase, ProductionOrder, ProductionOrderDetail, ProductionOrderPhase, FactoryManager, ProductionOrderWarehouseRetrievalDetail
+from .serializers import FactorySerializer, PhaseSerializer, ProductionLineSerializer, ProductionPhaseSerializer, ProductionOrderSerializer, ProductionOrderDetailSerializer, ProductionOrderPhaseSerializer, FactoryManagerSerializer, ProductionOrderWarehouseRetrievalDetailSerializer
 
 class FactoryViewSet(viewsets.ModelViewSet):
     queryset = Factory.objects.all()
@@ -33,4 +33,8 @@ class ProductionOrderPhaseViewSet(viewsets.ModelViewSet):
 class FactoryManagerViewSet(viewsets.ModelViewSet):
     queryset = FactoryManager.objects.all()
     serializer_class = FactoryManagerSerializer
+
+class ProductionOrderWarehouseRetrievalDetailViewSet(viewsets.ModelViewSet):
+    queryset = ProductionOrderWarehouseRetrievalDetail.objects.all()
+    serializer_class = ProductionOrderWarehouseRetrievalDetailSerializer
 

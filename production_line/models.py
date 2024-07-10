@@ -1,5 +1,5 @@
 from django.db import models
-from inventory.models import Product, Warehouse, State
+from inventory.models import Product, Warehouse, State, RawMaterial
 from users.models import User
 from users.models import Division  # Si Division es necesario
 from inventory.models import City
@@ -62,7 +62,6 @@ class ProductionOrder(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Completed', 'Completed')])
     warehouse_to_deliver = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='deliver_orders')
-    warehouse_to_retrieve = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='retrieve_orders')
     factory = models.ForeignKey(Factory, on_delete=models.CASCADE)
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -98,4 +97,14 @@ class FactoryManager(models.Model):
     class Meta:
         db_table = 'pro_FactoryManagers'
         unique_together = (('factory', 'manager'),)
+        
+class ProductionOrderWarehouseRetrievalDetail(models.Model):
+    production_order = models.ForeignKey(ProductionOrder, on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    raw_material = models.ForeignKey(RawMaterial, on_delete=models.CASCADE)
+    qty = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = 'pro_production_orders_warehouses_retrieveal_detail'
+        unique_together = (('production_order', 'warehouse', 'raw_material'),)
     
