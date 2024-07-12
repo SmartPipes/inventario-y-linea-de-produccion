@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Table, Modal, Form, Input, Space, Button } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message } from 'antd';
 import { API_URL_SUPPLIERS } from '../Config';
 import NavBarMenu from './NavBarMenu';
+import { apiClient } from '../../../ApiClient';
+
+const { Option } = Select;
 
 const SupplierPage = () => {
     const [suppliers, setSuppliers] = useState([]);
@@ -13,6 +15,10 @@ const SupplierPage = () => {
     const [form] = Form.useForm();
     const [currentSupplier, setCurrentSupplier] = useState(null);
     const [searchText, setSearchText] = useState('');
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [currentSupplierId, setCurrentSupplierId] = useState(null);
+    const [countdown, setCountdown] = useState(3);
+    const [deleteEnabled, setDeleteEnabled] = useState(false);
 
     useEffect(() => {
         fetchSuppliers();
@@ -22,10 +28,27 @@ const SupplierPage = () => {
         handleSearchChange(searchText);
     }, [searchText, suppliers]);
 
+    useEffect(() => {
+        if (isDeleteModalVisible) {
+            setCountdown(3);
+            setDeleteEnabled(false);
+            const timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        setDeleteEnabled(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+    }, [isDeleteModalVisible]);
+
     const fetchSuppliers = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(API_URL_SUPPLIERS);
+            const response = await apiClient.get(API_URL_SUPPLIERS);
             setSuppliers(response.data);
             setFilteredSuppliers(response.data);
         } catch (error) {
@@ -47,37 +70,49 @@ const SupplierPage = () => {
 
     const handleOk = async () => {
         try {
-            const values = form.getFieldsValue();
+            const values = await form.validateFields();
             if (editMode) {
-                await axios.put(`${API_URL_SUPPLIERS}${currentSupplier.supplier_id}/`, values);
+                await apiClient.put(`${API_URL_SUPPLIERS}${currentSupplier.supplier_id}/`, values);
+                message.success('Proveedor actualizado exitosamente');
             } else {
-                await axios.post(API_URL_SUPPLIERS, values);
+                await apiClient.post(API_URL_SUPPLIERS, values);
+                message.success('Proveedor agregado exitosamente');
             }
             fetchSuppliers();
             setIsModalVisible(false);
         } catch (error) {
-            console.error('Error saving supplier:', error);
+            console.error('Error al guardar el proveedor:', error);
+            message.error('Error al guardar el proveedor');
         }
     };
 
-    const handleDelete = async (supplierId) => {
+    const showDeleteModal = (supplierId) => {
+        setCurrentSupplierId(supplierId);
+        setIsDeleteModalVisible(true);
+    };
+
+    const handleDelete = async () => {
         try {
-            await axios.delete(`${API_URL_SUPPLIERS}${supplierId}/`);
+            await apiClient.delete(`${API_URL_SUPPLIERS}${currentSupplierId}/`);
             fetchSuppliers();
+            message.success('Proveedor eliminado exitosamente');
         } catch (error) {
-            console.error('Error deleting supplier:', error);
+            console.error('Error al eliminar el proveedor:', error);
+            message.error('Error al eliminar el proveedor');
+        } finally {
+            setIsDeleteModalVisible(false);
         }
     };
 
     const handleSearchChange = (searchText) => {
         setSearchText(searchText);
         const filtered = suppliers.filter(supplier =>
-            supplier.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            supplier.RFC.toLowerCase().includes(searchText.toLowerCase()) ||
-            supplier.email.toLowerCase().includes(searchText.toLowerCase()) ||
-            supplier.phone.toLowerCase().includes(searchText.toLowerCase()) ||
-            supplier.address.toLowerCase().includes(searchText.toLowerCase()) ||
-            supplier.rating.toString().includes(searchText)
+            (supplier.name && supplier.name.toLowerCase().includes(searchText.toLowerCase())) ||
+            (supplier.RFC && supplier.RFC.toLowerCase().includes(searchText.toLowerCase())) ||
+            (supplier.email && supplier.email.toLowerCase().includes(searchText.toLowerCase())) ||
+            (supplier.phone && supplier.phone.toLowerCase().includes(searchText.toLowerCase())) ||
+            (supplier.address && supplier.address.toLowerCase().includes(searchText.toLowerCase())) ||
+            (supplier.rating && supplier.rating.toString().includes(searchText))
         );
         setFilteredSuppliers(filtered);
     };
@@ -96,7 +131,7 @@ const SupplierPage = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => showModal(record)} type="link">Editar</Button>
-                    <Button onClick={() => handleDelete(record.supplier_id)} type="link" danger>Eliminar</Button>
+                    <Button onClick={() => showDeleteModal(record.supplier_id)} type="link" danger>Eliminar</Button>
                 </Space>
             )
         }
@@ -143,9 +178,25 @@ const SupplierPage = () => {
                         <Input />
                     </Form.Item>
                     <Form.Item name="rating" label="Calificación" rules={[{ required: true }]}>
-                        <Input type="number" min={1} max={5} />
+                        <Select>
+                            <Option value="A">A</Option>
+                            <Option value="B">B</Option>
+                            <Option value="C">C</Option>
+                            <Option value="D">D</Option>
+                            <Option value="E">E</Option>
+                        </Select>
                     </Form.Item>
                 </Form>
+            </Modal>
+            <Modal
+                title="Confirmar Eliminación"
+                visible={isDeleteModalVisible}
+                onOk={handleDelete}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
+                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
+            >
+                <p>¿Estás seguro de que quieres borrar este proveedor? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
             </Modal>
         </div>
     );

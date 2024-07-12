@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Table, Modal, Form, Input, Space, Button } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, message } from 'antd';
 import { API_URL_CATEGORIES } from '../Config';
 import NavBarMenu from './NavBarMenu';
+import { apiClient } from '../../../ApiClient';
 
 const CategoryPage = () => {
     const [categories, setCategories] = useState([]);
@@ -14,6 +14,11 @@ const CategoryPage = () => {
     const [currentCategory, setCurrentCategory] = useState(null);
     const [searchText, setSearchText] = useState('');
 
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [currentCategoryId, setCurrentCategoryId] = useState(null);
+    const [countdown, setCountdown] = useState(3);
+    const [deleteEnabled, setDeleteEnabled] = useState(false);
+
     useEffect(() => {
         fetchCategories();
     }, []);
@@ -22,10 +27,27 @@ const CategoryPage = () => {
         handleSearchChange(searchText);
     }, [searchText, categories]);
 
+    useEffect(() => {
+        if (isDeleteModalVisible) {
+            setCountdown(3);
+            setDeleteEnabled(false);
+            const timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        setDeleteEnabled(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+    }, [isDeleteModalVisible]);
+
     const fetchCategories = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(API_URL_CATEGORIES);
+            const response = await apiClient.get(API_URL_CATEGORIES);
             setCategories(response.data);
             setFilteredCategories(response.data);
         } catch (error) {
@@ -47,33 +69,45 @@ const CategoryPage = () => {
 
     const handleOk = async () => {
         try {
-            const values = form.getFieldsValue();
+            const values = await form.validateFields();
             if (editMode) {
-                await axios.put(`${API_URL_CATEGORIES}${currentCategory.category_id}/`, values);
+                await apiClient.put(`${API_URL_CATEGORIES}${currentCategory.category_id}/`, values);
+                message.success('Categoría actualizada exitosamente');
             } else {
-                await axios.post(API_URL_CATEGORIES, values);
+                await apiClient.post(API_URL_CATEGORIES, values);
+                message.success('Categoría agregada exitosamente');
             }
             fetchCategories();
             setIsModalVisible(false);
         } catch (error) {
-            console.error('Error saving category:', error);
+            console.error('Error al guardar la categoría:', error);
+            message.error('Error al guardar la categoría');
         }
     };
 
-    const handleDelete = async (categoryId) => {
+    const showDeleteModal = (categoryId) => {
+        setCurrentCategoryId(categoryId);
+        setIsDeleteModalVisible(true);
+    };
+
+    const handleDelete = async () => {
         try {
-            await axios.delete(`${API_URL_CATEGORIES}${categoryId}/`);
+            await apiClient.delete(`${API_URL_CATEGORIES}${currentCategoryId}/`);
             fetchCategories();
+            message.success('Categoría eliminada exitosamente');
         } catch (error) {
-            console.error('Error deleting category:', error);
+            console.error('Error al eliminar la categoría:', error);
+            message.error('Error al eliminar la categoría');
+        } finally {
+            setIsDeleteModalVisible(false);
         }
     };
 
     const handleSearchChange = (searchText) => {
         setSearchText(searchText);
         const filtered = categories.filter(category =>
-            category.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            category.description.toLowerCase().includes(searchText.toLowerCase())
+            (category.name && category.name.toLowerCase().includes(searchText.toLowerCase())) ||
+            (category.description && category.description.toLowerCase().includes(searchText.toLowerCase()))
         );
         setFilteredCategories(filtered);
     };
@@ -88,7 +122,7 @@ const CategoryPage = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => showModal(record)} type="link">Editar</Button>
-                    <Button onClick={() => handleDelete(record.category_id)} type="link" danger>Eliminar</Button>
+                    <Button onClick={() => showDeleteModal(record.category_id)} type="link" danger>Eliminar</Button>
                 </Space>
             )
         }
@@ -126,6 +160,16 @@ const CategoryPage = () => {
                         <Input />
                     </Form.Item>
                 </Form>
+            </Modal>
+            <Modal
+                title="Confirmar Eliminación"
+                visible={isDeleteModalVisible}
+                onOk={handleDelete}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
+                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
+            >
+                <p>¿Estás seguro de que quieres borrar esta categoría? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
             </Modal>
         </div>
     );
