@@ -23,7 +23,9 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = InventorySummarySerializer
 
     def list(self, request):
-        queryset = Inventory.objects.values('item_id', 'item_type', 'warehouse').annotate(
+        queryset = Inventory.objects.values(
+            'inventory_id', 'item_id', 'item_type', 'warehouse'
+        ).annotate(
             stock=Sum('stock')
         )
 
@@ -34,7 +36,6 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         serializer = InventorySummarySerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -67,6 +68,7 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return Response(serializer.data)
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()

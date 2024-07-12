@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, RawMaterialSupplier, ProductRawMaterialList
+from datetime import datetime
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,17 +32,35 @@ class OperationLogSerializer(serializers.ModelSerializer):
         model = OperationLog
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if 'datetime' in representation:
+            representation['datetime'] = self.format_datetime(representation['datetime'])
+        return representation
+
+    def format_datetime(self, value):
+        dt = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
+        return dt.strftime('%Y-%m-%d %H:%M')
+
 class RestockRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = RestockRequest
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if 'requested_at' in representation:
+            representation['requested_at'] = self.format_datetime(representation['requested_at'])
+        return representation
+
+    def format_datetime(self, value):
+        dt = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
+        return dt.strftime('%Y-%m-%d %H:%M')
+
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
-
-
 
 class ProductRawMaterialListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,6 +90,7 @@ class InventorySerializer(serializers.ModelSerializer):
 
 
 class InventorySummarySerializer(serializers.Serializer):
+    inventory_id = serializers.IntegerField()
     item_id = serializers.IntegerField()
     item_type = serializers.CharField(max_length=12)
     stock = serializers.IntegerField()
@@ -130,6 +150,7 @@ class InventorySummarySerializer(serializers.Serializer):
 
     def get_warehouse(self, obj):
         return obj['warehouse']
+
         
 
 class InventoryTotalStockSerializer(serializers.Serializer):
