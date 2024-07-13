@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, {css} from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -19,11 +19,13 @@ const ModalContent = styled.div`
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: #364936;
-  position:relative;
+  position: relative;
+  overflow-y: auto; /* Add this line to make the content scrollable */
+  max-height: 80vh; /* Adjust this value to control the maximum height of the modal */
+
   ${(props) => props.fixedSize && css`
-  width: 900px; /* Set your fixed width here */
-  
-`}
+    width: 900px; /* Set your fixed width here */
+  `}
 `;
 
 const CloseButton = styled.button`
@@ -34,7 +36,6 @@ const CloseButton = styled.button`
   border: none;
   cursor: pointer;
   font-size: 22px;
-  
 `;
 
 const ModalComponent = ({ onClose, children, fixedSize }) => {

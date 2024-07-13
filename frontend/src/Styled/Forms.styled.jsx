@@ -39,7 +39,11 @@ const ButtonContainer = styled.div`
 
 const Button = styled.button`
     padding: 0.5rem 1rem;
-    background: ${(props) => props.isdisabledBtn ? '#EE4E4E' : '#97b25e'};
+    background: ${(props) => 
+            props.isdisabledBtn ? '#EE4E4E' : 
+            props.iswarningBtn ? '#F4CE14' : 
+            '#97b25e'
+            };
     color: white;
     border: none;
     border-radius: 4px;
@@ -48,7 +52,9 @@ const Button = styled.button`
     margin-left: 10px;
 
     &:hover {
-        background: ${(props) => props.isdisabledBtn ? '#FF0000' : '#364936'};
+        background: ${(props) => props.isdisabledBtn ? '#FF0000' : 
+                                    props.iswarningBtn ?  '#FBE580' :
+                                    '#364936'};
     }
 
 `;

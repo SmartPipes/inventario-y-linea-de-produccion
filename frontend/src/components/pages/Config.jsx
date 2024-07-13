@@ -7,7 +7,7 @@ export const API_URL_PL= BASE_API_URL+'production-line/production-lines/';
 //factories
 export const API_URL_FACTORIES= BASE_API_URL+'production-line/factories/';
 //cities
-export const API_URL_CITIES= BASE_API_URL+'inventory/city/';
+export const API_URL_CITIES= BASE_API_URL+'inventory/cities/';
 //Users
 export const  API_URL_USERS= BASE_API_URL+'users/users/';
 //production phases
@@ -21,6 +21,8 @@ export const API_URL_INVENTORYSUM = BASE_API_URL+"inventory/inventory-total-stoc
 export const API_URL_PRODUCTS = BASE_API_URL+"inventory/products/";
 //inventory warehouse
 export const API_URL_WAREHOUSES = BASE_API_URL+"inventory/warehouse/";
+export const API_URL_PO_DETAILS = BASE_API_URL+"production-line/production-order-details/";
+export const API_URL_PO_RAWM_DETAILS = BASE_API_URL+"production-line/ProductionOrderWarehouseRetrievalDetail/"
 export const API_URL_CATEGORIES = BASE_API_URL+"inventory/category/";
 export const API_URL_RAWM = BASE_API_URL+"inventory/raw-material-suppliers/";
 export const API_URL_SUPPLIERS = BASE_API_URL+"inventory/supplier/";
@@ -28,3 +30,6 @@ export const API_URL_RAW_MATERIALS = BASE_API_URL+"inventory/raw-materials/";
 export const API_URL_OPERATION_LOG = BASE_API_URL+'inventory/operation-log/';
 export const API_URL_RESTOCKREQUEST = BASE_API_URL+'inventory/restockrequest/';
 export const API_URL = BASE_API_URL+'token/';
+
+//inventory 
+export const API_URL_RAWMLIST = BASE_API_URL+'inventory/product-raw-material-list/';
