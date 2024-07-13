@@ -19,6 +19,7 @@ import OperationLogPage from './components/pages/inventory/OperationLogPage.jsx'
 import RestockRequestPage from './components/pages/inventory/RestockRequestPage.jsx';
 import ProductPage from './components/pages/inventory/ProductPage.jsx';
 import RawMaterialPage from './components/pages/inventory/RawMaterialPage.jsx';
+import {ProductionOrders} from './components/pages/production/ProductionOrders.jsx'
 
 const router = createBrowserRouter([{
   path: "/",
@@ -40,7 +41,8 @@ const router = createBrowserRouter([{
     { path: "production", element: <Production /> },
     { path: "sales", element: <Sales /> },
     { path: "delivery", element: <Delivery /> },
-    { path: "user", element: <User /> }
+    { path: "user", element: <User /> },
+    {path: "production/orders", element:<ProductionOrders/>}
   ]
 }]);
 

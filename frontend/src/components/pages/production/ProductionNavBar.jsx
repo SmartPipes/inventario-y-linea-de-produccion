@@ -13,7 +13,8 @@ export const ProductionNavBar = () => {
     const links = [
         { page: "Factories", href: "/production/factories" },
         { page: "Production Lines", href: "/production/production-lines" },
-        { page: "Production Phases", href: "/production/production-phases" },        
+        { page: "Production Phases", href: "/production/production-phases" },
+        { page: "Production Orders", href: "/production/orders" },           
       ];
 
     const toggleMenu = () => {

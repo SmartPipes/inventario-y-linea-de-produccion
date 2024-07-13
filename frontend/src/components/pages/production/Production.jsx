@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import { ProductionNavBar } from './ProductionNavBar'
-import { MainContent, OrdersArea,PlacedOrderBoxes } from '../../../Styled/Production.styled'
+import { MainContent } from '../../../Styled/Production.styled'
 import { FormContainer, Label, Input, Button,ButtonContainer, Error, SelectStyled  } from '../../../Styled/Forms.styled'
 import {useForm, Controller} from 'react-hook-form'
 import { faPlus, faCheck } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +11,9 @@ import Select from 'react-select'
 import { ModalTitle} from '../../../Styled/Global.styled'
 import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS, API_URL_RAWMLIST, API_URL_INV, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS,API_URL_PO_RAWM_DETAILS} from '../Config'
 import { apiClient } from '../../../ApiClient'
+import { Card, Row, Col, Layout } from 'antd';
+import { Line } from '@ant-design/charts';
+const {  Content } = Layout;
 
 
 export const Production = () => {
@@ -355,6 +358,23 @@ const formatOptionLabel = ({ label, img }) => (
     <span>{label}</span>
   </div>
 );
+const data = [
+  { month: 'Jan', value: 30 },
+  { month: 'Feb', value: 20 },
+  { month: 'Mar', value: 50 },
+  { month: 'Apr', value: 60 },
+  { month: 'May', value: 70 },
+  { month: 'Jun', value: 90 },
+];
+
+const config = {
+  data,
+  xField: 'month',
+  yField: 'value',
+  smooth: true,
+  height: 300,
+  color: '#1890ff',
+};
 
   return (
       <MainContent>
@@ -364,10 +384,38 @@ const formatOptionLabel = ({ label, img }) => (
                   <FontAwesomeIcon icon={faPlus} /> New Order
               </Button>
           </NavSearchContainer>
-              <OrdersArea>
-                <PlacedOrderBoxes/>
-
-              </OrdersArea>
+              <Content style={{ padding: '50px' }}>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Card title="Total Pending Orders" bordered={false}>
+              Card content
+            </Card>
+           
+          </Col>
+          <Col span={8}>
+          <Card title="Total In Progress Orders" bordered={false}>
+              Card content
+            </Card>
+          </Col>
+          <Col span={8}>
+          <Card title="Total Finished Orders" bordered={false}>
+              Card content
+            </Card>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+        <Col span={8} style={{ paddingTop: '16px' }}>
+            <Card title="idk" bordered={false}>
+              Card content
+            </Card>
+        </Col>
+        <Col span={16} style={{ paddingTop: '16px' }}>
+            <Card title="Sales Data" bordered={false}>
+              <Line {...config} />
+            </Card>
+        </Col>
+        </Row>
+      </Content>
 
             {/* //   THIS IS THE FORM TO CREATE A NEW ORDER */}
         {newOrder &&
