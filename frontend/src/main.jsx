@@ -17,6 +17,8 @@ import CategoryPage from './components/pages/inventory/CategoryPage.jsx';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import OperationLogPage from './components/pages/inventory/OperationLogPage.jsx';
 import RestockRequestPage from './components/pages/inventory/RestockRequestPage.jsx';
+import ProductPage from './components/pages/inventory/ProductPage.jsx';
+import RawMaterialPage from './components/pages/inventory/RawMaterialPage.jsx';
 
 const router = createBrowserRouter([{
   path: "/",
@@ -32,6 +34,8 @@ const router = createBrowserRouter([{
     { path: "inventory/warehouses", element: <WarehousePage /> },
     { path: "inventory/suppliers", element: <SupplierPage /> },
     { path: "inventory/operation-log", element: <OperationLogPage /> },
+    { path: "inventory/products", element: <ProductPage /> },
+    { path: "inventory/raw-materials", element: <RawMaterialPage /> },
     { path: "/production/factories", element: <Factory /> },
     { path: "production", element: <Production /> },
     { path: "sales", element: <Sales /> },

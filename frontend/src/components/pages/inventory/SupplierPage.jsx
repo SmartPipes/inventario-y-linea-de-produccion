@@ -18,7 +18,7 @@ const SupplierPage = () => {
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [currentSupplierId, setCurrentSupplierId] = useState(null);
     const [countdown, setCountdown] = useState(3);
-    const [deleteEnabled, setDeleteEnabled] = useState(false);
+    const [deleteEnabled, setDeleteEnabled] = useState(false);  
 
     useEffect(() => {
         fetchSuppliers();

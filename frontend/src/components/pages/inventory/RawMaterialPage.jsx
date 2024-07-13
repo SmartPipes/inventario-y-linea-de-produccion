@@ -1,0 +1,243 @@
+import React, { useState, useEffect } from 'react';
+import { Table, Modal, Form, Input, Space, Button, message, Upload, Select } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { API_URL_RAW_MATERIALS, API_URL_CATEGORIES } from '../Config';
+import NavBarMenu from './NavBarMenu';
+import { apiClient } from '../../../ApiClient';
+
+const { Option } = Select;
+
+const RawMaterialPage = () => {
+    const [rawMaterials, setRawMaterials] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [filteredRawMaterials, setFilteredRawMaterials] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [form] = Form.useForm();
+    const [currentRawMaterial, setCurrentRawMaterial] = useState(null);
+    const [searchText, setSearchText] = useState('');
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [currentDeleteId, setCurrentDeleteId] = useState(null);
+    const [countdown, setCountdown] = useState(3);
+    const [deleteEnabled, setDeleteEnabled] = useState(false);
+
+    useEffect(() => {
+        fetchRawMaterials();
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        handleSearchChange(searchText);
+    }, [searchText, rawMaterials]);
+
+    useEffect(() => {
+        if (isDeleteModalVisible) {
+            setCountdown(3);
+            setDeleteEnabled(false);
+            const timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        setDeleteEnabled(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+    }, [isDeleteModalVisible]);
+
+    const fetchRawMaterials = async () => {
+        setLoading(true);
+        try {
+            const response = await apiClient.get(API_URL_RAW_MATERIALS);
+            setRawMaterials(response.data);
+            setFilteredRawMaterials(response.data);
+        } catch (error) {
+            console.error('Error fetching raw materials:', error);
+        }
+        setLoading(false);
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await apiClient.get(API_URL_CATEGORIES);
+            setCategories(response.data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
+
+    const normFile = (e) => {
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return e && e.fileList;
+    };
+
+    const showModal = async (rawMaterial = null) => {
+        setCurrentRawMaterial(rawMaterial);
+        setEditMode(!!rawMaterial);
+        if (rawMaterial) {
+            const categoryResponse = await apiClient.get(`${API_URL_CATEGORIES}${rawMaterial.category}/`);
+            form.setFieldsValue({
+                ...rawMaterial,
+                image_icon: rawMaterial.image_icon ? [{ url: rawMaterial.image_icon }] : [],
+                category: categoryResponse.data.category_id.toString() // Convertimos el category_id a string
+            });
+        } else {
+            form.resetFields();
+        }
+        setIsModalVisible(true);
+    };
+
+    const handleOk = async () => {
+        try {
+            const values = await form.validateFields();
+            const formData = new FormData();
+            formData.append('name', values.name);
+            formData.append('description', values.description);
+            formData.append('category', values.category);
+            if (values.image_icon) {
+                formData.append('image_icon', values.image_icon[0].originFileObj);
+            }
+
+            if (editMode) {
+                await apiClient.put(`${API_URL_RAW_MATERIALS}${currentRawMaterial.raw_material_id}/`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                message.success('Materia prima actualizada exitosamente');
+            } else {
+                await apiClient.post(API_URL_RAW_MATERIALS, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                message.success('Materia prima agregada exitosamente');
+            }
+            fetchRawMaterials();
+            setIsModalVisible(false);
+        } catch (error) {
+            console.error('Error saving raw material:', error);
+            message.error('Error al guardar la materia prima');
+        }
+    };
+
+    const showDeleteModal = (rawMaterialId) => {
+        setCurrentDeleteId(rawMaterialId);
+        setIsDeleteModalVisible(true);
+    };
+
+    const handleDelete = async () => {
+        try {
+            await apiClient.delete(`${API_URL_RAW_MATERIALS}${currentDeleteId}/`);
+            fetchRawMaterials();
+            message.success('Materia prima eliminada exitosamente');
+        } catch (error) {
+            console.error('Error al eliminar la materia prima:', error);
+            message.error('Error al eliminar la materia prima');
+        } finally {
+            setIsDeleteModalVisible(false);
+        }
+    };
+
+    const handleSearchChange = (searchText) => {
+        setSearchText(searchText);
+        const filtered = rawMaterials.filter(material =>
+            (material.name && material.name.toLowerCase().includes(searchText.toLowerCase())) ||
+            (material.description && material.description.toLowerCase().includes(searchText.toLowerCase()))
+        );
+        setFilteredRawMaterials(filtered);
+    };
+
+    const columns = [
+        { title: 'ID', dataIndex: 'raw_material_id', key: 'raw_material_id' },
+        { title: 'Nombre', dataIndex: 'name', key: 'name' },
+        { title: 'Descripción', dataIndex: 'description', key: 'description' },
+        {
+            title: 'Imagen',
+            dataIndex: 'image_icon',
+            key: 'image_icon',
+            render: (text, record) => <img src={record.image_icon} alt={record.name} style={{ width: 50 }} />
+        },
+        {
+            title: 'Categoría',
+            dataIndex: 'category',
+            key: 'category',
+            render: (text) => categories.find(category => category.category_id === text)?.name || 'Desconocido'
+        },
+        {
+            title: 'Acción',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button onClick={() => showModal(record)} type="link">Editar</Button>
+                    <Button onClick={() => showDeleteModal(record.raw_material_id)} type="link" danger>Eliminar</Button>
+                </Space>
+            )
+        }
+    ];
+
+    return (
+        <div>
+            <NavBarMenu title="Materias Primas" />
+            <div style={{ marginBottom: '16px' }}>
+                <Input
+                    placeholder="Buscar materia prima..."
+                    value={searchText}
+                    onChange={e => handleSearchChange(e.target.value)}
+                    style={{ width: 300, marginRight: '16px' }}
+                />
+                <Button type="primary" onClick={() => showModal()}>Agregar Materia Prima</Button>
+            </div>
+            <Table
+                columns={columns}
+                dataSource={filteredRawMaterials}
+                rowKey="raw_material_id"
+                loading={loading}
+            />
+            <Modal
+                title={editMode ? 'Editar Materia Prima' : 'Agregar Materia Prima'}
+                visible={isModalVisible}
+                onOk={handleOk}
+                onCancel={() => setIsModalVisible(false)}
+            >
+                <Form form={form} layout="vertical">
+                    <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="description" label="Descripción" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="category" label="Categoría" rules={[{ required: true }]}>
+                        <Select>
+                            {categories.map(category => (
+                                <Option key={category.category_id} value={category.category_id.toString()}>{category.name}</Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="image_icon" label="Imagen" valuePropName="fileList" getValueFromEvent={normFile}>
+                        <Upload name="image_icon" listType="picture" maxCount={1} beforeUpload={() => false}>
+                            <Button icon={<UploadOutlined />}>Subir</Button>
+                        </Upload>
+                    </Form.Item>
+                </Form>
+            </Modal>
+            <Modal
+                title="Confirmar eliminación"
+                visible={isDeleteModalVisible}
+                onOk={handleDelete}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
+                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white', color: deleteEnabled ? 'white' : 'black' } }}
+            >
+                <p>¿Estás seguro de que quieres borrar esta materia prima? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
+            </Modal>
+        </div>
+    );
+};
+
+export default RawMaterialPage;

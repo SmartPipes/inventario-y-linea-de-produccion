@@ -38,6 +38,8 @@ const NavBarMenu = ({ title }) => {
                         <DropdownItem><Link to="/inventory/suppliers">Proveedores</Link></DropdownItem>
                         <DropdownItem isLabel>Productos</DropdownItem>
                         <DropdownItem><Link to="/inventory/categories">Categorías de productos</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/products">Productos</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/raw-materials">Materias Primas</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/request-restock">Solicitudes de reabastecimiento</Link></DropdownItem>
                     </DropdownMenu>
                 </DropdownContainer>
