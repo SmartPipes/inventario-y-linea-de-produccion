@@ -7,7 +7,7 @@ export const API_URL_PL= BASE_API_URL+'production-line/production-lines/';
 //factories
 export const API_URL_FACTORIES= BASE_API_URL+'production-line/factories/';
 //cities
-export const API_URL_CITIES= BASE_API_URL+'inventory/cities/';
+export const API_URL_CITIES= BASE_API_URL+'inventory/city/';
 //Users
 export const  API_URL_USERS= BASE_API_URL+'users/users/';
 //production phases
@@ -30,6 +30,8 @@ export const API_URL_RAW_MATERIALS = BASE_API_URL+"inventory/raw-materials/";
 export const API_URL_OPERATION_LOG = BASE_API_URL+'inventory/operation-log/';
 export const API_URL_RESTOCKREQUEST = BASE_API_URL+'inventory/restockrequest/';
 export const API_URL = BASE_API_URL+'token/';
+export const API_URL_PRO_ORDERS = BASE_API_URL+'production-line/production-orders/';
+export const API_URL_PO_PHASES = BASE_API_URL+'production-line/production-order-phases/';
 
 //inventory 
 export const API_URL_RAWMLIST = BASE_API_URL+'inventory/product-raw-material-list/';

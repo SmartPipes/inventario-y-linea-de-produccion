@@ -7,14 +7,14 @@ import { faPlus, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NavSearchContainer} from '../../../Styled/InventoryNavBar.styled';
 import ModalComponent from '../../modals/ProductionModals';
-import Select from 'react-select'
+import Select from 'react-select';
 import { ModalTitle} from '../../../Styled/Global.styled'
-import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS, API_URL_RAWMLIST, API_URL_INV, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS,API_URL_PO_RAWM_DETAILS} from '../Config'
+import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS, API_URL_RAWMLIST, API_URL_INV, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS,API_URL_PO_RAWM_DETAILS,API_URL_PRO_ORDERS,API_URL_PL} from '../Config'
 import { apiClient } from '../../../ApiClient'
-import { Card, Row, Col, Layout } from 'antd';
-import { Line } from '@ant-design/charts';
+import { Card, Row, Col, Layout, Table} from 'antd';
+import { Column } from '@ant-design/charts';
+import factoryLogo from '../../../assets/factory.png';
 const {  Content } = Layout;
-
 
 export const Production = () => {
     const [newOrder, setNewOrder] = useState(false);
@@ -30,12 +30,23 @@ export const Production = () => {
     const [selectedWarehouses,setSelectedWarehouses] = useState();
     const [selectedWarehousesList, setSelectedWarehousesList] = useState([]);
     const [productionOrderInfo, setProductionOrder] = useState();
+    const [PendingOrders, setPendingOrders] = useState([]);
+    const [IPOrders, setIPOrders] = useState([]);
+    const [FinishedOrders, setFinishedOrders] = useState([]);
+    const [PL, setPL] = useState([]);
+    const [loading, setLoading] = useState(false);
+
 
       const addProductField = () => {
         setProductFields([...productFields, { product: '', qty: '' }]);
       };
 
-      const removeProductField = (index) => {
+  const removeProductField = (index) => {
+        // Desregistrar los campos del formulario
+        unregister(`productFields.${index}.product`);
+        unregister(`productFields.${index}.qty`);
+      
+        // Remover los campos del estado
         const newFields = [...productFields];
         newFields.splice(index, 1);
         setProductFields(newFields);
@@ -58,6 +69,8 @@ export const Production = () => {
         getFactories();
         getWarehouses();
         getRM();
+        getProductionOrders();
+        getPL();
         },[]);
 
     const {
@@ -66,8 +79,19 @@ export const Production = () => {
         handleSubmit,
         formState: { errors },
         reset,
-        setValue
+        setValue,
+        unregister
       } = useForm();
+
+      const getPL = async () => {
+        try {
+            const response = await apiClient.get(API_URL_PL);
+            setPL(response.data.filter(PL => PL.status === 'Active' && PL.factory === 1)); //THIS FACTORY SHOULD BE TAKEN BY THE CCONTEXT OF THE USER
+        } catch (errors) {
+            console.error('Error fetching PL:', errors);
+            setPL([]);
+        }
+    }
 
       const openModalWarehouse = (warehouse_id) => {
         if (typeof warehouse_id === 'object' && 'otherWH' in warehouse_id) {
@@ -352,29 +376,47 @@ const getWarehouses = async () => {
     }
 }
 
+const getProductionOrders = async () => {
+  try {
+      const response = await apiClient.get(API_URL_PRO_ORDERS);
+      let p = 0;
+      let ip = 0;
+      let d = 0;
+      const transformedOrders = response.data
+      transformedOrders.forEach(order => { 
+        if (order.status === 'Pending'){
+            p++;
+        }else if(order.status === 'In Progress'){
+          ip++;
+        }else{
+          d++;
+        }});
+        console.log(p,ip,d)
+        setPendingOrders(p);
+        setIPOrders(ip);
+        setFinishedOrders(d);
+  }catch (error) {
+    console.error('Error fetching warehouses:', error);
+    setPendingOrders([]);
+    setIPOrders([]);
+    setFinishedOrders([]);
+  }
+}
+
 const formatOptionLabel = ({ label, img }) => (
   <div style={{ display: 'flex', alignItems: 'center' }}>
     <img src={img} alt={label} style={{ width: 30, marginRight: 10 }} />
     <span>{label}</span>
   </div>
 );
-const data = [
-  { month: 'Jan', value: 30 },
-  { month: 'Feb', value: 20 },
-  { month: 'Mar', value: 50 },
-  { month: 'Apr', value: 60 },
-  { month: 'May', value: 70 },
-  { month: 'Jun', value: 90 },
+
+const columns = [
+  { title: 'ID', dataIndex: 'productionLine_id', key: 'productionLine_id' },
+  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Description', dataIndex: 'description', key: 'description' },
+  { title: 'State', dataIndex: 'state', key: 'state' }
 ];
 
-const config = {
-  data,
-  xField: 'month',
-  yField: 'value',
-  smooth: true,
-  height: 300,
-  color: '#1890ff',
-};
 
   return (
       <MainContent>
@@ -387,34 +429,30 @@ const config = {
               <Content style={{ padding: '50px' }}>
         <Row gutter={16}>
           <Col span={8}>
-            <Card title="Total Pending Orders" bordered={false}>
-              Card content
+            <Card title="Total Pending Orders" bordered={false} style={{color:'red', fontSize: '20px', fontWeight: 'bold'}}>
+                {PendingOrders}
             </Card>
            
           </Col>
           <Col span={8}>
-          <Card title="Total In Progress Orders" bordered={false}>
-              Card content
-            </Card>
+          <Card title="Total In Progress Orders" bordered={false}  style={{color:'#FFDE4D', fontSize: '20px', fontWeight: 'bold'}}>
+              {IPOrders}
+          </Card>
           </Col>
           <Col span={8}>
-          <Card title="Total Finished Orders" bordered={false}>
-              Card content
+          <Card title="Total Finished Orders" bordered={false} style={{color:'#9BEC00', fontSize: '20px', fontWeight: 'bold'}}>
+              {FinishedOrders}
             </Card>
           </Col>
         </Row>
-        <Row gutter={16}>
-        <Col span={8} style={{ paddingTop: '16px' }}>
-            <Card title="idk" bordered={false}>
-              Card content
-            </Card>
-        </Col>
-        <Col span={16} style={{ paddingTop: '16px' }}>
-            <Card title="Sales Data" bordered={false}>
-              <Line {...config} />
-            </Card>
-        </Col>
-        </Row>
+        <Table
+                columns={columns}
+                dataSource={PL}
+                rowKey="productionLine_id"
+                loading={loading}
+                style={{marginTop: '15px'}}
+            />
+
       </Content>
 
             {/* //   THIS IS THE FORM TO CREATE A NEW ORDER */}
@@ -552,7 +590,8 @@ const config = {
           {errors.productFields && errors.productFields[index] && errors.productFields[index].qty && (
             <Error>This is a required field.</Error>
           )}
-          <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ flex: 1, marginRight: '10px' }}>
             <h3>Items Needed</h3>
             <ul>
               {itemsNeeded.map(item => (
@@ -565,7 +604,7 @@ const config = {
               ))}
             </ul>
           </div>
-          <div>
+          <div style={{ flex: 1, marginLeft: '10px' }}>
             <h3>Selected Warehouses and Quantities</h3>
             <ul>
               {selectedWarehousesList.map(warehouse => (
@@ -581,6 +620,7 @@ const config = {
                 </li>
               ))}
             </ul>
+          </div>
           </div>
           <ButtonContainer>
             <Button type="button" isdisabledBtn={true} onClick={() => { closeModalWarehouseToPick(); console.log("cancelled order") }}>Cancel Order</Button>
