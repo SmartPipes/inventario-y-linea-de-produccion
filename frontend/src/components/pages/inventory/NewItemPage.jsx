@@ -1,11 +1,12 @@
-// NewItemPage.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormContainer, FormGroup, Button, ButtonGroup, ActionButtonGroup, SelectedImage, Labels, Input, Select, SubmitButton, Title, ActionButton, SelectedImageWrapper, IconWrapper, EditIcon, DeleteIcon, FormRow, Column } from '../../../Styled/InventoryForm.styled';
 import { API_URL_PRODUCTS, API_URL_RAWM, API_URL_SUPPLIERS, API_URL_CATEGORIES, API_URL_RAW_MATERIALS } from '../Config';
 import { apiClient } from '../../../ApiClient';
 import QuantityModal from './QuantityModal';
-import { Alert, AlertIcon, AlertTitle, AlertDescription, Box } from '@chakra-ui/react'
+import { Alert, AlertIcon, AlertTitle, AlertDescription, Box } from '@chakra-ui/react';
+import jsPDF from 'jspdf';
+import JsBarcode from 'jsbarcode';
 
 const NewItemPage = () => {
     const location = useLocation();
@@ -236,6 +237,82 @@ const NewItemPage = () => {
         setShowSuccessAlert(false);
     };
 
+
+    const handlePrintLabel = () => {
+        const pdf = new jsPDF('p', 'mm', 'a4'); // Página tamaño A4 en modo retrato
+        const barcodeValue = name || 'default'; // Valor predeterminado para el código de barras si name está indefinido
+        const canvas = document.createElement('canvas');
+        
+        // Generar el código de barras
+        try {
+            JsBarcode(canvas, barcodeValue, { format: 'CODE128' });
+        } catch (error) {
+            console.error('Error generating barcode:', error);
+            return;
+        }
+        const barcodeDataUrl = canvas.toDataURL('image/png');
+        
+        // Agregar logo
+        const logoPath = '/SmartPipesLogo.png';  // Ruta a la imagen del logo en la carpeta public
+        const img = new Image();
+        img.src = logoPath;
+        img.onload = function() {
+            try {
+                pdf.addImage(img, 'PNG', 80, 10, 50, 30); // Agranda el logo y céntralo
+                
+                // Agregar encabezado
+                pdf.setFontSize(22);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Etiqueta de Envío', 105, 50, { align: 'center' });
+                
+                // Agregar información del producto
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'normal');
+                const startX = 20;
+                let startY = 80;
+                const lineHeight = 10;
+                
+                pdf.text('Nombre del Producto:', startX, startY);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(String(name), 105, startY, { align: 'center' });
+                startY += lineHeight;
+                
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Cantidad:', startX, startY);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('__________', 105, startY, { align: 'center' }); // Espacio para llenar la cantidad
+                startY += lineHeight;
+                
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Descripción:', startX, startY);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(String(description), 105, startY, { align: 'center' });
+                startY += lineHeight;
+                
+                // Agregar código de barras
+                pdf.addImage(barcodeDataUrl, 'PNG', 40, startY + 10, 130, 40); // Ajustar tamaño y posición del código de barras
+                
+                // Agregar pie de página
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'italic');
+                pdf.text('Generado automáticamente', 105, 290, { align: 'center' });
+                
+                // Guardar PDF
+                pdf.save(`${name}_etiqueta.pdf`);
+            } catch (error) {
+                console.error('Error creating PDF:', error);
+            }
+        };
+        
+        img.onerror = function() {
+            console.error('Error loading logo image');
+        };
+    };
+    
+    
+
+    
+    
     return (
         <FormContainer>
             <Title>{isEditMode ? 'Editar' : 'Nuevo'} {formType === 'Product' ? 'Producto' : 'Material'}</Title>
@@ -260,7 +337,7 @@ const NewItemPage = () => {
                     Actualizar cantidad
                 </ActionButton>
                 <ActionButton>Reabastecer</ActionButton>
-                <ActionButton>Imprimir etiquetas</ActionButton>
+                <ActionButton onClick={handlePrintLabel}>Imprimir Etiqueta</ActionButton>
             </ActionButtonGroup>
             <form onSubmit={handleSubmit}>
                 <FormRow>
