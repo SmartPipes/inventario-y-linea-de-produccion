@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormContainer, FormGroup, Button, ButtonGroup, ActionButtonGroup, SelectedImage, Labels, Input, Select, SubmitButton, Title, ActionButton, SelectedImageWrapper, IconWrapper, EditIcon, DeleteIcon, FormRow, Column } from '../../../Styled/InventoryForm.styled';
-import { API_URL_PRODUCTS, API_URL_RAWM, API_URL_SUPPLIERS, API_URL_CATEGORIES, API_URL_RAW_MATERIALS } from '../Config';
+import { API_URL_PRODUCTS, API_URL_SUPPLIERS, API_URL_CATEGORIES, API_URL_RAW_MATERIALS } from '../Config';
 import { apiClient } from '../../../ApiClient';
 import QuantityModal from './QuantityModal';
 import { Alert, AlertIcon, AlertTitle, AlertDescription, Box } from '@chakra-ui/react'
@@ -60,7 +60,7 @@ const NewItemPage = () => {
             setDescription(rawMaterialData.description || '');
             setCategory(rawMaterialData.category);
 
-            const rawMaterialSupplierResponse = await apiClient.get(`${API_URL_RAWM}?raw_material=${data.item_id}`);
+            const rawMaterialSupplierResponse = await apiClient.get(`raw_material=${data.item_id}`);
             const rawMaterialSupplierData = rawMaterialSupplierResponse.data[0];
             setSupplier(rawMaterialSupplierData.supplier);
             setCost(rawMaterialSupplierData.purchase_price);
@@ -173,10 +173,10 @@ const NewItemPage = () => {
                     console.log(`${isEditMode ? "Updating" : "Creating"} Raw Material Supplier with data:`, rawMaterialSupplierData);
 
                     if (isEditMode) {
-                        const rawMaterialSupplierResponse = await apiClient.get(`${API_URL_RAWM}?raw_material=${rawMaterialId}`);
+                        const rawMaterialSupplierResponse = await apiClient.get(`raw_material=${rawMaterialId}`);
                         const rawMaterialSupplierId = rawMaterialSupplierResponse.data[0].id;
 
-                        const rawMaterialSupplierUpdateResponse = await apiClient.put(`${API_URL_RAWM}${rawMaterialSupplierId}/`, rawMaterialSupplierData, {
+                        const rawMaterialSupplierUpdateResponse = await apiClient.put(`${rawMaterialSupplierId}/`, rawMaterialSupplierData, {
                             headers: {
                                 'Content-Type': 'application/json',
                             }
@@ -190,7 +190,7 @@ const NewItemPage = () => {
                             alert('Error actualizando proveedor de materia prima: ' + rawMaterialSupplierUpdateResponse.data.message);
                         }
                     } else {
-                        const rawMaterialSupplierCreateResponse = await apiClient.post(API_URL_RAWM, rawMaterialSupplierData, {
+                        const rawMaterialSupplierCreateResponse = await apiClient.post(rawMaterialSupplierData, {
                             headers: {
                                 'Content-Type': 'application/json',
                             }

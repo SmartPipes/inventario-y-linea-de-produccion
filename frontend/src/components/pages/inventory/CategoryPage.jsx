@@ -70,18 +70,26 @@ const CategoryPage = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
+            console.log('Form Values:', values); // Log the form values for debugging
             if (editMode) {
-                await apiClient.put(`${API_URL_CATEGORIES}${currentCategory.category_id}/`, values);
+                const response = await apiClient.put(`${API_URL_CATEGORIES}${currentCategory.category_id}/`, values);
+                console.log('Edit Response:', response); // Log the response for debugging
                 message.success('Categoría actualizada exitosamente');
             } else {
-                await apiClient.post(API_URL_CATEGORIES, values);
+                const response = await apiClient.post(API_URL_CATEGORIES, values);
+                console.log('Create Response:', response); // Log the response for debugging
                 message.success('Categoría agregada exitosamente');
             }
             fetchCategories();
             setIsModalVisible(false);
         } catch (error) {
             console.error('Error al guardar la categoría:', error);
-            message.error('Error al guardar la categoría');
+            if (error.response) {
+                console.error('Server Response:', error.response.data); // Log the server response
+                message.error(`Error al guardar la categoría: ${error.response.data.detail || 'Error desconocido'}`);
+            } else {
+                message.error('Error al guardar la categoría');
+            }
         }
     };
 
