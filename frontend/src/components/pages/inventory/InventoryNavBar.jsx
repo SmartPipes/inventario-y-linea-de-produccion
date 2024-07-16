@@ -7,7 +7,7 @@ import { NavBarContainer, NavBarActionsFiltersContainer } from '../../../Styled/
 const InventoryNavBar = ({ applyFilters, currentPage, totalPages, setCurrentPage }) => {
     return (
         <NavBarContainer>
-            <NavBarMenu title="Inventario" />
+            <NavBarMenu title="Inventory" />
             <NavBarActionsFiltersContainer>
                 <NavBarActions newItemPath="/inventory/new-item" />
                 <NavBarFilters 

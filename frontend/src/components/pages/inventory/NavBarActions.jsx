@@ -13,7 +13,7 @@ const NavBarActions = ({ newItemPath }) => {
 
     return (
         <Button onClick={handleNewButtonClick}>
-            <FontAwesomeIcon icon={faPlus} /> Nuevo
+            <FontAwesomeIcon icon={faPlus} /> New
         </Button>
     );
 };

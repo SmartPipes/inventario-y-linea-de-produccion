@@ -25,22 +25,22 @@ const NavBarMenu = ({ title }) => {
                 <FontAwesomeIcon icon={faBars} size="lg" />
             </HamburgerMenu>
             <NavMenu isOpen={isMenuOpen}>
-                <NavItem><Link to="/inventory/informacion-general">Información general</Link></NavItem>
-                <NavItem><Link to="/inventory/operation-log">Operaciones</Link></NavItem>
-                <NavItem><Link to="/inventory">Productos</Link></NavItem>
-                <NavItem><Link to="/inventory/reportes">Reportes</Link></NavItem>
+                <NavItem><Link to="/inventory/informacion-general">General information</Link></NavItem>
+                <NavItem><Link to="/inventory/operation-log">Operations</Link></NavItem>
+                <NavItem><Link to="/inventory">Products</Link></NavItem>
+                <NavItem><Link to="/inventory/reportes">Reports</Link></NavItem>
                 <DropdownContainer>
-                    <NavItem onClick={toggleConfig}>Configuración</NavItem>
+                    <NavItem onClick={toggleConfig}>Settings</NavItem>
                     <DropdownMenu isOpen={isConfigOpen}>
-                        <DropdownItem isLabel>Gestión del almacén</DropdownItem>
-                        <DropdownItem><Link to="/inventory/warehouses">Almacenes</Link></DropdownItem>
-                        <DropdownItem isLabel>Gestión de proveedores</DropdownItem>
-                        <DropdownItem><Link to="/inventory/suppliers">Proveedores</Link></DropdownItem>
-                        <DropdownItem isLabel>Productos</DropdownItem>
-                        <DropdownItem><Link to="/inventory/categories">Categorías de productos</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/products">Productos</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/raw-materials">Materias Primas</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/request-restock">Solicitudes de reabastecimiento</Link></DropdownItem>
+                        <DropdownItem isLabel>Warehouse Management</DropdownItem>
+                        <DropdownItem><Link to="/inventory/warehouses">Warehouses</Link></DropdownItem>
+                        <DropdownItem isLabel>Supplier Management</DropdownItem>
+                        <DropdownItem><Link to="/inventory/suppliers">Suppliers</Link></DropdownItem>
+                        <DropdownItem isLabel>Products</DropdownItem>
+                        <DropdownItem><Link to="/inventory/categories">Product Categories</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/products">Products</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/raw-materials">Raw Materials</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/request-restock">Replenishment Requests</Link></DropdownItem>
                     </DropdownMenu>
                 </DropdownContainer>
             </NavMenu>

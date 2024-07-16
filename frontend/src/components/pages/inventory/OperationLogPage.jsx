@@ -141,33 +141,33 @@ const OperationLogPage = () => {
 
     const columns = [
         { title: 'ID', dataIndex: 'operation_log_id', key: 'operation_log_id' },
-        { title: 'Cantidad', dataIndex: 'quantity', key: 'quantity' },
-        { title: 'Fecha/Hora', dataIndex: 'datetime', key: 'datetime' },
-        { title: 'Tipo de Operación', dataIndex: 'type_operation', key: 'type_operation' },
+        { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
+        { title: 'Date/Hour', dataIndex: 'datetime', key: 'datetime' },
+        { title: 'Operation type', dataIndex: 'type_operation', key: 'type_operation' },
         {
-            title: 'Artículo',
+            title: 'Article',
             dataIndex: 'inventory_item',
             key: 'inventory_item',
             render: (text, record) => getItemName(record.inventory_item),
         },
         {
-            title: 'Usuario',
+            title: 'User',
             dataIndex: 'op_log_user',
             key: 'op_log_user',
             render: (text) => getUserById(text),
         },
         {
-            title: 'Almacén',
+            title: 'Warehouse',
             dataIndex: 'warehouse',
             key: 'warehouse',
             render: (text) => getWarehouseById(text),
         },
         {
-            title: 'Acción',
+            title: 'Action',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showDeleteModal(record.operation_log_id)} type="link" danger>Eliminar</Button>
+                    <Button onClick={() => showDeleteModal(record.operation_log_id)} type="link" danger>Delete</Button>
                 </Space>
             )
         }
@@ -175,7 +175,7 @@ const OperationLogPage = () => {
 
     return (
         <div>
-            <NavBarMenu title="Registro de Operaciones" />
+            <NavBarMenu title="Operations Log" />
             <Table
                 columns={columns}
                 dataSource={operationLogs}
@@ -183,14 +183,14 @@ const OperationLogPage = () => {
                 loading={loading}
             />
             <Modal
-                title="Confirmar Eliminación"
+                title="Confirm Deletion"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
                 okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>¿Estás seguro de que quieres borrar este registro? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
+                <p>Are you sure you want to delete this record? Please wait{countdown} seconds to confirm the deletion.</p>
             </Modal>
         </div>
     );
