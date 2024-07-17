@@ -17,7 +17,8 @@ const ProductPage = () => {
     const [currentProduct, setCurrentProduct] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [fileList, setFileList] = useState([]);
-
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [currentProductId, setCurrentProductId] = useState(null);
     const [countdown, setCountdown] = useState(3);
@@ -65,7 +66,7 @@ const ProductPage = () => {
         setEditMode(!!product);
         if (product) {
             form.setFieldsValue(product);
-            setFileList([{ url: product.image_icon }]);
+            setFileList(product.image_icon ? [{ url: product.image_icon, name: product.image_icon, thumbUrl: product.image_icon }] : []);
         } else {
             form.resetFields();
             setFileList([]);
@@ -81,25 +82,25 @@ const ProductPage = () => {
             formData.append('description', values.description);
             formData.append('price', values.price);
             formData.append('status', values.status);
+
             if (fileList.length > 0 && fileList[0].originFileObj) {
                 formData.append('image_icon', fileList[0].originFileObj);
-            } else if (currentProduct && currentProduct.image_icon) {
-                formData.append('image_icon', currentProduct.image_icon);
             }
 
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
             if (editMode) {
-                await apiClient.put(`${API_URL_PRODUCTS}${currentProduct.product_id}/`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                if (fileList.length === 0 && currentProduct.image_icon) {
+                    formData.append('image_icon', currentProduct.image_icon);
+                }
+                await apiClient.put(`${API_URL_PRODUCTS}${currentProduct.product_id}/`, formData, config);
                 message.success('Producto actualizado exitosamente');
             } else {
-                await apiClient.post(API_URL_PRODUCTS, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await apiClient.post(API_URL_PRODUCTS, formData, config);
                 message.success('Producto agregado exitosamente');
             }
             fetchProducts();
@@ -132,7 +133,18 @@ const ProductPage = () => {
         setFilteredProducts(filtered);
     };
 
-    const handleFileChange = ({ fileList }) => setFileList(fileList);
+    const handleFileChange = ({ fileList }) => {
+        if (fileList.length > 0) {
+            setFileList([fileList[fileList.length - 1]]);
+        } else {
+            setFileList([]);
+        }
+    };
+
+    const handlePreview = async (file) => {
+        setPreviewImage(file.url || file.thumbUrl);
+        setPreviewVisible(true);
+    };
 
     const columns = [
         { title: 'ID', dataIndex: 'product_id', key: 'product_id' },
@@ -144,7 +156,16 @@ const ProductPage = () => {
             title: 'Imagen',
             dataIndex: 'image_icon',
             key: 'image_icon',
-            render: (text, record) => <img src={record.image_icon} alt={record.name} style={{ width: 50 }} />
+            render: (text, record) => (
+                <Space size="middle">
+                    <img
+                        src={record.image_icon || 'https://via.placeholder.com/50'}
+                        alt={record.name}
+                        style={{ width: 50, cursor: 'pointer' }}
+                        onClick={() => handlePreview({ url: record.image_icon || 'https://via.placeholder.com/150' })}
+                    />
+                </Space>
+            )
         },
         {
             title: 'Acción',
@@ -210,11 +231,20 @@ const ProductPage = () => {
                             beforeUpload={() => false}
                             onChange={handleFileChange}
                             accept="image/*"
+                            onPreview={handlePreview}
                         >
                             <Button icon={<UploadOutlined />}>Subir Imagen</Button>
                         </Upload>
                     </Form.Item>
                 </Form>
+            </Modal>
+            <Modal
+                title="Vista previa de la imagen"
+                visible={previewVisible}
+                footer={null}
+                onCancel={() => setPreviewVisible(false)}
+            >
+                <img alt="Vista previa" style={{ width: '100%' }} src={previewImage} />
             </Modal>
             <Modal
                 title="Confirmar Eliminación"

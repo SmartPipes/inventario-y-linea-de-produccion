@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Modal, Form, Input, Space, Button, message, Upload, Select } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, EyeOutlined } from '@ant-design/icons';
 import { API_URL_RAW_MATERIALS, API_URL_CATEGORIES, API_URL_SUPPLIERS } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
@@ -17,13 +17,14 @@ const RawMaterialPage = () => {
     const [editMode, setEditMode] = useState(false);
     const [form] = Form.useForm();
     const [currentRawMaterial, setCurrentRawMaterial] = useState(null);
-    const [originalImageUrl, setOriginalImageUrl] = useState(null);
     const [searchText, setSearchText] = useState('');
+    const [fileList, setFileList] = useState([]);
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [currentDeleteId, setCurrentDeleteId] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
-    const defaultImage = 'https://via.placeholder.com/150';
 
     useEffect(() => {
         fetchRawMaterials();
@@ -98,30 +99,28 @@ const RawMaterialPage = () => {
         return e && e.fileList;
     };
 
-    const urlToFile = async (url, filename, mimeType) => {
-        const response = await fetch(url);
-        const buffer = await response.arrayBuffer();
-        const file = new File([buffer], filename, { type: mimeType });
-        return file;
+    const handleFileChange = ({ fileList }) => {
+        setFileList(fileList);
     };
 
-    const showModal = async (rawMaterial = null) => {
+    const handlePreview = async (file) => {
+        setPreviewImage(file.url || file.thumbUrl);
+        setPreviewVisible(true);
+    };
+
+    const showModal = (rawMaterial = null) => {
         setCurrentRawMaterial(rawMaterial);
         setEditMode(!!rawMaterial);
         if (rawMaterial) {
-            const categoryResponse = await apiClient.get(`${API_URL_CATEGORIES}${rawMaterial.category}/`);
-            setOriginalImageUrl(rawMaterial.image_icon);
-            const imageFile = await urlToFile(rawMaterial.image_icon, 'image.png', 'image/png');
             form.setFieldsValue({
                 ...rawMaterial,
-                supplier: rawMaterial.supplier ? rawMaterial.supplier : undefined,
-                purchase_price: rawMaterial.purchase_price || undefined,
-                image_icon: rawMaterial.image_icon ? [{ originFileObj: imageFile, url: rawMaterial.image_icon }] : [],
-                category: categoryResponse.data.category_id.toString()
+                supplier: rawMaterial.supplier_name,
+                category: rawMaterial.category.toString(),
             });
+            setFileList(rawMaterial.image_icon ? [{ url: rawMaterial.image_icon, name: rawMaterial.image_icon, thumbUrl: rawMaterial.image_icon }] : []);
         } else {
             form.resetFields();
-            setOriginalImageUrl(null);
+            setFileList([]);
         }
         setIsModalVisible(true);
     };
@@ -133,48 +132,34 @@ const RawMaterialPage = () => {
             formData.append('name', values.name);
             formData.append('description', values.description);
             formData.append('category', values.category);
-            formData.append('supplier', values.supplier);
+            formData.append('supplier', suppliers.find(supplier => supplier.name === values.supplier).supplier_id);
             formData.append('purchase_price', values.purchase_price);
 
-            if (values.image_icon && values.image_icon.length > 0) {
-                formData.append('image_icon', values.image_icon[0].originFileObj);
-            } else if (editMode && originalImageUrl) {
-                formData.append('image_icon_url', originalImageUrl);
-            } else {
-                formData.append('image_icon_url', defaultImage);
+            if (fileList.length > 0 && fileList[0].originFileObj) {
+                formData.append('image_icon', fileList[0].originFileObj);
+            } else if (editMode && currentRawMaterial.image_icon) {
+                formData.append('image_icon', currentRawMaterial.image_icon);
             }
 
-            let rawMaterialResponse;
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
             if (editMode) {
-                rawMaterialResponse = await apiClient.put(`${API_URL_RAW_MATERIALS}${currentRawMaterial.raw_material_id}/`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await apiClient.put(`${API_URL_RAW_MATERIALS}${currentRawMaterial.raw_material_id}/`, formData, config);
                 message.success('Materia prima actualizada exitosamente');
             } else {
-                rawMaterialResponse = await apiClient.post(API_URL_RAW_MATERIALS, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await apiClient.post(API_URL_RAW_MATERIALS, formData, config);
                 message.success('Materia prima agregada exitosamente');
             }
-
             fetchRawMaterials();
             setIsModalVisible(false);
         } catch (error) {
-            console.error('Error saving raw material:', error);
-            if (error.response && error.response.data) {
-                console.error('Server response:', error.response.data);
-            }
+            console.error('Error al guardar la materia prima:', error);
             message.error('Error al guardar la materia prima');
         }
-    };
-
-    const showDeleteModal = (rawMaterialId) => {
-        setCurrentDeleteId(rawMaterialId);
-        setIsDeleteModalVisible(true);
     };
 
     const handleDelete = async () => {
@@ -209,7 +194,16 @@ const RawMaterialPage = () => {
             title: 'Imagen',
             dataIndex: 'image_icon',
             key: 'image_icon',
-            render: (text, record) => <img src={record.image_icon || defaultImage} alt={record.name} style={{ width: 50 }} />
+            render: (text, record) => (
+                <Space size="middle">
+                    <img
+                        src={record.image_icon || 'https://via.placeholder.com/50'}
+                        alt={record.name}
+                        style={{ width: 50, cursor: 'pointer' }}
+                        onClick={() => handlePreview({ url: record.image_icon || 'https://via.placeholder.com/150' })}
+                    />
+                </Space>
+            )
         },
         {
             title: 'Categoría',
@@ -228,6 +222,11 @@ const RawMaterialPage = () => {
             )
         }
     ];
+
+    const showDeleteModal = (rawMaterialId) => {
+        setCurrentDeleteId(rawMaterialId);
+        setIsDeleteModalVisible(true);
+    };
 
     return (
         <div>
@@ -270,19 +269,40 @@ const RawMaterialPage = () => {
                     <Form.Item name="supplier" label="Proveedor" rules={[{ required: true }]}>
                         <Select>
                             {suppliers.map(supplier => (
-                                <Option key={supplier.supplier_id} value={supplier.supplier_id.toString()}>{supplier.name}</Option>
+                                <Option key={supplier.supplier_id} value={supplier.name}>{supplier.name}</Option>
                             ))}
                         </Select>
                     </Form.Item>
                     <Form.Item name="purchase_price" label="Precio de Compra" rules={[{ required: true }]}>
                         <Input type="number" step="0.01" />
                     </Form.Item>
-                    <Form.Item name="image_icon" label="Imagen" valuePropName="fileList" getValueFromEvent={normFile}>
-                        <Upload name="image_icon" listType="picture" maxCount={1} beforeUpload={() => false}>
-                            <Button icon={<UploadOutlined />}>Subir</Button>
+                    <Form.Item label="Imagen">
+                        <Upload
+                            listType="picture"
+                            fileList={fileList}
+                            beforeUpload={() => false}
+                            onChange={({ fileList }) => {
+                                if (fileList.length > 0) {
+                                    setFileList([fileList[fileList.length - 1]]);
+                                } else {
+                                    setFileList([]);
+                                }
+                            }}
+                            accept="image/*"
+                            onPreview={handlePreview}
+                        >
+                            <Button icon={<UploadOutlined />}>Subir Imagen</Button>
                         </Upload>
                     </Form.Item>
                 </Form>
+            </Modal>
+            <Modal
+                title="Vista previa de la imagen"
+                visible={previewVisible}
+                footer={null}
+                onCancel={() => setPreviewVisible(false)}
+            >
+                <img alt="Vista previa" style={{ width: '100%' }} src={previewImage} />
             </Modal>
             <Modal
                 title="Confirmar eliminación"
