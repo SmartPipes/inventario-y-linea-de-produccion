@@ -23,6 +23,7 @@ const ProductPage = () => {
     const [currentProductId, setCurrentProductId] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
+    const [removeImage, setRemoveImage] = useState(false);
 
     useEffect(() => {
         fetchProducts();
@@ -64,6 +65,7 @@ const ProductPage = () => {
     const showModal = (product = null) => {
         setCurrentProduct(product);
         setEditMode(!!product);
+        setRemoveImage(false);  // Reset the remove image state
         if (product) {
             form.setFieldsValue(product);
             setFileList(product.image_icon ? [{ url: product.image_icon, name: product.image_icon, thumbUrl: product.image_icon }] : []);
@@ -85,6 +87,8 @@ const ProductPage = () => {
 
             if (fileList.length > 0 && fileList[0].originFileObj) {
                 formData.append('image_icon', fileList[0].originFileObj);
+            } else if (removeImage) {
+                formData.append('image_icon', '');
             }
 
             const config = {
@@ -94,9 +98,6 @@ const ProductPage = () => {
             };
 
             if (editMode) {
-                if (fileList.length === 0 && currentProduct.image_icon) {
-                    formData.append('image_icon', currentProduct.image_icon);
-                }
                 await apiClient.put(`${API_URL_PRODUCTS}${currentProduct.product_id}/`, formData, config);
                 message.success('Producto actualizado exitosamente');
             } else {
@@ -138,6 +139,7 @@ const ProductPage = () => {
             setFileList([fileList[fileList.length - 1]]);
         } else {
             setFileList([]);
+            setRemoveImage(true);
         }
     };
 

@@ -25,6 +25,7 @@ const RawMaterialPage = () => {
     const [currentDeleteId, setCurrentDeleteId] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
+    const [removeImage, setRemoveImage] = useState(false);
 
     useEffect(() => {
         fetchRawMaterials();
@@ -92,15 +93,14 @@ const RawMaterialPage = () => {
         }
     };
 
-    const normFile = (e) => {
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return e && e.fileList;
-    };
-
     const handleFileChange = ({ fileList }) => {
-        setFileList(fileList);
+        if (fileList.length > 0) {
+            setFileList([fileList[fileList.length - 1]]);
+            setRemoveImage(false);
+        } else {
+            setFileList([]);
+            setRemoveImage(true);
+        }
     };
 
     const handlePreview = async (file) => {
@@ -111,6 +111,7 @@ const RawMaterialPage = () => {
     const showModal = (rawMaterial = null) => {
         setCurrentRawMaterial(rawMaterial);
         setEditMode(!!rawMaterial);
+        setRemoveImage(false);
         if (rawMaterial) {
             form.setFieldsValue({
                 ...rawMaterial,
@@ -137,8 +138,8 @@ const RawMaterialPage = () => {
 
             if (fileList.length > 0 && fileList[0].originFileObj) {
                 formData.append('image_icon', fileList[0].originFileObj);
-            } else if (editMode && currentRawMaterial.image_icon) {
-                formData.append('image_icon', currentRawMaterial.image_icon);
+            } else if (removeImage) {
+                formData.append('image_icon', '');
             }
 
             const config = {
@@ -281,13 +282,7 @@ const RawMaterialPage = () => {
                             listType="picture"
                             fileList={fileList}
                             beforeUpload={() => false}
-                            onChange={({ fileList }) => {
-                                if (fileList.length > 0) {
-                                    setFileList([fileList[fileList.length - 1]]);
-                                } else {
-                                    setFileList([]);
-                                }
-                            }}
+                            onChange={handleFileChange}
                             accept="image/*"
                             onPreview={handlePreview}
                         >
