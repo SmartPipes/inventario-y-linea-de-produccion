@@ -126,18 +126,18 @@ const WarehousePage = () => {
 
     const columns = [
         { title: 'ID', dataIndex: 'warehouse_id', key: 'warehouse_id' },
-        { title: 'Nombre', dataIndex: 'name', key: 'name' },
-        { title: 'Dirección', dataIndex: 'address', key: 'address' },
-        { title: 'Teléfono', dataIndex: 'phone', key: 'phone' },
-        { title: 'Estado', dataIndex: 'status', key: 'status' },
-        { title: 'Ciudad', dataIndex: 'city', key: 'city', render: (text) => cities.find(city => city.city_id === text)?.city_name || 'Desconocido' },
+        { title: 'Name', dataIndex: 'name', key: 'name' },
+        { title: 'Address', dataIndex: 'address', key: 'address' },
+        { title: 'Phone', dataIndex: 'phone', key: 'phone' },
+        { title: 'State', dataIndex: 'status', key: 'status' },
+        { title: 'City', dataIndex: 'city', key: 'city', render: (text) => cities.find(city => city.city_id === text)?.city_name || 'Desconocido' },
         {
-            title: 'Acción',
+            title: 'Action',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Editar</Button>
-                    <Button onClick={() => showDeleteModal(record.warehouse_id)} type="link" danger>Eliminar</Button>
+                    <Button onClick={() => showModal(record)} type="link">Edit</Button>
+                    <Button onClick={() => showDeleteModal(record.warehouse_id)} type="link" danger>Delete</Button>
                 </Space>
             )
         }
@@ -145,15 +145,15 @@ const WarehousePage = () => {
 
     return (
         <div>
-            <NavBarMenu title="Almacenes" />
+            <NavBarMenu title="Warehouses" />
             <div style={{ marginBottom: '16px' }}>
                 <Input
-                    placeholder="Buscar almacén..."
+                    placeholder="Search Warehouse..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Agregar Almacén</Button>
+                <Button type="primary" onClick={() => showModal()}>Add Warehouse</Button>
             </div>
             <Table
                 columns={columns}
@@ -162,28 +162,28 @@ const WarehousePage = () => {
                 loading={loading}
             />
             <Modal
-                title={editMode ? 'Editar Almacén' : 'Agregar Almacén'}
+                title={editMode ? 'Edit Warehouse' : 'Add Warehouse'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
+                    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="address" label="Dirección" rules={[{ required: true }]}>
+                    <Form.Item name="address" label="Address" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="phone" label="Teléfono" rules={[{ required: true }]}>
+                    <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="status" label="Estado" rules={[{ required: true }]}>
+                    <Form.Item name="status" label="State" rules={[{ required: true }]}>
                         <Select>
                             <Option value="Active">Active</Option>
                             <Option value="Inactive">Inactive</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item name="city" label="Ciudad" rules={[{ required: true }]}>
+                    <Form.Item name="city" label="City" rules={[{ required: true }]}>
                         <Select>
                             {cities.map(city => (
                                 <Option key={city.city_id} value={city.city_id}>{city.city_name}</Option>

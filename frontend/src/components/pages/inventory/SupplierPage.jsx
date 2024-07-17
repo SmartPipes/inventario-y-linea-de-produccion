@@ -119,19 +119,19 @@ const SupplierPage = () => {
 
     const columns = [
         { title: 'ID', dataIndex: 'supplier_id', key: 'supplier_id' },
-        { title: 'Nombre', dataIndex: 'name', key: 'name' },
+        { title: 'Name', dataIndex: 'name', key: 'name' },
         { title: 'RFC', dataIndex: 'RFC', key: 'RFC' },
         { title: 'Email', dataIndex: 'email', key: 'email' },
-        { title: 'Teléfono', dataIndex: 'phone', key: 'phone' },
-        { title: 'Dirección', dataIndex: 'address', key: 'address' },
-        { title: 'Calificación', dataIndex: 'rating', key: 'rating' },
+        { title: 'Phone', dataIndex: 'phone', key: 'phone' },
+        { title: 'Address', dataIndex: 'address', key: 'address' },
+        { title: 'Rating', dataIndex: 'rating', key: 'rating' },
         {
-            title: 'Acción',
+            title: 'Action',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Editar</Button>
-                    <Button onClick={() => showDeleteModal(record.supplier_id)} type="link" danger>Eliminar</Button>
+                    <Button onClick={() => showModal(record)} type="link">Edit</Button>
+                    <Button onClick={() => showDeleteModal(record.supplier_id)} type="link" danger>Delete</Button>
                 </Space>
             )
         }
@@ -139,15 +139,15 @@ const SupplierPage = () => {
 
     return (
         <div>
-            <NavBarMenu title="Proveedores" />
+            <NavBarMenu title="Suppliers" />
             <div style={{ marginBottom: '16px' }}>
                 <Input
-                    placeholder="Buscar proveedor..."
+                    placeholder="Search Suppiler..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Agregar Proveedor</Button>
+                <Button type="primary" onClick={() => showModal()}>Add Supplier</Button>
             </div>
             <Table
                 columns={columns}
@@ -156,13 +156,13 @@ const SupplierPage = () => {
                 loading={loading}
             />
             <Modal
-                title={editMode ? 'Editar Proveedor' : 'Agregar Proveedor'}
+                title={editMode ? 'Edit Supplier' : 'Add Supplier'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
+                    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item name="RFC" label="RFC" rules={[{ required: true }]}>
@@ -171,13 +171,13 @@ const SupplierPage = () => {
                     <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="phone" label="Teléfono" rules={[{ required: true }]}>
+                    <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="address" label="Dirección" rules={[{ required: true }]}>
+                    <Form.Item name="address" label="Address" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="rating" label="Calificación" rules={[{ required: true }]}>
+                    <Form.Item name="rating" label="Rating" rules={[{ required: true }]}>
                         <Select>
                             <Option value="A">A</Option>
                             <Option value="B">B</Option>
@@ -189,15 +189,14 @@ const SupplierPage = () => {
                 </Form>
             </Modal>
             <Modal
-                title="Confirmar Eliminación"
+                title="Confirm Deletion"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
                 okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>¿Estás seguro de que quieres borrar este proveedor? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
-            </Modal>
+                <p>Are you sure you want to delete this provider? Please wait {countdown} seconds to confirm the deletion.</p>            </Modal>
         </div>
     );
 };

@@ -216,20 +216,20 @@ const RestockRequestPage = () => {
     const columns = [
         { title: 'ID', dataIndex: 'restock_request_id', key: 'restock_request_id' },
         {
-            title: 'Nombre del artículo',
+            title: 'Article Name',
             dataIndex: 'raw_material',
             key: 'raw_material',
             render: (text) => getRawMaterialNameById(text),
         },
-        { title: 'Cantidad', dataIndex: 'quantity', key: 'quantity' },
-        { title: 'Estado', dataIndex: 'status', key: 'status' },
+        { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
+        { title: 'Status', dataIndex: 'status', key: 'status' },
         {
-            title: 'Solicitado por',
+            title: 'Requested by',
             dataIndex: 'requested_by',
             key: 'requested_by',
             render: (text) => getUserById(text),
         },
-        { title: 'Fecha de Solicitud', dataIndex: 'requested_at', key: 'requested_at' },
+        { title: 'Request Date', dataIndex: 'requested_at', key: 'requested_at' },
         {
             title: 'Warehouse',
             dataIndex: 'warehouse',
@@ -237,12 +237,12 @@ const RestockRequestPage = () => {
             render: (text) => getWarehouseById(text),
         },
         {
-            title: 'Acción',
+            title: 'Action',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Editar</Button>
-                    <Button onClick={() => showDeleteModal(record.restock_request_id)} type="link" danger>Eliminar</Button>
+                    <Button onClick={() => showModal(record)} type="link">Edit</Button>
+                    <Button onClick={() => showDeleteModal(record.restock_request_id)} type="link" danger>Delete</Button>
                 </Space>
             )
         }
@@ -250,15 +250,15 @@ const RestockRequestPage = () => {
 
     return (
         <div>
-            <NavBarMenu title="Solicitudes de Reabastecimiento" />
+            <NavBarMenu title="Replenishment Requests" />
             <div style={{ marginBottom: '16px' }}>
                 <Input
-                    placeholder="Buscar solicitud..."
+                    placeholder="Search Request..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Agregar Solicitud</Button>
+                <Button type="primary" onClick={() => showModal()}>Add Request</Button>
             </div>
             <Table
                 columns={columns}
@@ -267,13 +267,13 @@ const RestockRequestPage = () => {
                 loading={loading}
             />
             <Modal
-                title={editMode ? 'Editar Solicitud' : 'Agregar Solicitud'}
+                title={editMode ? 'Edit Request' : 'Add Request'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="raw_material" label="Artículo" rules={[{ required: true }]}>
+                    <Form.Item name="raw_material" label="Article" rules={[{ required: true }]}>
                         <Select>
                             {rawMaterials.map(item => (
                                 <Option key={item.raw_material_id} value={item.raw_material_id}>
@@ -282,17 +282,17 @@ const RestockRequestPage = () => {
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item name="quantity" label="Cantidad" rules={[{ required: true }]}>
+                    <Form.Item name="quantity" label="Quantity" rules={[{ required: true }]}>
                         <Input type="number" />
                     </Form.Item>
-                    <Form.Item name="status" label="Estado" rules={[{ required: true }]}>
+                    <Form.Item name="status" label="Status" rules={[{ required: true }]}>
                         <Select>
                             <Option value="Pending">Pending</Option>
                             <Option value="Approved">Approved</Option>
                             <Option value="Rejected">Rejected</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item name="requested_by" label="Solicitado por" rules={[{ required: true }]}>
+                    <Form.Item name="requested_by" label="Request by" rules={[{ required: true }]}>
                         <Select>
                             {users.map(user => (
                                 <Option key={user.id} value={user.id}>
@@ -301,7 +301,7 @@ const RestockRequestPage = () => {
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item name="warehouse" label="Almacén" rules={[{ required: true }]}>
+                    <Form.Item name="warehouse" label="Warehouse" rules={[{ required: true }]}>
                         <Select>
                             {warehouses.map(warehouse => (
                                 <Option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
@@ -313,15 +313,14 @@ const RestockRequestPage = () => {
                 </Form>
             </Modal>
             <Modal
-                title="Confirmar Eliminación"
+                title="Confirm Deletion"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
-                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
+                okText={`Deletion${countdown > 0 ? ` (${countdown})` : ''}`}
                 okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>¿Estás seguro de que quieres borrar esta solicitud de reabastecimiento? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
-            </Modal>
+            <p>Are you sure you want to delete this replenishment request? Please wait {countdown} seconds to confirm the deletion.</p>            </Modal>
         </div>
     );
 };
