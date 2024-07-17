@@ -71,17 +71,29 @@ const SupplierPage = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
+            const data = {
+                name: values.name,
+                RFC: values.RFC,
+                email: values.email,
+                phone: values.phone,
+                address: values.address,
+                rating: values.rating
+            };
+
             if (editMode) {
-                await apiClient.put(`${API_URL_SUPPLIERS}${currentSupplier.supplier_id}/`, values);
+                await apiClient.put(`${API_URL_SUPPLIERS}${currentSupplier.supplier_id}/`, data);
                 message.success('Proveedor actualizado exitosamente');
             } else {
-                await apiClient.post(API_URL_SUPPLIERS, values);
+                await apiClient.post(API_URL_SUPPLIERS, data);
                 message.success('Proveedor agregado exitosamente');
             }
             fetchSuppliers();
             setIsModalVisible(false);
         } catch (error) {
             console.error('Error al guardar el proveedor:', error);
+            if (error.response && error.response.data) {
+                console.error('Server response:', error.response.data);
+            }
             message.error('Error al guardar el proveedor');
         }
     };
@@ -194,7 +206,7 @@ const SupplierPage = () => {
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
-                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
+                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white', color: deleteEnabled ? 'white' : 'black' } }}
             >
                 <p>Are you sure you want to delete this provider? Please wait {countdown} seconds to confirm the deletion.</p>            </Modal>
         </div>

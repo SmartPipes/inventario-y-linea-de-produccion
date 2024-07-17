@@ -24,7 +24,6 @@ export const API_URL_WAREHOUSES = BASE_API_URL+"inventory/warehouse/";
 export const API_URL_PO_DETAILS = BASE_API_URL+"production-line/production-order-details/";
 export const API_URL_PO_RAWM_DETAILS = BASE_API_URL+"production-line/ProductionOrderWarehouseRetrievalDetail/"
 export const API_URL_CATEGORIES = BASE_API_URL+"inventory/category/";
-export const API_URL_RAWM = BASE_API_URL+"inventory/raw-material-suppliers/";
 export const API_URL_SUPPLIERS = BASE_API_URL+"inventory/supplier/";
 export const API_URL_RAW_MATERIALS = BASE_API_URL+"inventory/raw-materials/";
 export const API_URL_OPERATION_LOG = BASE_API_URL+'inventory/operation-log/';

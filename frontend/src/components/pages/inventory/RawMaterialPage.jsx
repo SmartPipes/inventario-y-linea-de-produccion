@@ -1,52 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Modal, Form, Input, Space, Button, message, Upload, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { API_URL_RAW_MATERIALS, API_URL_CATEGORIES, API_URL_RAWM, API_URL_SUPPLIERS } from '../Config';
+import { API_URL_RAW_MATERIALS, API_URL_CATEGORIES, API_URL_SUPPLIERS } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
 
 const { Option } = Select;
-
-const supplierCache = {};
-
-const fetchSupplierData = async (rawMaterialId) => {
-    if (supplierCache[rawMaterialId]) {
-        return supplierCache[rawMaterialId];
-    }
-
-    try {
-        const supplierResponse = await apiClient.get(`${API_URL_RAWM}?raw_material=${rawMaterialId}`);
-        if (supplierResponse.data.length > 0) {
-            const supplierData = supplierResponse.data[0];
-            const supplierResponseDetail = await apiClient.get(`${API_URL_SUPPLIERS}${supplierData.supplier}/`);
-            const supplierName = supplierResponseDetail.data.name;
-            const result = { 
-                purchase_price: supplierData.purchase_price, 
-                supplier: supplierData.supplier,
-                supplier_name: supplierName
-            };
-            supplierCache[rawMaterialId] = result;
-            return result;
-        } else {
-            const result = {
-                purchase_price: 'Sin asignar',
-                supplier: 'Sin asignar',
-                supplier_name: 'Sin asignar'
-            };
-            supplierCache[rawMaterialId] = result;
-            return result;
-        }
-    } catch (err) {
-        console.error(`Error fetching supplier data for raw material ${rawMaterialId}:`, err);
-        const result = {
-            purchase_price: 'Sin asignar',
-            supplier: 'Sin asignar',
-            supplier_name: 'Sin asignar'
-        };
-        supplierCache[rawMaterialId] = result;
-        return result;
-    }
-};
 
 const RawMaterialPage = () => {
     const [rawMaterials, setRawMaterials] = useState([]);
@@ -58,12 +17,13 @@ const RawMaterialPage = () => {
     const [editMode, setEditMode] = useState(false);
     const [form] = Form.useForm();
     const [currentRawMaterial, setCurrentRawMaterial] = useState(null);
-    const [currentSupplierData, setCurrentSupplierData] = useState({});
+    const [originalImageUrl, setOriginalImageUrl] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [currentDeleteId, setCurrentDeleteId] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
+    const defaultImage = 'https://via.placeholder.com/150';
 
     useEffect(() => {
         fetchRawMaterials();
@@ -100,8 +60,8 @@ const RawMaterialPage = () => {
 
             const rawMaterialsWithSupplierData = await Promise.all(
                 rawMaterialsData.map(async (rawMaterial) => {
-                    const supplierData = await fetchSupplierData(rawMaterial.raw_material_id);
-                    return { ...rawMaterial, ...supplierData };
+                    const supplierResponse = rawMaterial.supplier ? await apiClient.get(`${API_URL_SUPPLIERS}${rawMaterial.supplier}/`) : { data: { name: 'Sin asignar' } };
+                    return { ...rawMaterial, supplier_name: supplierResponse.data.name || 'Sin asignar', purchase_price: rawMaterial.purchase_price || 'Sin asignar' };
                 })
             );
 
@@ -138,24 +98,30 @@ const RawMaterialPage = () => {
         return e && e.fileList;
     };
 
+    const urlToFile = async (url, filename, mimeType) => {
+        const response = await fetch(url);
+        const buffer = await response.arrayBuffer();
+        const file = new File([buffer], filename, { type: mimeType });
+        return file;
+    };
+
     const showModal = async (rawMaterial = null) => {
         setCurrentRawMaterial(rawMaterial);
         setEditMode(!!rawMaterial);
         if (rawMaterial) {
             const categoryResponse = await apiClient.get(`${API_URL_CATEGORIES}${rawMaterial.category}/`);
-            const supplierResponse = await apiClient.get(`${API_URL_RAWM}?raw_material=${rawMaterial.raw_material_id}`);
-            const supplierData = supplierResponse.data[0];
-            setCurrentSupplierData(supplierData);
+            setOriginalImageUrl(rawMaterial.image_icon);
+            const imageFile = await urlToFile(rawMaterial.image_icon, 'image.png', 'image/png');
             form.setFieldsValue({
                 ...rawMaterial,
-                supplier: supplierData ? supplierData.supplier : undefined,
-                purchase_price: supplierData ? supplierData.purchase_price : undefined,
-                image_icon: rawMaterial.image_icon ? [{ url: rawMaterial.image_icon }] : [],
+                supplier: rawMaterial.supplier ? rawMaterial.supplier : undefined,
+                purchase_price: rawMaterial.purchase_price || undefined,
+                image_icon: rawMaterial.image_icon ? [{ originFileObj: imageFile, url: rawMaterial.image_icon }] : [],
                 category: categoryResponse.data.category_id.toString()
             });
         } else {
             form.resetFields();
-            setCurrentSupplierData({});
+            setOriginalImageUrl(null);
         }
         setIsModalVisible(true);
     };
@@ -167,8 +133,15 @@ const RawMaterialPage = () => {
             formData.append('name', values.name);
             formData.append('description', values.description);
             formData.append('category', values.category);
-            if (values.image_icon) {
+            formData.append('supplier', values.supplier);
+            formData.append('purchase_price', values.purchase_price);
+
+            if (values.image_icon && values.image_icon.length > 0) {
                 formData.append('image_icon', values.image_icon[0].originFileObj);
+            } else if (editMode && originalImageUrl) {
+                formData.append('image_icon_url', originalImageUrl);
+            } else {
+                formData.append('image_icon_url', defaultImage);
             }
 
             let rawMaterialResponse;
@@ -186,19 +159,6 @@ const RawMaterialPage = () => {
                     }
                 });
                 message.success('Materia prima agregada exitosamente');
-            }
-
-            const rawMaterialId = rawMaterialResponse.data.raw_material_id;
-            const supplierData = {
-                raw_material: rawMaterialId,
-                supplier: values.supplier,
-                purchase_price: values.purchase_price
-            };
-
-            if (editMode && currentSupplierData.id) {
-                await apiClient.put(`${API_URL_RAWM}${currentSupplierData.id}/`, supplierData);
-            } else {
-                await apiClient.post(API_URL_RAWM, supplierData);
             }
 
             fetchRawMaterials();
@@ -249,7 +209,7 @@ const RawMaterialPage = () => {
             title: 'Imagen',
             dataIndex: 'image_icon',
             key: 'image_icon',
-            render: (text, record) => <img src={record.image_icon} alt={record.name} style={{ width: 50 }} />
+            render: (text, record) => <img src={record.image_icon || defaultImage} alt={record.name} style={{ width: 50 }} />
         },
         {
             title: 'Categoría',

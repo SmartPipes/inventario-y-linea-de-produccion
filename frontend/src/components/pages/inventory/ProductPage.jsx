@@ -83,6 +83,8 @@ const ProductPage = () => {
             formData.append('status', values.status);
             if (fileList.length > 0 && fileList[0].originFileObj) {
                 formData.append('image_icon', fileList[0].originFileObj);
+            } else if (currentProduct && currentProduct.image_icon) {
+                formData.append('image_icon', currentProduct.image_icon);
             }
 
             if (editMode) {
@@ -108,9 +110,9 @@ const ProductPage = () => {
         }
     };
 
-    const handleDelete = async (productId) => {
+    const handleDelete = async () => {
         try {
-            await apiClient.delete(`${API_URL_PRODUCTS}${productId}/`);
+            await apiClient.delete(`${API_URL_PRODUCTS}${currentProductId}/`);
             fetchProducts();
             message.success('Producto eliminado exitosamente');
         } catch (error) {
