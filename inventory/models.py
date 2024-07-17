@@ -68,6 +68,8 @@ class RawMaterial(models.Model):
     description = models.CharField(max_length=200, blank=True)
     image_icon = models.ImageField(upload_to='product_icons/', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True, blank=True)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = 'inv_raw_material'
@@ -166,14 +168,6 @@ class ProductRawMaterialList(models.Model):
         db_table = 'inv_product_raw_material_list'
         unique_together = (('product', 'raw_material'),)
 
-class RawMaterialSupplier(models.Model):
-    raw_material = models.ForeignKey(RawMaterial, on_delete=models.CASCADE)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    class Meta:
-        db_table = 'inv_raw_material_supplier'
-        unique_together = (('raw_material', 'supplier'),)
 
 class RestockRequest(models.Model):
     restock_request_id = models.AutoField(primary_key=True)

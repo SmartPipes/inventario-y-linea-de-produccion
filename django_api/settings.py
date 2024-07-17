@@ -42,10 +42,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'inventory',
     'production_line',
-    'tickets',
     'users',
     'sales',
-    'delivery'
+    'delivery',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -129,14 +128,15 @@ WSGI_APPLICATION = 'django_api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'smartpipes',
         'USER': 'adminsp',
-        'PASSWORD': '8RsXtYhno1z4huxwnIbJ',
+        'PASSWORD': '4SxYdhnha3g6uhgndTvD',
         'HOST': 'localhost',
-        'PORT': '3306',
+        'PORT': '5432',
     }
 }
+
 
 
 

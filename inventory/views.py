@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, RawMaterialSupplier, ProductRawMaterialList
-from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, RawMaterialSupplierSerializer, ProductRawMaterialListSerializer, InventorySummarySerializer, InventoryTotalStockSerializer
+from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, ProductRawMaterialList
+from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, ProductRawMaterialListSerializer, InventorySummarySerializer, InventoryTotalStockSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
@@ -103,11 +103,6 @@ class OperationLogViewSet(viewsets.ModelViewSet):
 class RestockRequestViewSet(viewsets.ModelViewSet):
     queryset = RestockRequest.objects.all()
     serializer_class = RestockRequestSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-class RawMaterialSupplierViewSet(viewsets.ModelViewSet):
-    queryset = RawMaterialSupplier.objects.all()
-    serializer_class = RawMaterialSupplierSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 class ProductRawMaterialListSet(viewsets.ModelViewSet):

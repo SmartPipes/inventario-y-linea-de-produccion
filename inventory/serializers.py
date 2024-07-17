@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, RawMaterialSupplier, ProductRawMaterialList
+from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, ProductRawMaterialList
 from datetime import datetime
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -70,12 +70,7 @@ class ProductRawMaterialListSerializer(serializers.ModelSerializer):
 class RawMaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = RawMaterial
-        fields = '__all__'
-
-class RawMaterialSupplierSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RawMaterialSupplier
-        fields = '__all__'
+        fields = ['raw_material_id', 'name', 'description', 'image_icon', 'purchase_price', 'category', 'supplier']
         
 class InventorySerializer(serializers.ModelSerializer):
     item_name = serializers.SerializerMethodField()

@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ProductViewSet, RawMaterialViewSet, InventoryViewSet, CategoryViewSet, 
     StateViewSet, CityViewSet, WarehouseViewSet, SupplierViewSet, 
-    OperationLogViewSet, RestockRequestViewSet, RawMaterialSupplierViewSet, 
+    OperationLogViewSet, RestockRequestViewSet, 
     ProductRawMaterialListSet, InventoryTotalStockViewSet
 )
 
@@ -18,7 +18,6 @@ router.register(r'warehouse', WarehouseViewSet)
 router.register(r'supplier', SupplierViewSet)
 router.register(r'operation-log', OperationLogViewSet)
 router.register(r'restockrequest', RestockRequestViewSet)
-router.register(r'raw-material-suppliers', RawMaterialSupplierViewSet)
 router.register(r'product-raw-material-list', ProductRawMaterialListSet)
 router.register(r'inventory-total-stock', InventoryTotalStockViewSet, basename='inventory-total-stock')
 
