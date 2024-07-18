@@ -1,21 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody } from '../../../Styled/Inventory.styled';
+import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody, CardFooter, PriceTag, StockInfo } from '../../../Styled/Inventory.styled';
 
-const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, children }) => {
+const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse, children }) => {
     const navigate = useNavigate();
 
     const handleCardClick = () => {
         navigate('/inventory/new-item', {
             state: {
-                item_id: item_id,
-                item_name: item_name,
-                item_description: item_description,
-                image_icon: image_icon,
-                item_price: item_price,
-                stock: stock,
-                item_type: item_type,
+                item_id,
+                item_name,
+                item_description,
+                image_icon,
+                item_price,
+                stock,
+                item_type,
+                warehouse,
                 isEditMode: true
             }
         });
@@ -23,15 +24,18 @@ const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, 
 
     return (
         <InventoryCard className="inventory-card" onClick={handleCardClick}>
+            <CardImage src={image_icon} alt={item_name} />
             <CardBody>
                 <CardHeader>
                     <CardTitle>{item_name}</CardTitle>
                 </CardHeader>
-                <p>Precio: ${item_price}</p>
-                <p>Disponible: {stock} Unidades</p>
-                {children}
+                <PriceTag>Precio: ${item_price}</PriceTag>
+                <StockInfo>Disponible: {stock} Unidades</StockInfo>
+                <CardFooter>
+                    <p>Almacén: {warehouse}</p>
+                    {children}
+                </CardFooter>
             </CardBody>
-            <CardImage src={image_icon} alt={item_name} />
         </InventoryCard>
     );
 };
@@ -40,11 +44,12 @@ Card.propTypes = {
     inventory_id: PropTypes.number.isRequired,
     item_id: PropTypes.number.isRequired,
     item_name: PropTypes.string.isRequired,
-    item_description: PropTypes.string, // Added description prop
+    item_description: PropTypes.string,
     image_icon: PropTypes.string.isRequired,
     item_price: PropTypes.number.isRequired,
     stock: PropTypes.number.isRequired,
     item_type: PropTypes.string.isRequired,
+    warehouse: PropTypes.string.isRequired,
     children: PropTypes.node
 };
 

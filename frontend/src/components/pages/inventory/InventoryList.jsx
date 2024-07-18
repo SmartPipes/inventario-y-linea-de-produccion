@@ -1,29 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import InventoryItemCard from './InventoryItemCard';
-import InventoryNavBar from './InventoryNavBar';
-import { InventoryContainer, InventorySubContainer } from '../../../Styled/Inventory.styled';
+import { Input, Button, Row, Col, Spin, Empty } from 'antd';
 import { apiClient } from '../../../ApiClient';
-import { API_URL_INV, API_URL_WAREHOUSES } from '../Config';
-import NavBarActions from './NavBarActions';
+import { API_URL_INV } from '../Config';
+import NavBarMenu from './NavBarMenu';
+import NewItemPage from './NewItemPage';
+import InventoryItemCard from './InventoryItemCard';
 
 const InventoryList = () => {
     const [items, setItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
-    const [warehouses, setWarehouses] = useState([]);
-    const [selectedFilters, setSelectedFilters] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 16;
+    const [searchText, setSearchText] = useState('');
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchItems();
-        fetchWarehouses();
     }, []);
 
     useEffect(() => {
-        applyFilters(selectedFilters);
-    }, [selectedFilters, items, warehouses]);
+        handleSearchChange(searchText);
+    }, [searchText]);
 
     const fetchItems = async () => {
+        setLoading(true);
         try {
             const response = await apiClient.get(API_URL_INV);
             setItems(response.data);
@@ -31,62 +30,53 @@ const InventoryList = () => {
         } catch (error) {
             console.error('Error fetching inventory items:', error);
         }
+        setLoading(false);
     };
 
-    const fetchWarehouses = async () => {
-        try {
-            const response = await apiClient.get(API_URL_WAREHOUSES);
-            setWarehouses(response.data);
-        } catch (error) {
-            console.error('Error fetching warehouses:', error);
-        }
-    };
-
-    const applyFilters = (filters) => {
-        let filtered = [...items];
-
-        filters.forEach(filter => {
-            if (filter === 'Products') {
-                filtered = filtered.filter(item => item.item_type === 'Product');
-            } else if (filter === 'Raw Material') {
-                filtered = filtered.filter(item => item.item_type === 'RawMaterial');
-            } else if (filter === 'Precio ASC') {
-                filtered = filtered.sort((a, b) => a.item_price - b.item_price);
-            } else if (filter.startsWith('Warehouse:')) {
-                const warehouseName = filter.split(': ')[1];
-                const warehouse = warehouses.find(wh => wh.name === warehouseName);
-                if (warehouse) {
-                    filtered = filtered.filter(item => item.warehouse === warehouse.warehouse_id);
-                }
-            }
-        });
-
+    const handleSearchChange = (searchText) => {
+        setSearchText(searchText);
+        const filtered = items.filter(item =>
+            (item.item_name && item.item_name.toLowerCase().includes(searchText.toLowerCase())) ||
+            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
+        );
         setFilteredItems(filtered);
-        setCurrentPage(1); // Reset to first page on filter change
     };
 
-    // Logic for displaying current items
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
-
-    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    const handleModalClose = () => {
+        setIsModalVisible(false);
+    };
 
     return (
         <div>
-            <InventoryNavBar
-                applyFilters={applyFilters}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                setCurrentPage={setCurrentPage}
+            <NavBarMenu title="Inventory" />
+            <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
+                <Input
+                    placeholder="Search item..."
+                    value={searchText}
+                    onChange={e => handleSearchChange(e.target.value)}
+                    style={{ width: 300, marginRight: '16px' }}
+                />
+                <Button type="primary" onClick={() => setIsModalVisible(true)}>Add Item</Button>
+            </div>
+            <NewItemPage
+                isModalVisible={isModalVisible}
+                setIsModalVisible={setIsModalVisible}
+                fetchInventoryItems={fetchItems}
+                onClose={handleModalClose}
             />
-            <InventoryContainer>
-                <InventorySubContainer>
-                    {currentItems.map(item => (
-                        <InventoryItemCard key={item.inventory_id} item={item} />
+            {loading ? (
+                <Spin size="large" />
+            ) : filteredItems.length > 0 ? (
+                <Row gutter={[16, 16]}>
+                    {filteredItems.map(item => (
+                        <Col key={item.inventory_id} span={6}>
+                            <InventoryItemCard item={item} />
+                        </Col>
                     ))}
-                </InventorySubContainer>
-            </InventoryContainer>
+                </Row>
+            ) : (
+                <Empty description="No items found" />
+            )}
         </div>
     );
 };
