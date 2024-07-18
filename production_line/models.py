@@ -25,6 +25,7 @@ class Phase(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
+    after_phase = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_phases')
 
     class Meta:
         db_table = 'pro_Phases'
@@ -41,6 +42,7 @@ class ProductionLine(models.Model):
     factory = models.ForeignKey(Factory, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, null=True,blank=False)
+    state = models.CharField(max_length=20, choices=[('In Use','IN USE'),('Free','FREE')], default='Free')
                                   
     class Meta:
         db_table = 'pro_ProductionLines'
@@ -64,6 +66,7 @@ class ProductionOrder(models.Model):
     warehouse_to_deliver = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='deliver_orders')
     factory = models.ForeignKey(Factory, on_delete=models.CASCADE)
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    pl_assigned = models.ForeignKey(ProductionLine, on_delete=models.CASCADE, null=True, default=None)
 
     class Meta:
         db_table = 'pro_ProductionOrders'
@@ -80,8 +83,8 @@ class ProductionOrderDetail(models.Model):
 class ProductionOrderPhase(models.Model):
     production_order = models.ForeignKey(ProductionOrder, on_delete=models.CASCADE)
     phase = models.ForeignKey(Phase, on_delete=models.CASCADE)
-    entry_phase_date = models.DateTimeField()
-    exit_phase_date = models.DateTimeField()
+    entry_phase_date = models.DateTimeField(auto_now_add=True)
+    exit_phase_date = models.DateTimeField(null=True, default=None)
 
     class Meta:
         db_table = 'pro_ProductionOrders-Phases'
