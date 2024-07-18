@@ -1,0 +1,65 @@
+nohup: ignoring input
+Watching for file changes with StatReloader
+[18/Jul/2024 10:02:53] "GET /api/inventory/ HTTP/1.1" 200 7942
+[18/Jul/2024 10:02:54] "GET /api/inventory/ HTTP/1.1" 200 7942
+Forbidden: /api/inventory/warehouse/
+Forbidden: /api/inventory/inventory/
+[18/Jul/2024 10:03:25] "GET /api/inventory/inventory/ HTTP/1.1" 403 183
+[18/Jul/2024 10:03:25] "GET /api/inventory/warehouse/ HTTP/1.1" 403 183
+Forbidden: /api/inventory/inventory/
+Forbidden: /api/inventory/warehouse/
+[18/Jul/2024 10:03:25] "GET /api/inventory/inventory/ HTTP/1.1" 403 183
+[18/Jul/2024 10:03:25] "OPTIONS /api/token/refresh/ HTTP/1.1" 200 0
+[18/Jul/2024 10:03:25] "GET /api/inventory/warehouse/ HTTP/1.1" 403 183
+[18/Jul/2024 10:03:25] "OPTIONS /api/token/refresh/ HTTP/1.1" 200 0
+[18/Jul/2024 10:03:25] "POST /api/token/refresh/ HTTP/1.1" 200 241
+[18/Jul/2024 10:03:25] "POST /api/token/refresh/ HTTP/1.1" 200 241
+[18/Jul/2024 10:03:25] "POST /api/token/refresh/ HTTP/1.1" 200 241
+[18/Jul/2024 10:03:25] "POST /api/token/refresh/ HTTP/1.1" 200 241
+[18/Jul/2024 10:03:25] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:03:25] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:03:25] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:03:25] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:03:29] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:03:29] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:03:29] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:03:29] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:03:31] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:03:31] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:03:31] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:03:31] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:04:38] "GET /api/inventory/supplier/ HTTP/1.1" 200 990
+[18/Jul/2024 10:04:38] "GET /api/inventory/supplier/ HTTP/1.1" 200 990
+[18/Jul/2024 10:04:49] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:04:49] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:04:49] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:04:49] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:05:26] "GET /api/inventory/raw-materials/ HTTP/1.1" 200 2345
+[18/Jul/2024 10:05:26] "GET /api/inventory/category/ HTTP/1.1" 200 582
+[18/Jul/2024 10:05:26] "GET /api/inventory/supplier/ HTTP/1.1" 200 990
+[18/Jul/2024 10:05:29] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:05:29] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:05:35] "OPTIONS /api/inventory/city/ HTTP/1.1" 200 0
+[18/Jul/2024 10:05:35] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:05:37] "GET /api/inventory/supplier/ HTTP/1.1" 200 990
+[18/Jul/2024 10:05:41] "GET /api/inventory/ HTTP/1.1" 200 7942
+[18/Jul/2024 10:05:44] "GET /api/inventory/category/ HTTP/1.1" 200 582
+[18/Jul/2024 10:05:54] "GET /api/inventory/category/ HTTP/1.1" 200 582
+[18/Jul/2024 10:05:56] "GET /api/inventory/category/ HTTP/1.1" 200 582
+[18/Jul/2024 10:06:22] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:06:22] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:06:22] "GET /api/inventory/warehouse/ HTTP/1.1" 200 674
+[18/Jul/2024 10:06:22] "GET /api/inventory/inventory/ HTTP/1.1" 200 1763
+[18/Jul/2024 10:06:36] "GET /api/inventory/category/ HTTP/1.1" 200 582
+/home/smartpipes/htdocs/inventario-y-linea-de-produccion/django_api/settings.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+July 18, 2024 - 10:02:51
+Django version 5.0.7, using settings 'django_api.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[18/Jul/2024 10:07:06] "GET /api/inventory/category/ HTTP/1.1" 200 582
+[18/Jul/2024 10:07:49] "GET /api/inventory/category/ HTTP/1.1" 200 582

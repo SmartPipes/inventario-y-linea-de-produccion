@@ -199,5 +199,6 @@ CORS_ALLOWED_ORIGINS = [
     'https://smartpipes.cloud',
     'https://www.smartpipes.cloud',
     "http://178.16.142.77:5173",
+    'https://hydrosmartpipes.cloud',
 ]
 
