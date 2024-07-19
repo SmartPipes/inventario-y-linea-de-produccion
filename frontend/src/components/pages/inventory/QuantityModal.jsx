@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ModalOverlay, ModalContent, Title, Label, ButtonContainer, Button, Input } from '../../../Styled/QuantityModal.styled';
+import { Modal, Select, Input, Form, Button, message } from 'antd';
 import { apiClient } from '../../../ApiClient';
 import { API_URL_WAREHOUSES, API_URL_INV } from '../Config';
-import { FormControl, FormLabel, Select } from '@chakra-ui/react';
+import { Title, Label, ButtonContainer } from '../../../Styled/QuantityModal.styled';
+
+const { Option } = Select;
 
 const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => {
     const [newQuantity, setNewQuantity] = useState('');
@@ -17,7 +19,7 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
                 const response = await apiClient.get(API_URL_WAREHOUSES);
                 setWarehouses(response.data);
                 if (response.data.length > 0) {
-                    setSelectedWarehouse(response.data[0].id);
+                    setSelectedWarehouse(response.data[0].warehouse_id);
                 }
             } catch (error) {
                 console.error('Error fetching warehouses:', error);
@@ -72,52 +74,71 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
 
     const handleApply = () => {
         const quantityValue = parseFloat(newQuantity);
+        if (isNaN(quantityValue) || quantityValue < 0) {
+            message.error('La cantidad debe ser un número positivo.');
+            return;
+        }
+        if (!selectedMaterial) {
+            message.error('No hay material seleccionado.');
+            return;
+        }
+        if (!selectedWarehouse) {
+            message.error('No hay almacén seleccionado.');
+            return;
+        }
         onApply(quantityValue, selectedWarehouse, selectedMaterial);
         onClose();
     };
 
-    const handleSelectWarehouse = (warehouseId) => {
-        setSelectedWarehouse(warehouseId);
+    const handleSelectWarehouse = (value) => {
+        setSelectedWarehouse(value);
+        // Clear new quantity when warehouse changes
+        setNewQuantity('');
     };
 
     return (
-        <ModalOverlay isVisible={isVisible}>
-            <ModalContent>
-                <Title>Cambiar cantidad de producto</Title>
-                {selectedMaterial && (
-                    <>
-                        <Label htmlFor="newQuantity">Material: {selectedMaterial.item_name}</Label>
-                        <Label>Precio: {selectedMaterial.item_price}</Label>
-                    </>
-                )}
-                <FormControl id="warehouse" mt={4}>
-                    <FormLabel>Almacén</FormLabel>
+        <Modal
+            visible={isVisible}
+            onCancel={onClose}
+            footer={null}
+            width={600}
+        >
+            <Title>Cambiar cantidad de producto</Title>
+            {selectedMaterial && (
+                <>
+                    <Label htmlFor="newQuantity">Material: {selectedMaterial.item_name}</Label>
+                    <Label>Precio: {selectedMaterial.item_price}</Label>
+                </>
+            )}
+            <Form layout="vertical">
+                <Form.Item label="Almacén" required>
                     <Select
                         value={selectedWarehouse}
-                        onChange={(e) => handleSelectWarehouse(e.target.value)}
+                        onChange={handleSelectWarehouse}
+                        placeholder="Selecciona un almacén"
                     >
                         {warehouses.map((warehouse) => (
-                            <option key={warehouse.id} value={warehouse.id}>
+                            <Option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
                                 {warehouse.name}
-                            </option>
+                            </Option>
                         ))}
                     </Select>
-                </FormControl>
-                <Label htmlFor="newQuantity">Nueva cantidad disponible:</Label>
-                <Input
-                    type="number"
-                    id="newQuantity"
-                    value={newQuantity}
-                    onChange={(e) => setNewQuantity(e.target.value)}
-                    min="0"
-                    step="0.01"
-                />
+                </Form.Item>
+                <Form.Item label="Nueva cantidad disponible" required>
+                    <Input
+                        type="number"
+                        value={newQuantity}
+                        onChange={(e) => setNewQuantity(e.target.value)}
+                        min="0"
+                        step="0.01"
+                    />
+                </Form.Item>
                 <ButtonContainer>
-                    <Button variant="apply" onClick={handleApply}>Aplicar</Button>
-                    <Button variant="discard" onClick={onClose}>Descartar</Button>
+                    <Button type="primary" onClick={handleApply} style={{ marginRight: '8px' }}>Aplicar</Button>
+                    <Button onClick={onClose}>Descartar</Button>
                 </ButtonContainer>
-            </ModalContent>
-        </ModalOverlay>
+            </Form>
+        </Modal>
     );
 };
 

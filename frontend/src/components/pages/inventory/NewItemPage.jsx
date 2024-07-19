@@ -100,20 +100,20 @@ const NewItemPage = ({ isModalVisible, setIsModalVisible, fetchInventoryItems })
 
     return (
         <Modal
-            title={editMode ? 'Editar Ítem' : 'Agregar Ítem'}
+            title={editMode ? 'Edit Ítem' : 'Add Ítem'}
             visible={isModalVisible}
             onOk={handleOk}
             onCancel={() => setIsModalVisible(false)}
         >
             <Form form={form} layout="vertical">
-                <Form.Item name="warehouse" label="Almacén" rules={[{ required: true }]}>
+                <Form.Item name="warehouse" label="Warehouse" rules={[{ required: true }]}>
                     <Select>
                         {warehouses.map(warehouse => (
                             <Option key={warehouse.warehouse_id} value={warehouse.warehouse_id.toString()}>{warehouse.name}</Option>
                         ))}
                     </Select>
                 </Form.Item>
-                <Form.Item name="type" label="Tipo" rules={[{ required: true }]}>
+                <Form.Item name="type" label="Type" rules={[{ required: true }]}>
                     <Select onChange={handleTypeChange}>
                         <Option value="Product">Product</Option>
                         <Option value="Raw-Material">Raw-Material</Option>
@@ -128,11 +128,6 @@ const NewItemPage = ({ isModalVisible, setIsModalVisible, fetchInventoryItems })
                 </Form.Item>
                 <Form.Item name="stock" label="Stock" rules={[{ required: true }]}>
                     <Input type="number" />
-                </Form.Item>
-                <Form.Item name="image_icon" label="Imagen" valuePropName="fileList" getValueFromEvent={normFile}>
-                    <Upload name="image_icon" listType="picture" maxCount={1} beforeUpload={() => false}>
-                        <Button icon={<UploadOutlined />}>Subir</Button>
-                    </Upload>
                 </Form.Item>
             </Form>
         </Modal>
