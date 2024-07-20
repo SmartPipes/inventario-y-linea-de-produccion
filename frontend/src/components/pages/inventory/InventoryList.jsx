@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Input, Button, Row, Col, Spin, Empty, message } from 'antd';
 import { apiClient } from '../../../ApiClient';
-import { API_URL_INV } from '../Config'; // Importa la URL de la API
+import { API_URL_INV } from '../Config'; // Import the API URL
 import NavBarMenu from './NavBarMenu';
 import NewItemPage from './NewItemPage';
-import Card from './Card'; // Importa el componente Card
-import QuantityModal from './QuantityModal'; // Importa el componente QuantityModal
+import Card from './Card'; // Import the Card component
+import QuantityModal from './QuantityModal'; // Import the QuantityModal component
 
 const InventoryList = () => {
     const [items, setItems] = useState([]);
@@ -22,29 +22,20 @@ const InventoryList = () => {
 
     useEffect(() => {
         handleSearchChange(searchText);
-    }, [searchText]);
+    }, [searchText, items]);
 
     const fetchItems = async () => {
         setLoading(true);
         try {
             const response = await apiClient.get(API_URL_INV);
             const uniqueItems = getUniqueItems(response.data);
-            setItems(uniqueItems);
-            setFilteredItems(uniqueItems);
+            const aggregatedItems = aggregateStock(uniqueItems);
+            setItems(aggregatedItems);
+            setFilteredItems(aggregatedItems);
         } catch (error) {
             console.error('Error fetching inventory items:', error);
         }
         setLoading(false);
-    };
-
-    const getUniqueItems = (data) => {
-        const uniqueItemsMap = {};
-        data.forEach(item => {
-            if (!uniqueItemsMap[item.item_id]) {
-                uniqueItemsMap[item.item_id] = item;
-            }
-        });
-        return Object.values(uniqueItemsMap);
     };
 
     const handleSearchChange = (searchText) => {
@@ -72,27 +63,48 @@ const InventoryList = () => {
 
     const handleApplyQuantity = async (quantity, warehouse, material) => {
         try {
-            const response = await apiClient.put(`${API_URL_INV}${material.inventory_id}/`, {
-                item_id: material.item_id,
-                item_type: material.item_type,
-                warehouse: warehouse,
-                stock: quantity,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
+            // Buscar el registro en la base de datos
+            const response = await apiClient.get(API_URL_INV);
+            const allItems = response.data;
+            
+            const existingItem = allItems.find(item =>
+                item.item_id === material.item_id &&
+                item.item_type === material.item_type &&
+                item.warehouse === warehouse
+            );
+    
+            if (existingItem) {
+                const updateResponse = await apiClient.put(`${API_URL_INV}${existingItem.inventory_id}/`, {
+                    item_id: material.item_id,
+                    item_type: material.item_type,
+                    warehouse: warehouse,
+                    stock: quantity,
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+    
+                // Registro de la respuesta en la consola
+                console.log('Server Response:', updateResponse.data);
+                console.log(material.item_id, material.item_type, warehouse, quantity);
+                if (updateResponse.status === 200) {
+                    message.success('Cantidad actualizada exitosamente.');
+                } else {
+                    message.error('Error al actualizar la cantidad.');
                 }
-            });
     
-            console.log('Update Response:', response);
-            if (response.status === 200) {
-                message.success('Cantidad actualizada exitosamente.');
+                fetchItems();
+                setIsQuantityModalVisible(false);
+                setSelectedRawMaterial(null); // Clear selected raw material after update
             } else {
-                message.error('Error al actualizar la cantidad.');
+                message.error('No se encontró el registro para actualizar.');
+                console.log('Item no encontrado:', {
+                    item_id: material.item_id,
+                    item_type: material.item_type,
+                    warehouse: warehouse
+                });
             }
-    
-            fetchItems();
-            setIsQuantityModalVisible(false);
-    
         } catch (error) {
             console.error('Error updating quantity:', error);
     
@@ -106,6 +118,37 @@ const InventoryList = () => {
     };
     
     
+    
+
+    const getUniqueItems = (data) => {
+        const uniqueProductsMap = {};
+        const rawMaterials = [];
+
+        data.forEach(item => {
+            if (item.item_type === 'RawMaterial') {
+                rawMaterials.push(item);
+            } else {
+                if (!uniqueProductsMap[item.item_id]) {
+                    uniqueProductsMap[item.item_id] = item;
+                }
+            }
+        });
+
+        return [...Object.values(uniqueProductsMap), ...rawMaterials];
+    };
+
+    const aggregateStock = (data) => {
+        const aggregatedItems = data.reduce((acc, item) => {
+            const existingItem = acc.find(i => i.item_id === item.item_id && i.item_type === item.item_type);
+            if (existingItem) {
+                existingItem.stock += item.stock;
+            } else {
+                acc.push({ ...item });
+            }
+            return acc;
+        }, []);
+        return aggregatedItems;
+    };
 
     return (
         <div>
@@ -133,7 +176,7 @@ const InventoryList = () => {
                         <Col key={item.inventory_id} xs={24} sm={12} md={8} lg={6} xl={4} style={{ display: 'flex', justifyContent: 'center' }}>
                             <Card 
                                 {...item}
-                                onCardClick={() => handleCardClick(item)} // Pasar la función onCardClick
+                                onCardClick={() => handleCardClick(item)} // Pass the onCardClick function
                             />
                         </Col>
                     ))}

@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody, CardFooter, PriceTag, StockInfo } from '../../../Styled/Inventory.styled';
 
-const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse ,onCardClick, children }) => {
+const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse, onCardClick, children }) => {
     const handleCardClick = () => {
-        onCardClick();
+        onCardClick({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse });
     };
 
     return (
@@ -14,10 +14,8 @@ const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, 
                 <CardHeader>
                     <CardTitle>{item_name}</CardTitle>
                 </CardHeader>
-                <PriceTag>Price: ${item_price}</PriceTag>
-                <StockInfo>Available: {stock} Unidades</StockInfo>
                 <CardFooter>
-                    {children}
+                <PriceTag>Price: ${item_price}</PriceTag>
                 </CardFooter>
             </CardBody>
         </InventoryCard>
@@ -36,6 +34,6 @@ Card.propTypes = {
     warehouse: PropTypes.string.isRequired,
     onCardClick: PropTypes.func.isRequired,
     children: PropTypes.node
-};
+};  
 
 export default Card;

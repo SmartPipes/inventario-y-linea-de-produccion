@@ -87,13 +87,20 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
             return;
         }
         onApply(quantityValue, selectedWarehouse, selectedMaterial);
-        onClose();
+        setNewQuantity(''); // Clear quantity after applying
     };
 
     const handleSelectWarehouse = (value) => {
         setSelectedWarehouse(value);
-        // Clear new quantity when warehouse changes
-        setNewQuantity('');
+        // Update quantity when warehouse changes
+        if (selectedMaterial) {
+            const warehouseStock = rawMaterials.find(item => 
+                item.item_id === selectedMaterial.item_id && 
+                item.item_type === selectedMaterial.item_type && 
+                item.warehouse === parseInt(value)
+            );
+            setNewQuantity(warehouseStock ? warehouseStock.stock : 0);
+        }
     };
 
     return (
@@ -108,6 +115,7 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
                 <>
                     <Label htmlFor="newQuantity">Material: {selectedMaterial.item_name}</Label>
                     <Label>Precio: {selectedMaterial.item_price}</Label>
+                    <Label>Cantidad actual en almacén seleccionado: {newQuantity}</Label>
                 </>
             )}
             <Form layout="vertical">
