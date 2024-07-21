@@ -88,3 +88,7 @@ export const WowText = styled.p`
     margin-top: 8px;
     font-style: italic;
 `;
+export const StockTag = styled.span`
+  font-size: 14px;
+  color: #666666;
+`;

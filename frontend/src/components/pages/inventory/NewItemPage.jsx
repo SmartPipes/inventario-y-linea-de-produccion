@@ -116,7 +116,7 @@ const NewItemPage = ({ isModalVisible, setIsModalVisible, fetchInventoryItems })
                 <Form.Item name="type" label="Type" rules={[{ required: true }]}>
                     <Select onChange={handleTypeChange}>
                         <Option value="Product">Product</Option>
-                        <Option value="Raw-Material">Raw-Material</Option>
+                        <Option value="RawMaterial">RawMaterial</Option>
                     </Select>
                 </Form.Item>
                 <Form.Item name="item_id" label="Item" rules={[{ required: true }]}>

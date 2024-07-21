@@ -1,8 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody, CardFooter, PriceTag } from '../../../Styled/Inventory.styled';
+import { API_URL_INVENTORYSUM } from '../Config';
+import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody, CardFooter, PriceTag, StockTag } from '../../../Styled/Inventory.styled';
+import { apiClient } from '../../../ApiClient';
 
 const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse, onCardClick }) => {
+    const [totalStock, setTotalStock] = useState(null);
+
+    useEffect(() => {
+        const fetchTotalStock = async () => {
+            try {
+                const response = await apiClient.get(API_URL_INVENTORYSUM);
+                const stockData = response.data.find(item => item.item_id === item_id && item.item_type === item_type);
+                if (stockData) {
+                    setTotalStock(stockData.total_stock);
+                }
+            } catch (error) {
+                console.error('Error fetching total stock:', error);
+                // Puedes agregar un mensaje de error aquí si es necesario
+            }
+        };
+
+        fetchTotalStock();
+    }, [item_id, item_type]);
+
     const handleCardClick = () => {
         onCardClick({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse });
     };
@@ -16,6 +37,7 @@ const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, 
                 </CardHeader>
                 <CardFooter>
                     <PriceTag>Price: ${item_price}</PriceTag>
+                    {totalStock !== null && <StockTag>Total Stock: {totalStock}</StockTag>}
                 </CardFooter>
             </CardBody>
         </InventoryCard>
