@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Select, Input, Form, Button, message } from 'antd';
 import { apiClient } from '../../../ApiClient';
 import { API_URL_WAREHOUSES, API_URL_INV } from '../Config';
-import { Title, Label, ButtonContainer } from '../../../Styled/QuantityModal.styled';
+import { ButtonContainer } from '../../../Styled/QuantityModal.styled';
 
 const { Option } = Select;
 
-const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => {
+const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial, fetchItems }) => {
     const [newQuantity, setNewQuantity] = useState('');
+    const [currentQuantity, setCurrentQuantity] = useState(0);
     const [warehouses, setWarehouses] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState('');
     const [rawMaterials, setRawMaterials] = useState([]);
-    const [selectedMaterial, setSelectedMaterial] = useState(null);
+    const [selectedMaterial, setSelectedMaterial] = useState(selectedRawMaterial);
 
     useEffect(() => {
         const fetchWarehouses = async () => {
@@ -23,6 +24,7 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
                 }
             } catch (error) {
                 console.error('Error fetching warehouses:', error);
+                message.error('Error fetching warehouses.');
             }
         };
 
@@ -33,6 +35,7 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
                 setRawMaterials(mergedInventory);
             } catch (error) {
                 console.error('Error fetching raw materials:', error);
+                message.error('Error fetching raw materials.');
             }
         };
 
@@ -48,12 +51,7 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
 
     useEffect(() => {
         if (selectedMaterial && selectedWarehouse) {
-            const warehouseStock = rawMaterials.find(item => 
-                item.item_id === selectedMaterial.item_id && 
-                item.item_type === selectedMaterial.item_type && 
-                item.warehouse === parseInt(selectedWarehouse)
-            );
-            setNewQuantity(warehouseStock ? warehouseStock.stock : 0);
+            updateCurrentQuantity(selectedMaterial, selectedWarehouse);
         }
     }, [selectedWarehouse, selectedMaterial, rawMaterials]);
 
@@ -64,66 +62,64 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
             if (mergedInventory[key]) {
                 mergedInventory[key].stock += item.stock;
             } else {
-                mergedInventory[key] = {
-                    ...item,
-                };
+                mergedInventory[key] = { ...item };
             }
         });
         return Object.values(mergedInventory);
     };
 
-    const handleApply = () => {
-        const quantityValue = parseFloat(newQuantity);
-        if (isNaN(quantityValue) || quantityValue < 0) {
-            message.error('La cantidad debe ser un número positivo.');
-            return;
-        }
-        if (!selectedMaterial) {
-            message.error('No hay material seleccionado.');
-            return;
-        }
-        if (!selectedWarehouse) {
-            message.error('No hay almacén seleccionado.');
-            return;
-        }
-        onApply(quantityValue, selectedWarehouse, selectedMaterial);
-        setNewQuantity(''); // Clear quantity after applying
+    const updateCurrentQuantity = (material, warehouse) => {
+        const inventoryItem = rawMaterials.find(
+            (item) =>
+                item.item_id === material.item_id &&
+                item.item_type === material.item_type &&
+                item.warehouse === warehouse
+        );
+        setCurrentQuantity(inventoryItem ? inventoryItem.stock : 0);
     };
 
-    const handleSelectWarehouse = (value) => {
-        setSelectedWarehouse(value);
-        // Update quantity when warehouse changes
-        if (selectedMaterial) {
-            const warehouseStock = rawMaterials.find(item => 
-                item.item_id === selectedMaterial.item_id && 
-                item.item_type === selectedMaterial.item_type && 
-                item.warehouse === parseInt(value)
-            );
-            setNewQuantity(warehouseStock ? warehouseStock.stock : 0);
+    const handleApply = async () => {
+        if (newQuantity === '') {
+            message.error('Por favor, ingrese una cantidad.');
+            return;
+        }
+
+        if (selectedMaterial && selectedWarehouse) {
+            try {
+                // Llamar a onApply y obtener la respuesta
+                await onApply(newQuantity, selectedWarehouse, selectedMaterial);
+
+                // Actualizar rawMaterials y currentQuantity después de aplicar los cambios
+                const updatedRawMaterials = await apiClient.get(API_URL_INV).then(response => mergeInventory(response.data));
+                setRawMaterials(updatedRawMaterials);
+                updateCurrentQuantity(selectedMaterial, selectedWarehouse);
+
+                // Limpiar el campo newQuantity
+                setNewQuantity('');
+                
+                // Cerrar el modal
+                onClose();
+            } catch (error) {
+                console.error('Error applying changes:', error);
+                message.error('Error aplicando los cambios.');
+            }
+        } else {
+            message.error('Por favor, seleccione un almacén y un material.');
         }
     };
 
     return (
         <Modal
+            title={`Actualizar Cantidad - ${selectedMaterial ? selectedMaterial.item_name : ''}`}
             visible={isVisible}
             onCancel={onClose}
             footer={null}
-            width={600}
         >
-            <Title>Cambiar cantidad de producto</Title>
-            {selectedMaterial && (
-                <>
-                    <Label htmlFor="newQuantity">Material: {selectedMaterial.item_name}</Label>
-                    <Label>Precio: {selectedMaterial.item_price}</Label>
-                    <Label>Cantidad actual en almacén seleccionado: {newQuantity}</Label>
-                </>
-            )}
             <Form layout="vertical">
-                <Form.Item label="Almacén" required>
+                <Form.Item label="Almacén">
                     <Select
                         value={selectedWarehouse}
-                        onChange={handleSelectWarehouse}
-                        placeholder="Selecciona un almacén"
+                        onChange={(value) => setSelectedWarehouse(value)}
                     >
                         {warehouses.map((warehouse) => (
                             <Option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
@@ -132,19 +128,24 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial }) => 
                         ))}
                     </Select>
                 </Form.Item>
-                <Form.Item label="Nueva cantidad disponible" required>
+                <Form.Item label="Cantidad Actual">
+                    <Input value={currentQuantity} disabled />
+                </Form.Item>
+                <Form.Item label="Nueva Cantidad">
                     <Input
                         type="number"
                         value={newQuantity}
                         onChange={(e) => setNewQuantity(e.target.value)}
-                        min="0"
-                        step="0.01"
                     />
                 </Form.Item>
-                <ButtonContainer>
-                    <Button type="primary" onClick={handleApply} style={{ marginRight: '8px' }}>Aplicar</Button>
-                    <Button onClick={onClose}>Descartar</Button>
-                </ButtonContainer>
+                <Form.Item>
+                    <ButtonContainer>
+                        <Button type="primary" onClick={handleApply}>
+                            Aplicar
+                        </Button>
+                        <Button onClick={onClose}>Cancelar</Button>
+                    </ButtonContainer>
+                </Form.Item>
             </Form>
         </Modal>
     );

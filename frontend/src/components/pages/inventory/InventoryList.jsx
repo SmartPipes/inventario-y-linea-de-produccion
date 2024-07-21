@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Input, Button, Row, Col, Spin, Empty, message } from 'antd';
 import { apiClient } from '../../../ApiClient';
-import { API_URL_INV } from '../Config'; // Import the API URL
+import { API_URL_INV } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import NewItemPage from './NewItemPage';
-import Card from './Card'; // Import the Card component
-import QuantityModal from './QuantityModal'; // Import the QuantityModal component
+import Card from './Card';
+import QuantityModal from './QuantityModal';
 
 const InventoryList = () => {
     const [items, setItems] = useState([]);
@@ -63,16 +63,15 @@ const InventoryList = () => {
 
     const handleApplyQuantity = async (quantity, warehouse, material) => {
         try {
-            // Buscar el registro en la base de datos
             const response = await apiClient.get(API_URL_INV);
             const allItems = response.data;
-            
+
             const existingItem = allItems.find(item =>
                 item.item_id === material.item_id &&
                 item.item_type === material.item_type &&
                 item.warehouse === warehouse
             );
-    
+
             if (existingItem) {
                 const updateResponse = await apiClient.put(`${API_URL_INV}${existingItem.inventory_id}/`, {
                     item_id: material.item_id,
@@ -84,30 +83,24 @@ const InventoryList = () => {
                         'Content-Type': 'application/json'
                     }
                 });
-    
-                // Registro de la respuesta en la consola
-                console.log('Server Response:', updateResponse.data);
-                console.log(material.item_id, material.item_type, warehouse, quantity);
+
                 if (updateResponse.status === 200) {
                     message.success('Cantidad actualizada exitosamente.');
+
+                    // Vuelve a obtener el inventario para asegurarte de que los datos estén actualizados
+                    await fetchItems();
+
+                    setIsQuantityModalVisible(false);
+                    setSelectedRawMaterial(null);
                 } else {
                     message.error('Error al actualizar la cantidad.');
                 }
-    
-                fetchItems();
-                setIsQuantityModalVisible(false);
-                setSelectedRawMaterial(null); // Clear selected raw material after update
             } else {
                 message.error('No se encontró el registro para actualizar.');
-                console.log('Item no encontrado:', {
-                    item_id: material.item_id,
-                    item_type: material.item_type,
-                    warehouse: warehouse
-                });
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
-    
+
             if (error.response) {
                 console.error('Server Response:', error.response.data);
                 message.error(`Error al actualizar la cantidad: ${error.response.data.detail || 'Error desconocido'}`);
@@ -116,9 +109,6 @@ const InventoryList = () => {
             }
         }
     };
-    
-    
-    
 
     const getUniqueItems = (data) => {
         const uniqueProductsMap = {};
@@ -189,6 +179,7 @@ const InventoryList = () => {
                 onClose={handleQuantityModalClose} 
                 onApply={handleApplyQuantity} 
                 selectedRawMaterial={selectedRawMaterial}
+                fetchItems={fetchItems} // Pass fetchItems as a prop
             />
         </div>
     );
