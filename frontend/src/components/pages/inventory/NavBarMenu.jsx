@@ -40,7 +40,7 @@ const NavBarMenu = ({ title }) => {
                         <DropdownItem><Link to="/inventory/categories">Product Categories</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/products">Products</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/raw-materials">Raw Materials</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/request-restock">Replenishment Requests</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/request-restock">Restock Requests</Link></DropdownItem>
                     </DropdownMenu>
                 </DropdownContainer>
             </NavMenu>

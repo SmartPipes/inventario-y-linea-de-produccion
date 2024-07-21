@@ -250,7 +250,7 @@ const RestockRequestPage = () => {
 
     return (
         <div>
-            <NavBarMenu title="Replenishment Requests" />
+            <NavBarMenu title="Restock Requests" />
             <div style={{ marginBottom: '16px' }}>
                 <Input
                     placeholder="Search Request..."
