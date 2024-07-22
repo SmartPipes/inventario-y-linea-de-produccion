@@ -9,7 +9,7 @@ import { NavSearchContainer} from '../../../Styled/InventoryNavBar.styled';
 import ModalComponent from '../../modals/ProductionModals';
 import Select from 'react-select';
 import { ModalTitle} from '../../../Styled/Global.styled'
-import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS, API_URL_RAWMLIST, API_URL_INV, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS,API_URL_PO_RAWM_DETAILS,API_URL_PRO_ORDERS,API_URL_PL} from '../Config'
+import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS, API_URL_RAWMLIST, API_URL_INV, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS,API_URL_PO_RAWM_DETAILS,API_URL_PRO_ORDERS,API_URL_PL, API_URL_RESTOCK_WH, API_URL_RESTOCK_WH_DETAIL} from '../Config'
 import { apiClient } from '../../../ApiClient'
 import { Card, Row, Col, Layout, Table} from 'antd';
 import { Column } from '@ant-design/charts';
@@ -35,8 +35,21 @@ export const Production = () => {
     const [FinishedOrders, setFinishedOrders] = useState([]);
     const [PL, setPL] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [rawmToRetrieveFrom, setRawmToRetrieveFrom] = useState({});
+    const [responseIDWarehouseRestock, setResponseIDWarehouseRestock] = useState();
 
-
+    useEffect(() => {
+      // Cuando selectedWarehousesList cambie, actualiza materialesArray
+      const newMaterialsArray = selectedWarehousesList.flatMap(warehouse =>
+        warehouse.materials.map(material => ({
+          warehouse: warehouse.warehouse,
+          rawm: material.rawm,
+          qty: material.qty
+        }))
+      );
+      setRawmToRetrieveFrom(newMaterialsArray);
+    }, [selectedWarehousesList]);
+    
       const addProductField = () => {
         setProductFields([...productFields, { product: '', qty: '' }]);
       };
@@ -271,7 +284,6 @@ export const Production = () => {
             console.error('Error submitting:', error);
         }
     };
-    
 const onSubmitWarehousesPicking = async(data) => {
     console.log(data);
     console.log(productionOrderInfo);
@@ -308,8 +320,74 @@ const onSubmitWarehousesPicking = async(data) => {
           await apiClient.post(API_URL_PO_RAWM_DETAILS, material_order);
       }
   }
+
+  const groupByWarehouse = rawmToRetrieveFrom.reduce((acc, item) => {
+    if (!acc[item.warehouse]) {
+      acc[item.warehouse] = [];
+    }
+    acc[item.warehouse].push(item);
+    return acc;
+  }, {});
+let arrayRequestRM =[]
+  const postWarehouseData = async (warehouseId) => {
+    const payload = {
+      status: 'Pending',
+      from_warehouse: warehouseId,
+      requested_by: 1, // THIS NEEDS TO BE THE USER FROM THE LOGIN
+      to_factory: productionOrderInfo.factory.value,
+      production_order_id: production_order.data.production_order_id
+    };
   
-}
+    try {
+      const response = await apiClient.post(API_URL_RESTOCK_WH, payload);
+      arrayRequestRM.push(response.data.id)
+    } catch (error) {
+      console.error(`Error posting warehouse data for warehous restock ${warehouseId}:`, error);
+    }
+  }
+
+  const postItemData = async (items) => {
+    try {
+      const transformed_rawm_needed = items.map(rawm => ({
+        quantity: rawm.qty,
+        restock_request_warehouse: arrayRequestRM[flag],
+        raw_material: rawm.rawm
+      }));
+  
+      console.log('Transformed Raw Materials Needed:', transformed_rawm_needed);
+  
+      for (let i = 0; i < transformed_rawm_needed.length; i++) {
+        const item = transformed_rawm_needed[i];
+        if (item.quantity && item.restock_request_warehouse && item.raw_material) {
+          try {
+            const response = await apiClient.post(API_URL_RESTOCK_WH_DETAIL, item);
+            console.log(`Successfully posted item: ${JSON.stringify(item)}`, response.data);
+          } catch (error) {
+            console.error(`Error posting item ${JSON.stringify(item)}:`, error.response ? error.response.data : error);
+          }
+        } else {
+          console.error(`Invalid item data: ${JSON.stringify(item)}`);
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing items: ${JSON.stringify(items)}`, error);
+    }
+  };
+  
+  // Make the rawm request to all the other warehouses
+  let flag = 0;
+  for (const [warehouseId, items] of Object.entries(groupByWarehouse)) {
+    await postWarehouseData(Number(warehouseId));
+    await postItemData(items,flag);
+    flag++;
+  }
+  closeModalWarehouseToPick();
+  closeModal();
+  getProductionOrders();
+};
+  
+
+
 
   const getProducts = async () => {
     try{
@@ -610,6 +688,7 @@ const columns = [
               {selectedWarehousesList.map(warehouse => (
                 <li key={warehouse.warehouse}>
                   Warehouse {warehouse.warehouse}:
+                  
                   <ul>
                     {warehouse.materials.map(material => (
                       <li key={material.rawm}>
@@ -625,7 +704,7 @@ const columns = [
           <ButtonContainer>
             <Button type="button" isdisabledBtn={true} onClick={() => { closeModalWarehouseToPick(); console.log("cancelled order") }}>Cancel Order</Button>
             <Button type="button" onClick={() => {onSubmitWarehousesPicking(selectedWarehousesList)}}>Complete Order</Button>
-          </ButtonContainer>
+\          </ButtonContainer>
         </form>
       </FormContainer>
     </ModalComponent>

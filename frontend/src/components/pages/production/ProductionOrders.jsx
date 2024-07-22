@@ -5,7 +5,7 @@ import {
     API_URL_ORDERS, API_URL_PO_PHASES, API_URL_PL_PH, API_URL_PHASES
 } from '../Config';
 import { ProductionNavBar } from './ProductionNavBar';
-import { Table, Modal, Form, Input, Space, Button, Select, message, Descriptions } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Descriptions, Steps } from 'antd';
 import { apiClient } from '../../../ApiClient';
 import { MainContent } from '../../../Styled/Production.styled';
 import { NavContainer } from '../../../Styled/InventoryNavBar.styled';
@@ -20,6 +20,7 @@ export const ProductionOrders = () => {
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalVisibleDetails, setIsModalVisibleDetails] = useState(false);
+    const [isModalVisibleTrack, setIsModalVisibleTrack] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [form] = Form.useForm();
     const [currentOrder, setCurrentOrder] = useState(null);
@@ -32,9 +33,14 @@ export const ProductionOrders = () => {
     const [transformedOrderDet, setTransformedOrderDet] = useState([]);
     const [phases, setPhases] = useState([]);
     const [PLPhases, setPLPhases] = useState([]);
+    const [currentPhase, setCurrentPhase] = useState([]); //this is the list of phases for the porduction line
+    const [POP, setPOP] = useState([]); 
+    const [stepPLP, setStepPLP] = useState(); //This is the step which the PO is currently at
+
 
     useEffect(() => {
         getPL();
+        getPLP();
         getPhases();
         fetchWarehouses();
         getProductionOrders();
@@ -94,6 +100,15 @@ export const ProductionOrders = () => {
             setPL([]);
         }
     }
+
+    const getPLP = async () => {
+        try{
+          const response = await apiClient.get(API_URL_PO_PHASES);
+          setPOP(response.data);
+        }catch (error){
+          console.error('Error at fetching PLP: ',error)
+        }
+      }
 
     const getFactories = async () => {
         try {
@@ -165,6 +180,29 @@ export const ProductionOrders = () => {
         }
         setIsModalVisible(true);
     };
+    const getPhaseCountForOrder = (orderId, dataArray) => {
+        const filteredArray = dataArray
+            .filter(obj => obj.production_order === orderId);
+    
+        if (filteredArray.length === 0) {
+            return -1; // No objects found for this production order
+        }
+    
+        // The count of phases for the given orderId
+        return filteredArray.length;
+    };
+
+    const showModalTrack = (order = null) => { // to track in which phases the order is
+        setCurrentOrder(order);
+        const PLPhase = PLPhases.filter(plp => plp.productionLine === order.pl_assigned)
+        .map(transform => ({
+            title: phases.find(phase => phase.phase_id === transform.phase).name,
+            description: phases.find(phase => phase.phase_id === transform.phase).description
+        }));
+        setCurrentPhase(PLPhase);
+        setStepPLP(getPhaseCountForOrder(order.production_order_id, POP));
+        setIsModalVisibleTrack(true);
+            };
 
     const showModalDetails = (order = null) => {
         setCurrentOrder(order);
@@ -180,6 +218,7 @@ export const ProductionOrders = () => {
                     value: `${product ? product.name : 'Unknown Product'} (Qty: ${details.product_quantity})`
                 };
             });
+
 
         const warehouseRetrievals = POWR
             .filter(retrieval => retrieval.production_order === order.production_order_id)
@@ -277,7 +316,7 @@ export const ProductionOrders = () => {
                     )}
                     <Button onClick={() => showModalDetails(record)} type="default">Details</Button>
                     {record.pl_assigned != null && (
-                        <Button onClick={() => showModal(record)} type="default">Track</Button>
+                        <Button onClick={() => showModalTrack(record)} type="default">Track</Button>
                     )}
                 </Space>
             )
@@ -339,13 +378,26 @@ export const ProductionOrders = () => {
                         ))}
                     </Descriptions>
 
-                    <Descriptions title="Retrievalx" bordered column={1}>
+                    <Descriptions title="Retrieval" bordered column={1}>
                         {transformedDetails.map(detail => (
                             <Descriptions.Item key={detail.key} label={detail.label}>
                                 {detail.value}
                             </Descriptions.Item>
                         ))}
                     </Descriptions>
+                </div>
+            </Modal>
+            <Modal
+                title={`Order ID: ${currentOrder ? currentOrder.production_order_id : ''} - Track`}
+                visible={isModalVisibleTrack}
+                onCancel={() => setIsModalVisibleTrack(false)}
+                footer={[
+                    <Button key="close" onClick={() => setIsModalVisibleTrack(false)}>Close</Button>
+                ]}
+            >
+
+                <div style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '10px', maxWidth:'800px'}}>
+                    <Steps direction='vertical' current={stepPLP-1} items={currentPhase}/> {/*current should be dynamic and should be taken from pro_ProductionOrders-Phases*/}
                 </div>
             </Modal>
         </div>

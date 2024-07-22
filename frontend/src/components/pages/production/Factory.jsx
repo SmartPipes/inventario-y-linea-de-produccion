@@ -3,7 +3,7 @@ import { FormContainer, Label, Input, Button,ButtonContainer, Error, SelectStyle
 import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes, BtnEdit } from '../../../Styled/Production.styled';
 import { Titles, SubTitle, SubTitle2 } from '../../../Styled/Global.styled'
 import {useForm, Controller} from 'react-hook-form'
-import {API_URL_FACTORIES, API_URL_CITIES } from '../Config'
+import {API_URL_FACTORIES, API_URL_CITIES} from '../Config'
 import {apiClient} from '../../../ApiClient'
 import ModalComponent from '../../modals/ProductionModals';
 import Select from 'react-select'
