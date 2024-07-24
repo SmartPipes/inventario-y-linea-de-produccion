@@ -3,7 +3,7 @@ import { Table, Modal, Form, Input, Space, Button, Select } from 'antd';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient'; // Ensure the path is correct
 import {
-  API_URL_RESTOCK_REQUEST_WAREHOUSE,
+  API_URL_RESTOCK_WH,
   API_URL_WAREHOUSES,
   API_URL_USERS,
   API_URL_FACTORIES,
@@ -29,7 +29,7 @@ const RestockRequestWarehousePage = () => {
 
     useEffect(() => {
         // Fetch initial data for restock requests
-        apiClient.get(API_URL_RESTOCK_REQUEST_WAREHOUSE)
+        apiClient.get(API_URL_RESTOCK_WH)
             .then(response => {
                 setData(response.data);
             })
@@ -72,7 +72,7 @@ const RestockRequestWarehousePage = () => {
     }, []);
 
     const handleAdd = (values) => {
-        apiClient.post(API_URL_RESTOCK_REQUEST_WAREHOUSE, values)
+        apiClient.post(API_URL_RESTOCK_WH, values)
             .then(response => {
                 setData([...data, response.data]);
                 setIsAddModalVisible(false);
@@ -83,7 +83,7 @@ const RestockRequestWarehousePage = () => {
     };
 
     const handleDelete = () => {
-        apiClient.delete(`${API_URL_RESTOCK_REQUEST_WAREHOUSE}/${currentDeleteId}/`)
+        apiClient.delete(`${API_URL_RESTOCK_WH}/${currentDeleteId}/`)
             .then(() => {
                 setData(data.filter(item => item.id !== currentDeleteId));
                 setIsDeleteModalVisible(false);
