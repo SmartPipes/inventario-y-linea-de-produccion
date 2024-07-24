@@ -20,6 +20,7 @@ import RestockRequestPage from './components/pages/inventory/RestockRequestPage.
 import ProductPage from './components/pages/inventory/ProductPage.jsx';
 import RawMaterialPage from './components/pages/inventory/RawMaterialPage.jsx';
 import {ProductionOrders} from './components/pages/production/ProductionOrders.jsx'
+import RestockRequestWarehousePage from './components/pages/inventory/RestockRequestWarehousePage.jsx';  // Import the new component
 
 const router = createBrowserRouter([{
   path: "/",
@@ -35,6 +36,7 @@ const router = createBrowserRouter([{
     { path: "inventory/warehouses", element: <WarehousePage /> },
     { path: "inventory/suppliers", element: <SupplierPage /> },
     { path: "inventory/operation-log", element: <OperationLogPage /> },
+    { path: "inventory/request-restock-warehouse", element: <RestockRequestWarehousePage /> },
     { path: "inventory/products", element: <ProductPage /> },
     { path: "inventory/raw-materials", element: <RawMaterialPage /> },
     { path: "/production/factories", element: <Factory /> },

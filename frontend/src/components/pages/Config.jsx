@@ -34,3 +34,5 @@ export const API_URL_PO_PHASES = BASE_API_URL+'production-line/production-order-
 
 //inventory 
 export const API_URL_RAWMLIST = BASE_API_URL+'inventory/product-raw-material-list/';
+
+export const API_URL_RESTOCK_REQUEST_WAREHOUSE = BASE_API_URL+'inventory/Restock-Request-Warehouse/';
