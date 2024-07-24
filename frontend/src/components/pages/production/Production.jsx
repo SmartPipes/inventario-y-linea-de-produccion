@@ -48,6 +48,9 @@ export const Production = () => {
     const [PO,setPO] = useState([]);
     const [currentPOID, setCurrentPOID] = useState();
     const [messageApi, contextHolder] = message.useMessage();
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [allItemsFulfilled, setAllItemsFulfilled] = useState(false);
+
 
     useEffect(() => {
       // Cuando selectedWarehousesList cambie, actualiza materialesArray
@@ -62,20 +65,33 @@ export const Production = () => {
     }, [selectedWarehousesList]);
 
     
-      const addProductField = () => {
-        setProductFields([...productFields, { product: '', qty: '' }]);
-      };
+    const addProductField = () => {
+      setProductFields([...productFields, { product: '', qty: '' }]);
+      setSelectedProducts([...selectedProducts, '']);
+    };
 
-  const removeProductField = (index) => {
-        // Desregistrar los campos del formulario
-        unregister(`productFields.${index}.product`);
-        unregister(`productFields.${index}.qty`);
+    const removeProductField = (index) => {
+      unregister(`productFields.${index}.product`);
+      unregister(`productFields.${index}.qty`);
       
-        // Remover los campos del estado
-        const newFields = [...productFields];
-        newFields.splice(index, 1);
-        setProductFields(newFields);
-      };
+      const newFields = [...productFields];
+      newFields.splice(index, 1);
+      setProductFields(newFields);
+      
+      const newSelectedProducts = [...selectedProducts];
+      newSelectedProducts.splice(index, 1);
+      setSelectedProducts(newSelectedProducts);
+    };
+
+    const handleProductChange = (value, index) => {
+      const newSelectedProducts = [...selectedProducts];
+      newSelectedProducts[index] = value;
+      setSelectedProducts(newSelectedProducts);
+    };
+    
+    const getFilteredProducts = (index) => {
+      return products.filter(product => !selectedProducts.includes(product) || selectedProducts[index] === product);
+    };
 
             //Open modal to create a new prodcution order
   const openModal = () => {
@@ -169,6 +185,10 @@ export const Production = () => {
         setItemsNeeded(updatedItems);
         setSelectedWarehouses(selectedWarehouses);
         setSelectedWarehousesList(updatedSelectedWarehousesList);
+
+        const allFulfilled = updatedItems.every(item => item.qty === 0);
+        console.log(updatedItems);
+        setAllItemsFulfilled(allFulfilled);
       };
     
       const closeModalWarehouse = () => {
@@ -220,54 +240,53 @@ export const Production = () => {
             }
             const agregatedCombinedMaterialList = aggregateMaterials(combinedMaterialsList);
             // Check the warehouses in the same city as the factory
-            const filteredWarehouses = warehouse.filter(wh => wh.city === data.factory.city)
-                .map(f_warehouse => ({
-                    id: f_warehouse.value,
-                    name: f_warehouse.label
-                }));
+            // const filteredWarehouses = warehouse.filter(wh => wh.city === data.factory.city)
+            //     .map(f_warehouse => ({
+            //         id: f_warehouse.value,
+            //         name: f_warehouse.label
+            //     }));
             const inventory = await apiClient.get(API_URL_INV);
     
-            let neededMaterials = [...agregatedCombinedMaterialList];
-            let warehousesUsed = [];
+            // let neededMaterials = [...agregatedCombinedMaterialList];
+            // let warehousesUsed = [];
     
-            for (let i = 0; i < filteredWarehouses.length; i++) {
-                const warehouseId = filteredWarehouses[i].id;
+            // for (let i = 0; i < filteredWarehouses.length; i++) {
+            //     const warehouseId = filteredWarehouses[i].id;
     
-                const filteredInv = inventory.data.filter(inv => inv.warehouse === warehouseId && inv.item_type === 'RawMaterial');
+            //     const filteredInv = inventory.data.filter(inv => inv.warehouse === warehouseId && inv.item_type === 'RawMaterial');
 
     
-                let warehouseMaterialsUsed = [];
-                for (let j = 0; j < neededMaterials.length; j++) {
-                    const material = neededMaterials[j];
-                    const inventoryItem = filteredInv.find(inv => inv.item_id === material.rawm);
-                    //console.log(` ALL ${inventoryItem.inventory_id} - ${inventoryItem.stock} - ${material.qty}`)
+            //     let warehouseMaterialsUsed = [];
+            //     for (let j = 0; j < neededMaterials.length; j++) {
+            //         const material = neededMaterials[j];
+            //         const inventoryItem = filteredInv.find(inv => inv.item_id === material.rawm);
+            //         //console.log(` ALL ${inventoryItem.inventory_id} - ${inventoryItem.stock} - ${material.qty}`)
 
-                    if (inventoryItem && inventoryItem.stock >= material.qty) {
-                      //console.log(`${inventoryItem.stock} - ${material.qty}`)
-                        warehouseMaterialsUsed.push(material);
-                    }
-                }
+            //         if (inventoryItem && inventoryItem.stock >= material.qty) {
+            //           //console.log(`${inventoryItem.stock} - ${material.qty}`)
+            //             warehouseMaterialsUsed.push(material);
+            //         }
+            //     }
                   
-                if (warehouseMaterialsUsed.length > 0) {
-                    warehousesUsed.push({ warehouseId, materials: warehouseMaterialsUsed });
-                    neededMaterials = neededMaterials.filter(material => !warehouseMaterialsUsed.includes(material));
-                }
-                if (neededMaterials.length === 0) {
-                    break;
-                }
+            //     if (warehouseMaterialsUsed.length > 0) {
+            //         warehousesUsed.push({ warehouseId, materials: warehouseMaterialsUsed });
+            //         neededMaterials = neededMaterials.filter(material => !warehouseMaterialsUsed.includes(material));
+            //     }
+            //     if (neededMaterials.length === 0) {
+            //         break;
+            //     }
                 
-            }
+            // }
 
-            if (neededMaterials.length === 0) {
-                // We have found enough materials in the warehouses in the same city
-                console.log(warehousesUsed)
-                openModalWarehouse(warehousesUsed[0].warehouseId);
+            // if (neededMaterials.length === 0) {
+            //     // We have found enough materials in the warehouses in the same city
+            //     console.log(warehousesUsed)
+            //     openModalWarehouse(warehousesUsed[0].warehouseId);
 
-            } else {
+            // } else {
             // We need to look for materials in other cities
             let agregatedCombinedMaterialList_withName
             let filtered_rm = [];
-              console.log(warehouse)
             for (let i = 0; i < warehouse.length; i++) {
                 const warehouseId = warehouse[i].value;
                 console.log('warehouse ID: '+warehouseId)
@@ -303,7 +322,7 @@ export const Production = () => {
           
             // Open modal sending the qty of each material specified in agregatedCombinedMaterialList for each warehouse, only sending info of rhe material we need (specidied in agregatedCombinedMaterialList)
             openModalWarehouse({ agregatedCombinedMaterialList_withName,filtered_rm,otherWH: true});
-        }
+        //}
 
     
         } catch (error) {
@@ -706,98 +725,103 @@ const columns = [
             </Modal>
 
             {/* //   THIS IS THE FORM TO CREATE A NEW ORDER */}
-        {newOrder &&
-        <ModalComponent onClose={closeModal} fixedSize>
-            <ModalTitle>Create a New production order</ModalTitle>
-              <FormContainer>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {productFields.map((field, index) => (
-            <div key={index} >
-              <Label>Product</Label>
-              <SelectStyled>
-                <Controller
-                  name={`productFields[${index}].product`}
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      options={products}
-                      formatOptionLabel={formatOptionLabel}
-                    />
-                  )}
+            {newOrder &&
+<ModalComponent onClose={closeModal} fixedSize>
+  <ModalTitle>Create a New production order</ModalTitle>
+  <FormContainer>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {productFields.map((field, index) => (
+        <div key={index}>
+          <Label>Product</Label>
+          <SelectStyled>
+            <Controller
+              name={`productFields[${index}].product`}
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={getFilteredProducts(index)}
+                  formatOptionLabel={formatOptionLabel}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    handleProductChange(value, index);
+                  }}
                 />
-                {errors.productFields && errors.productFields[index] && errors.productFields[index].product && (
-                  <Error>This is a required field.</Error>
-                )}
-              </SelectStyled>
-              <Label>Size of Batch per Product</Label>
-              <SelectStyled>
-                <Controller
-                  name={`productFields[${index}].qty`}
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      options={products_batch}
-                    />
-                  )}
+              )}
+            />
+            {errors.productFields && errors.productFields[index] && errors.productFields[index].product && (
+              <Error>This is a required field.</Error>
+            )}
+          </SelectStyled>
+          <Label>Size of Batch per Product</Label>
+          <SelectStyled>
+            <Controller
+              name={`productFields[${index}].qty`}
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={products_batch}
                 />
-                {errors.productFields && errors.productFields[index] && errors.productFields[index].qty && (
-                  <Error>This is a required field.</Error>
-                )}
-              </SelectStyled>
-              {index > 0 && (
-                <Button iswarningBtn={true} onClick={() => removeProductField(index)}>Remove</Button>
               )}
-            </div>
-          ))}
-          <div className="form-control">
-            <Label>Factory</Label>
-            <SelectStyled>
-              <Controller
-                name="factory"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Select {...field} options={factory} />
-                )}
-              />
-              {errors.factory && (
-                <Error>This is a required field.</Error>
-              )}
-            </SelectStyled>
-          </div>
-          <div className="form-control">
-            <Label>Warehouse to Deliver</Label>
-            <SelectStyled>
-              <Controller
-                name="warehouse"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Select {...field} options={warehouse} />
-                )}
-              />
-              {errors.warehouse && (
-                <Error>This is a required field.</Error>
-              )}
-            </SelectStyled>
-          </div>
-          <div>
-            <label></label>
-            <ButtonContainer>
-              <Button type="submit">Create Order</Button>
-              <Button iswarningBtn={true} onClick={addProductField}>
-                <FontAwesomeIcon icon={faPlus} /> Product
-              </Button>
-            </ButtonContainer>
-          </div>
-        </form>
-      </FormContainer>
-          </ModalComponent>
-          }
+            />
+            {errors.productFields && errors.productFields[index] && errors.productFields[index].qty && (
+              <Error>This is a required field.</Error>
+            )}
+          </SelectStyled>
+          {index > 0 && (
+            <Button iswarningBtn={true} onClick={() => removeProductField(index)}>Remove</Button>
+          )}
+        </div>
+      ))}
+      <div className="form-control">
+        <Label>Factory</Label>
+        <SelectStyled>
+          <Controller
+            name="factory"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <Select {...field} options={factory} />
+            )}
+          />
+          {errors.factory && (
+            <Error>This is a required field.</Error>
+          )}
+        </SelectStyled>
+      </div>
+      <div className="form-control">
+        <Label>Warehouse to Deliver</Label>
+        <SelectStyled>
+          <Controller
+            name="warehouse"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <Select {...field} options={warehouse} />
+            )}
+          />
+          {errors.warehouse && (
+            <Error>This is a required field.</Error>
+          )}
+        </SelectStyled>
+      </div>
+      <div>
+        <label></label>
+        <ButtonContainer>
+          <Button type="submit">Create Order</Button>
+          <Button iswarningBtn={true} onClick={addProductField}>
+            <FontAwesomeIcon icon={faPlus} /> Product
+          </Button>
+        </ButtonContainer>
+      </div>
+    </form>
+  </FormContainer>
+</ModalComponent>
+}
+
           {modalWarehouse && ( //Show modal only if a factory is selected
           <ModalComponent onClose={closeModalWarehouse}>
             <h2>WARNING</h2>
@@ -837,9 +861,10 @@ const columns = [
               )}
             />
           </SelectStyled>
-          {errors.productFields && errors.productFields[index] && errors.productFields[index].qty && (
+          {errors.Warehouses && (
             <Error>This is a required field.</Error>
           )}
+
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div style={{ flex: 1, marginRight: '10px' }}>
             <h3>Items Needed</h3>
@@ -874,8 +899,10 @@ const columns = [
           </div>
           </div>
           <ButtonContainer>
-            <Button type="button" isdisabledBtn={true} onClick={() => { closeModalWarehouseToPick(); console.log("cancelled order") }}>Cancel Order</Button>
-            <Button type="button" onClick={() => {onSubmitWarehousesPicking(selectedWarehousesList)}}>Complete Order</Button>
+            <Button type="button" isdisabledBtn={true} onClick={() => { closeModalWarehouseToPick(); closeModal()}}>Cancel Order</Button>
+            <Button type="button" onClick={() => { onSubmitWarehousesPicking(selectedWarehousesList)}} disabled={!allItemsFulfilled}>
+              Complete Order
+            </Button>
           </ButtonContainer>
         </form>
       </FormContainer>

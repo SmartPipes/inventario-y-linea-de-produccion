@@ -40,6 +40,7 @@ const ButtonContainer = styled.div`
 const Button = styled.button`
     padding: 0.5rem 1rem;
     background: ${(props) => 
+            props.disabled ? '#DDDDDD' :
             props.isdisabledBtn ? '#EE4E4E' : 
             props.iswarningBtn ? '#F4CE14' : 
             '#97b25e'
@@ -52,7 +53,7 @@ const Button = styled.button`
     margin-left: 10px;
 
     &:hover {
-        background: ${(props) => props.isdisabledBtn ? '#FF0000' : 
+        background: ${(props) =>  props.disabled ? '#DDDDDD' :props.isdisabledBtn ? '#FF0000' : 
                                     props.iswarningBtn ?  '#FBE580' :
                                     '#364936'};
     }

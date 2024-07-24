@@ -38,4 +38,14 @@ color: #364936;
 text-transform: uppercase;
 `;
 
-export  {GlobalStyles, Titles, SubTitle, SubTitle2,ModalTitle, Labels};
+const LoginStyle = createGlobalStyle`
+body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    background: #E2FBD7;
+}
+`;
+
+export  {GlobalStyles, Titles, SubTitle, SubTitle2,ModalTitle, Labels, LoginStyle};

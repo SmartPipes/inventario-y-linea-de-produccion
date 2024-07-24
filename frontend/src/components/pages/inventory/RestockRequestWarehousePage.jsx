@@ -3,11 +3,11 @@ import { Table, Modal, Form, Input, Space, Button, Select } from 'antd';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient'; // Ensure the path is correct
 import {
-  API_URL_RESTOCK_WH,
-  API_URL_WAREHOUSES,
-  API_URL_USERS,
-  API_URL_FACTORIES,
-  API_URL_ORDERS,
+    API_URL_RESTOCK_WH,
+    API_URL_WAREHOUSES,
+    API_URL_USERS,
+    API_URL_FACTORIES,
+    API_URL_ORDERS,
 } from '../Config';
 import Barcode from 'react-barcode'; // Import barcode library
 import jsPDF from 'jspdf';
@@ -18,6 +18,7 @@ const { Option } = Select;
 
 const RestockRequestWarehousePage = () => {
     const [data, setData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
     const [warehouses, setWarehouses] = useState([]);
     const [users, setUsers] = useState([]);
     const [factories, setFactories] = useState([]);
@@ -26,12 +27,15 @@ const RestockRequestWarehousePage = () => {
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [isPrintModalVisible, setIsPrintModalVisible] = useState(false); // State for print modal
     const [currentPrintRecord, setCurrentPrintRecord] = useState(null); // State for current record to print
+    const [searchText, setSearchText] = useState('');
+    const [currentDeleteId, setCurrentDeleteId] = useState(null);
 
     useEffect(() => {
         // Fetch initial data for restock requests
         apiClient.get(API_URL_RESTOCK_WH)
             .then(response => {
                 setData(response.data);
+                setFilteredData(response.data);
             })
             .catch(error => {
                 console.error("There was an error fetching the data!", error);
@@ -74,7 +78,9 @@ const RestockRequestWarehousePage = () => {
     const handleAdd = (values) => {
         apiClient.post(API_URL_RESTOCK_WH, values)
             .then(response => {
-                setData([...data, response.data]);
+                const newData = [...data, response.data];
+                setData(newData);
+                setFilteredData(newData);
                 setIsAddModalVisible(false);
             })
             .catch(error => {
@@ -82,21 +88,46 @@ const RestockRequestWarehousePage = () => {
             });
     };
 
-    const handleDelete = () => {
-        apiClient.delete(`${API_URL_RESTOCK_WH}/${currentDeleteId}/`)
+const handleDelete = () => {
+        if (!currentDeleteId) {
+            message.error('No ID specified for deletion.');
+            return;
+        }
+    
+        const deleteUrl = `${API_URL_RESTOCK_WH}${currentDeleteId}`; // Ensure correct URL
+        console.log(deleteUrl);
+        apiClient.delete(deleteUrl)
             .then(() => {
                 setData(data.filter(item => item.id !== currentDeleteId));
                 setIsDeleteModalVisible(false);
                 setCurrentDeleteId(null);
+                message.success('Restock request deleted successfully!');
             })
             .catch(error => {
                 console.error("There was an error deleting the data!", error);
+                message.error('Failed to delete restock request.');
             });
+    };
+
+    const handleSearchChange = (text) => {
+        setSearchText(text);
+        if (text) {
+            const filtered = data.filter(item =>
+                item.production_order_id.toString().includes(text)
+            );
+            setFilteredData(filtered);
+        } else {
+            setFilteredData(data);
+        }
     };
 
     const showPrintModal = (record) => {
         setCurrentPrintRecord(record);
         setIsPrintModalVisible(true);
+    };
+    const showDeleteModal = (id) => {
+        setCurrentDeleteId(id);
+        setIsDeleteModalVisible(true);
     };
 
     const generatePDF = () => {
@@ -143,7 +174,7 @@ const RestockRequestWarehousePage = () => {
             key: 'production_order_id',
             align: 'center',
             render: (text) => (
-                <span>{orders.find(order => order.production_order_id === text)?.creation_date || text}</span>
+                <span>{orders.find(order => order.production_order_id === text)?.production_order_id || text}</span>
             ),
         },
         {
@@ -159,8 +190,7 @@ const RestockRequestWarehousePage = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => showPrintModal(record)} type="link">Print Request</Button>
-                    <Button onClick={() => showModal(record)} type="link">Edit</Button>
-                    <Button onClick={() => showDeleteModal(record.restock_request_id)} type="link" danger>Delete</Button>
+                    <Button onClick={() => showDeleteModal(record.id)} type="link" danger>Delete</Button>
                 </Space>
             )
         },
@@ -171,14 +201,16 @@ const RestockRequestWarehousePage = () => {
             <NavBarMenu title="Restock Requests Warehouse" />
             <div style={{ marginBottom: '16px' }}>
                 <Input
-                    placeholder="Search Request..."
+                    placeholder="Search by Order ID"
+                    value={searchText}
+                    onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
                 <Button type="primary" onClick={() => setIsAddModalVisible(true)}>Add Request</Button>
             </div>
             <Table
                 columns={columns}
-                dataSource={data}
+                dataSource={filteredData}
                 rowKey="id"
             />
             <Modal
@@ -279,10 +311,11 @@ const RestockRequestWarehousePage = () => {
                     <div id="print-content" style={{ padding: '20px', fontFamily: 'Arial, sans-serif', color: '#333' }}>
                         <img src={logo} alt="Company Logo" style={{ width: '150px', display: 'block', margin: '0 auto 20px auto' }} />
                         <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', fontSize: '24px', color: '#333' }}>Restock Request Details</h2>
+                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Production Order:</strong> {orders.find(order => order.production_order_id === currentPrintRecord.production_order_id)?.production_order_id}</p>
                         <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>From Warehouse:</strong> {warehouses.find(wh => wh.warehouse_id === currentPrintRecord.from_warehouse)?.name}</p>
                         <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Requested By:</strong> {users.find(user => user.id === currentPrintRecord.requested_by)?.first_name} {users.find(user => user.id === currentPrintRecord.requested_by)?.last_name}</p>
                         <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>To Factory:</strong> {factories.find(factory => factory.factory_id === currentPrintRecord.to_factory)?.name}</p>
-                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Production Order:</strong> {orders.find(order => order.production_order_id === currentPrintRecord.production_order_id)?.creation_date}</p>
+                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Production Order Date:</strong> {orders.find(order => order.production_order_id === currentPrintRecord.production_order_id)?.creation_date}</p>
                         <p style={{ fontSize: '16px', marginBottom: '20px' }}><strong>Status:</strong> {currentPrintRecord.status}</p>
                         <div style={{ textAlign: 'center', marginTop: '20px' }}>
                             <Barcode value={currentPrintRecord.id.toString()} />

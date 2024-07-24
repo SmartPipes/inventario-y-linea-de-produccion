@@ -364,7 +364,7 @@ export const ProductionOrders = () => {
                 <Form form={form} layout="vertical">
                     <Form.Item name="Production Line" label="Assign Order To" rules={[{ required: true }]}>
                         <Select>
-                            {PL.filter(PL => PL.factory === 1).map(PL => (// EL 1 DE LA FACTORY DEBE DE SER CAMBIADO TOMANDO EL NUMERO DE FACTORY QUE SE LE TIENE ASIGNADO AL USER DE MANAGER DE LA FABRICA, TOMAR DEL CONTEXTO
+                            {PL.filter(PL => PL.factory === 1 && PL.state === "Free" && PL.status === "Active").map(PL => (// EL 1 DE LA FACTORY DEBE DE SER CAMBIADO TOMANDO EL NUMERO DE FACTORY QUE SE LE TIENE ASIGNADO AL USER DE MANAGER DE LA FABRICA, TOMAR DEL CONTEXTO
                                 <Select.Option key={PL.productionLine_id} value={PL.productionLine_id}>{PL.name}</Select.Option>
                             ))}
                         </Select>
