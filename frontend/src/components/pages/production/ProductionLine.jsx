@@ -22,7 +22,7 @@ const [isEditing, setIsEditing] = useState(false); // to know that its in editin
 const [selectedPLID, setSelectedPLID] = useState(null); // to know what is being edited
 
 //THIS USER ID SHOULD BE GLOBALLY ACCESIBLE WHEN LOGIN IN
-const userID = 2;
+const userID = 1;
 
     useEffect(() => {
       getProductionLines();
@@ -40,55 +40,23 @@ const userID = 2;
         setValue
       } = useForm();
     
-      const onSubmit = (data) => {
-        const formData = {
-            ...data,
-            factory: data.factory.value, // to get only the id of the factory
-            production_line_creator: userID, // adding the user ID
-        };
-    
-        // Extract the phase IDs
-        let phases = formData.phases.map(phase => phase.value);
-    
-        // Delete phases from the formData JSON
-        delete formData.phases;
-
-        if (isEditing) {
-          apiClient.put(`${API_URL_PL}${selectedPLID}/`, formData)
-          .then(response => {
-              const productionLineId = response.data.productionLine_id; // Assuming the response contains the id of the created production line
-              // Prepare and post each phase
-              const phasePromises = phases.map((phaseId, index) => {
-                  const productionLinePhase = {
-                      sequence_number: index + 1, // Assuming sequence_number is just the index + 1
-                      productionLine: productionLineId,
-                      phase: phaseId,
-                  };
-  
-                  return apiClient.put(`${API_URL_PL_PH}${selectedPLID}`, productionLinePhase);
-              });
-  
-              // Wait for all phase posts to complete
-              return Promise.all(phasePromises);
-          })
-          .then(() => {
-              // After posting all phases, refresh the production lines and reset the form
-              getProductionLines();            
-              getPL_PH();
-              reset();
-              setValue('factory', '');  
-              setValue('phases', '');
-          })
-          .catch(error => {
-              console.error('Error upd production line:', error);
-          });
-    
-        }else{
-        // Post formData to the first API endpoint
-        apiClient.post(API_URL_PL, formData)
+      const onSubmit = async (data) => {
+        try {
+          const formData = {
+            name: data.name,
+            description: data.description,
+            status: 'Active', // Set status if needed
+            state: 'Free', // Set state if needed
+            production_line_creator: userID,
+            factory: data.factory.value // Assuming `data.factory` is an object with a `value` property
+          };
+      
+          console.log('Submitting form data:', formData); // Log the form data
+      
+          if (isEditing) {
+            apiClient.put(`${API_URL_PL}${selectedPLID}/`, formData)
             .then(response => {
                 const productionLineId = response.data.productionLine_id; // Assuming the response contains the id of the created production line
-    
                 // Prepare and post each phase
                 const phasePromises = phases.map((phaseId, index) => {
                     const productionLinePhase = {
@@ -97,7 +65,7 @@ const userID = 2;
                         phase: phaseId,
                     };
     
-                    return apiClient.post(API_URL_PL_PH, productionLinePhase);
+                    return apiClient.put(`${API_URL_PL_PH}${selectedPLID}`, productionLinePhase);
                 });
     
                 // Wait for all phase posts to complete
@@ -105,6 +73,7 @@ const userID = 2;
             })
             .then(() => {
                 // After posting all phases, refresh the production lines and reset the form
+                isEditing(false);
                 getProductionLines();            
                 getPL_PH();
                 reset();
@@ -112,10 +81,43 @@ const userID = 2;
                 setValue('phases', '');
             })
             .catch(error => {
-                console.error('Error posting production line:', error);
+                console.error('Error upd production line:', error);
             });
+          } else {
+            // Create new production line
+            const createResponse = await apiClient.post(API_URL_PL, formData);
+            const productionLineId = createResponse.data.productionLine_id;
+      
+            // Prepare and post each phase
+            const phasePromises = data.phases.map((phase, index) => {
+              const productionLinePhase = {
+                sequence_number: index + 1,
+                productionLine: productionLineId,
+                phase: phase.value,
+              };
+      
+              return apiClient.post(API_URL_PL_PH, productionLinePhase);
+            });
+      
+            await Promise.all(phasePromises);
+            console.log('Successfully created production line and phases');
           }
-    };
+      
+          // Refresh data and reset form
+          getProductionLines();
+          getPL_PH();
+          reset();
+          setValue('factory', '');
+          setValue('phases', '');
+        } catch (error) {
+          if (error.response) {
+            console.error('Error during submission:', error.response.data); // Log the error response data
+          } else {
+            console.error('Error during submission:', error.message); // Log the error message if no response
+          }
+        }
+      };
+      
     
       
 
@@ -353,7 +355,7 @@ const userID = 2;
               <ButtonContainer>
               {isEditing &&(
                 <BtnEdit onClick={cancelEdit}>Cancel</BtnEdit>)}
-              <Button type="submit">Create a Production Line</Button>
+              <Button type="submit">{isEditing ? 'Update Production Line':'Create a Production Line'}</Button>
               </ButtonContainer>
             </div>
           </form>
