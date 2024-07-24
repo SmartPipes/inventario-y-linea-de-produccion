@@ -257,8 +257,18 @@ export const ProductionOrders = () => {
                 phase: initialPhase.phase
             };
 
+            // set the production line to in use
+            const PLtoUPD = PL.find(pl => pl.productionLine_id === values['Production Line']);
+            //set its state to "In Use"
+            const updatedPL = {
+                ...PLtoUPD,
+                state: 'In Use'
+            }
+
+
             await apiClient.put(`${API_URL_ORDERS}${currentOrder.production_order_id}/`, updatedOrder);
             await apiClient.post(API_URL_PO_PHASES, PO_phases);
+            await apiClient.put(`${API_URL_PL}${values['Production Line']}/`,updatedPL)
             message.success('Order successfully assigned to Production Line, Starting production!');
             getProductionOrders();
             setIsModalVisible(false);
@@ -315,7 +325,7 @@ export const ProductionOrders = () => {
                         <Button onClick={() => showModal(record)} type="default">Assign to PL</Button>
                     )}
                     <Button onClick={() => showModalDetails(record)} type="default">Details</Button>
-                    {record.pl_assigned != null && (
+                    {record.pl_assigned != null && record.status === 'In Progress' &&(
                         <Button onClick={() => showModalTrack(record)} type="default">Track</Button>
                     )}
                 </Space>

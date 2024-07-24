@@ -1,20 +1,21 @@
 import React, {useState, useEffect} from 'react'
 import { ProductionNavBar } from './ProductionNavBar'
 import { MainContent } from '../../../Styled/Production.styled'
-import { FormContainer, Label, Input, Button,ButtonContainer, Error, SelectStyled  } from '../../../Styled/Forms.styled'
+import { FormContainer, Label, Input,ButtonContainer, Error, SelectStyled,Button  } from '../../../Styled/Forms.styled'
 import {useForm, Controller} from 'react-hook-form'
-import { faPlus, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faCheck,faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NavSearchContainer} from '../../../Styled/InventoryNavBar.styled';
 import ModalComponent from '../../modals/ProductionModals';
 import Select from 'react-select';
 import { ModalTitle} from '../../../Styled/Global.styled'
-import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS, API_URL_RAWMLIST, API_URL_INV, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS,API_URL_PO_RAWM_DETAILS,API_URL_PRO_ORDERS,API_URL_PL, API_URL_RESTOCK_WH, API_URL_RESTOCK_WH_DETAIL} from '../Config'
+import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS, API_URL_RAWMLIST, API_URL_INV, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS,API_URL_PO_RAWM_DETAILS,API_URL_PRO_ORDERS,API_URL_PL, API_URL_RESTOCK_WH, API_URL_RESTOCK_WH_DETAIL,API_URL_PO_PHASES,API_URL_PHASES,API_URL_PL_PH} from '../Config'
 import { apiClient } from '../../../ApiClient'
-import { Card, Row, Col, Layout, Table} from 'antd';
+import { Card, Row, Col, Layout, Table,Space, Button as AntButton, Modal,Flex,Steps, Typography,message} from 'antd';
 import { Column } from '@ant-design/charts';
-import factoryLogo from '../../../assets/factory.png';
 const {  Content } = Layout;
+const { Text } = Typography;
+
 
 export const Production = () => {
     const [newOrder, setNewOrder] = useState(false);
@@ -37,6 +38,16 @@ export const Production = () => {
     const [loading, setLoading] = useState(false);
     const [rawmToRetrieveFrom, setRawmToRetrieveFrom] = useState({});
     const [responseIDWarehouseRestock, setResponseIDWarehouseRestock] = useState();
+    const [currentPL, setCurrentPL] = useState([]);
+    const [isModalVisibleProduction, setIsModalVisibleProduction] = useState(false);
+    const [PLPhases, setPLPhases] = useState([]);
+    const [phases, setPhases] = useState([]);
+    const [currentPhase, setCurrentPhase] = useState([]); //this is the list of phases for the porduction line
+    const [POP, setPOP] = useState([]); 
+    const [stepPLP, setStepPLP] = useState(); //This is the step which the PO is currently at
+    const [PO,setPO] = useState([]);
+    const [currentPOID, setCurrentPOID] = useState();
+    const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
       // Cuando selectedWarehousesList cambie, actualiza materialesArray
@@ -49,6 +60,7 @@ export const Production = () => {
       );
       setRawmToRetrieveFrom(newMaterialsArray);
     }, [selectedWarehousesList]);
+
     
       const addProductField = () => {
         setProductFields([...productFields, { product: '', qty: '' }]);
@@ -84,6 +96,8 @@ export const Production = () => {
         getRM();
         getProductionOrders();
         getPL();
+        getPLP();
+        getPhases();
         },[]);
 
     const {
@@ -105,6 +119,18 @@ export const Production = () => {
             setPL([]);
         }
     }
+
+    const getPhases = async () => {
+      try {
+          const response = await apiClient.get(API_URL_PHASES);
+          setPhases(response.data);
+
+          const response2 = await apiClient.get(API_URL_PL_PH);
+          setPLPhases(response2.data);
+      } catch (error) {
+          console.error('Error at fetching phases', error)
+      }
+  }
 
       const openModalWarehouse = (warehouse_id) => {
         if (typeof warehouse_id === 'object' && 'otherWH' in warehouse_id) {
@@ -473,11 +499,21 @@ const getProductionOrders = async () => {
         setPendingOrders(p);
         setIPOrders(ip);
         setFinishedOrders(d);
+        setPO(transformedOrders);
   }catch (error) {
     console.error('Error fetching warehouses:', error);
     setPendingOrders([]);
     setIPOrders([]);
     setFinishedOrders([]);
+  }
+}
+
+const getPLP = async () => {
+  try{
+    const response = await apiClient.get(API_URL_PO_PHASES);
+    setPOP(response.data);
+  }catch (error){
+    console.error('Error at fetching PLP: ',error)
   }
 }
 
@@ -487,12 +523,117 @@ const formatOptionLabel = ({ label, img }) => (
     <span>{label}</span>
   </div>
 );
+const getPhaseCountForOrder = (orderId, dataArray) => {
+  const filteredArray = dataArray
+      .filter(obj => obj.production_order === orderId);
+
+  if (filteredArray.length === 0) {
+      return -1; // No objects found for this production order
+  }
+
+  // The count of phases for the given orderId
+  return filteredArray.length;
+};
+
+const showModalProduction = (PL = null) => { 
+  setCurrentPL(PL);
+  const PLPhase = PLPhases.filter(plp => plp.productionLine === PL.productionLine_id)
+  .map(transform => ({
+      title: phases.find(phase => phase.phase_id === transform.phase).name,
+      description: phases.find(phase => phase.phase_id === transform.phase).description
+  }));
+  setCurrentPhase(PLPhase);
+  const productionOrderID = PO.find(po => po.pl_assigned === PL.productionLine_id && po.status === 'In Progress').production_order_id
+  setCurrentPOID(productionOrderID)
+  setStepPLP(getPhaseCountForOrder(productionOrderID, POP));
+  setIsModalVisibleProduction(true);
+      };
+
+function getNextPhase(phases, currentPhase) {
+  // Sort the phases by sequence_number
+  const sortedPhases = phases.sort((a, b) => a.sequence_number - b.sequence_number);
+  
+  // Find the index of the current phase
+  const currentIndex = sortedPhases.findIndex(phase => phase.phase === currentPhase);
+  
+  // If the current phase is not found or it is the last phase, return null
+  if (currentIndex === -1 || currentIndex === sortedPhases.length - 1) {
+    return 0;
+  }
+  
+  // Return the next phase
+  return sortedPhases[currentIndex + 1];
+}
+
+const success = (type) => {
+if(type){  messageApi.open({
+    type: 'success',
+    content: 'Changed Phase Successfully!',
+  });}else {
+    messageApi.open({
+      type: 'success',
+      content: 'Finished Order!',
+  })}
+};
+
+const ChangePOPhase = async () => {
+  try{
+    const selfPhases = PLPhases.filter(ph => ph.productionLine === currentPL.productionLine_id)
+    const nextPhase = getNextPhase(selfPhases, stepPLP).phase;
+
+    if(nextPhase != undefined){
+    const PO_phases = {
+      exit_phase_date: null,
+      production_order: currentPOID,
+      phase: nextPhase
+    };
+    console.log(nextPhase)
+    await apiClient.post(API_URL_PO_PHASES, PO_phases);
+    await getPLP();
+    setIsModalVisibleProduction(false);
+    success(true);
+  }else{
+    console.log("It was the last phase");
+    success(false);
+    const PLupdState = {
+      ...currentPL,
+      state: "Free"
+    }
+    delete PLupdState.date_created;
+
+    const POfinish = {
+      ...(PO.find(po => po.production_order_id === currentPOID)),
+      status: "Completed"
+    }
+    delete POfinish.creation_date;
+
+  await apiClient.put(`${API_URL_PL}${currentPL.productionLine_id}/`,PLupdState);
+  await apiClient.put(`${API_URL_PRO_ORDERS}${currentPOID}/`,POfinish)
+  setIsModalVisibleProduction(false);
+  }
+
+  }catch (error){
+    console.error(error);
+  }
+};
+
 
 const columns = [
   { title: 'ID', dataIndex: 'productionLine_id', key: 'productionLine_id' },
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Description', dataIndex: 'description', key: 'description' },
-  { title: 'State', dataIndex: 'state', key: 'state' }
+  { title: 'State', dataIndex: 'state', key: 'state' },
+  {
+    title: 'Actions',
+    key: 'action',
+    render: (_, record) => (
+        <Space size="middle">
+            {record.state === 'In Use' && (
+                <AntButton onClick={() => showModalProduction(record)} type="default">Production</AntButton>
+            )}
+        </Space>
+    )
+}
 ];
 
 
@@ -532,6 +673,37 @@ const columns = [
             />
 
       </Content>
+      {contextHolder}
+      <Modal
+                title={`Production Phases For: ${currentPL ? currentPL.name : ''}`}
+                visible={isModalVisibleProduction}
+                onCancel={() => setIsModalVisibleProduction(false)}
+                footer={[
+                    
+                ]}
+                width={900}
+            >
+
+                <div style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '10px', width:'800px'}}>
+                <Flex justify="space-between">
+                  <div style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '10px', flex: 1 }}>
+                    <Steps direction='vertical' current={stepPLP-1} items={currentPhase} />
+                  </div>
+                  <Flex vertical align="flex-end" justify="space-between" style={{ paddingLeft: 32, flex: 1 }}>
+                    <Typography.Title level={4}>
+                      Change To The Next Production Phase
+                    </Typography.Title>
+                    <Text italic underline style={{marginTop:"-240px", marginRight:"10px"}}>You're currently viewing for the production order <Text strong mark>{currentPOID}</Text></Text>
+                    <Text type="danger"style={{marginTop:"-200px", marginLeft:"30px"}}>By changing the production phase, you agree that the previous phase has already been completed within the production line based on the production order.</Text>
+                    <Flex gap={10}>
+                    <AntButton danger onClick={()=> {ChangePOPhase()}}>
+                      Next Phase <FontAwesomeIcon icon={faArrowRight} />
+                    </AntButton>
+                    </Flex>
+                  </Flex>
+                </Flex>
+                </div>
+            </Modal>
 
             {/* //   THIS IS THE FORM TO CREATE A NEW ORDER */}
         {newOrder &&
@@ -704,7 +876,7 @@ const columns = [
           <ButtonContainer>
             <Button type="button" isdisabledBtn={true} onClick={() => { closeModalWarehouseToPick(); console.log("cancelled order") }}>Cancel Order</Button>
             <Button type="button" onClick={() => {onSubmitWarehousesPicking(selectedWarehousesList)}}>Complete Order</Button>
-\          </ButtonContainer>
+          </ButtonContainer>
         </form>
       </FormContainer>
     </ModalComponent>
