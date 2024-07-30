@@ -1,7 +1,11 @@
 import React from 'react'
+import OrdersPage from './OrdersPage';
+
 
 export const Delivery = () => {
   return (
-    <div>Delivery</div>
+    <div>
+    <OrdersPage />
+</div>
   )
 }

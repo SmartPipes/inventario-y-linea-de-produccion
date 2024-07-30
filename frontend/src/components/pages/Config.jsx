@@ -40,3 +40,21 @@ export const API_URL_RESTOCK_WH_DETAIL = BASE_API_URL+'inventory/Restock-Request
 export const API_URL_FAC_MANAGER = BASE_API_URL+'production-line/factory-managers/';
 export const  API_URL_USR_DIV = BASE_API_URL+'users/divisions/';
 export const API_URL_DIV_USR = BASE_API_URL+"users/division-users/";
+// General API URLs
+export const API_URL_DIVISIONS = BASE_API_URL + 'users/divisions/';
+export const API_URL_DIVISION_USERS = BASE_API_URL + 'users/division-users/';
+export const API_URL_PAYMENT_METHODS = BASE_API_URL + 'users/payment-methods/';
+
+// Delivery API URLs
+export const API_URL_DELIVERY_CARTS = BASE_API_URL + 'sales/carts/';
+export const API_URL_DELIVERY_SALES = BASE_API_URL + 'sales/sales/';
+export const API_URL_DELIVERY_PAYMENTS = BASE_API_URL + 'sales/payments/';
+export const API_URL_DELIVERY_CART_DETAILS = BASE_API_URL + 'sales/cart-details/';
+export const API_URL_DELIVERY_SALE_DETAILS = BASE_API_URL + 'sales/sale-details/';
+
+// Delivery Orders API URLs
+export const API_URL_DELIVERY_ORDERS = BASE_API_URL + 'delivery/delivery-orders/';
+export const API_URL_DELIVERY_ORDER_DETAILS = BASE_API_URL + 'delivery/delivery-orders-detail/';
+
+// Third-Party Services API URL
+export const API_URL_THIRD_PARTY_SERVICES = BASE_API_URL + 'delivery/third-party-service/';
