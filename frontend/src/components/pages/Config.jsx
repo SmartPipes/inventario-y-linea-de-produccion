@@ -37,3 +37,6 @@ export const API_URL_RAWMLIST = BASE_API_URL+'inventory/product-raw-material-lis
 
 export const API_URL_RESTOCK_WH = BASE_API_URL+'inventory/Restock-Request-Warehouse/';
 export const API_URL_RESTOCK_WH_DETAIL = BASE_API_URL+'inventory/Restock-Request-Warehouse-Rawm/';
+export const API_URL_FAC_MANAGER = BASE_API_URL+'production-line/factory-managers/';
+export const  API_URL_USR_DIV = BASE_API_URL+'users/divisions/';
+export const API_URL_DIV_USR = BASE_API_URL+"users/division-users/";

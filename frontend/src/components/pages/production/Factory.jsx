@@ -3,13 +3,15 @@ import { FormContainer, Label, Input, Button,ButtonContainer, Error, SelectStyle
 import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes, BtnEdit } from '../../../Styled/Production.styled';
 import { Titles, SubTitle, SubTitle2 } from '../../../Styled/Global.styled'
 import {useForm, Controller} from 'react-hook-form'
-import {API_URL_FACTORIES, API_URL_CITIES} from '../Config'
+import {API_URL_FACTORIES, API_URL_CITIES,API_URL_FAC_MANAGER,API_URL_USERS,API_URL_USR_DIV,API_URL_DIV_USR} from '../Config'
 import {apiClient} from '../../../ApiClient'
 import ModalComponent from '../../modals/ProductionModals';
 import Select from 'react-select'
 import { ProductionNavBar } from './ProductionNavBar';
-import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faUserTie} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {Modal, Form, Select as SelectANT, message} from 'antd';
+
 
 export const Factory = () => {
 const [city, setCities] = useState([]);
@@ -17,10 +19,19 @@ const [selectedFactory, setSelectedFactory] = useState(null); //to know what fac
 const [factories, setFactories] = useState([]);
 const [isEditing, setIsEditing] = useState(false); // to know that its in editing mode
 const [selectedFactoryID, setSelectedFactoryID] = useState(null); // to know what is being edited
+const [isModalVisible, setIsModalVisible] = useState(false);
+const [form] = Form.useForm();
+const [managers, setManagers] = useState([]);
+const [user, setUser] = useState([]);
+const [DivUser, setDivUsers] = useState([]);
+const [UserDivision, setUserDivisions] = useState([]);
+
 
     useEffect(() => {
       getCities();
       getFactories();
+      getFactoryManagers();
+      getUsers();
       },[]);
   
 
@@ -65,6 +76,19 @@ const [selectedFactoryID, setSelectedFactoryID] = useState(null); // to know wha
         }
       }
       };
+
+    const getUsers = async () => {
+      try{
+        const response = await apiClient.get(API_URL_USERS);
+        setUser(response.data);
+        const response2 = await apiClient.get(API_URL_USR_DIV);
+        setDivUsers(response2.data);
+        const response3 = await apiClient.get(API_URL_DIV_USR);
+        setUserDivisions(response3.data);
+      }catch (error){
+        console.error('Error at fetching users: ', error);
+      }
+    }
       
 
     // get the existan cities
@@ -86,6 +110,15 @@ const [selectedFactoryID, setSelectedFactoryID] = useState(null); // to know wha
         console.error('Error fetching cities:', error);
       }
       }
+
+    const getFactoryManagers = async () => {
+      try {
+        const response = await apiClient.get(API_URL_FAC_MANAGER);
+        setManagers(response.data);
+      }catch (error){
+        console.error('Error at fetching managers: ',error);
+      }
+    }
 
       // get the existatnt factories
     const getFactories = async () => {
@@ -156,6 +189,77 @@ const [selectedFactoryID, setSelectedFactoryID] = useState(null); // to know wha
       setSelectedFactory(null);
     };
 
+    const handleOk = async () => {
+      try {
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+        const formattedDate = `${year}-${month}-${day}`;
+
+        const values = await form.validateFields();
+
+        const managerData = {
+          "entry_date": formattedDate,
+          "departure_date": null,
+          "factory": selectedFactoryID,
+          "manager": values['Selected Factory']
+        }
+        console.log(managerData);
+
+        await apiClient.post(API_URL_FAC_MANAGER, managerData);
+
+        message.success('Added Manager Successfully!');
+        setSelectedFactory(null);
+        setIsModalVisible(false);
+        getFactoryManagers();
+
+      } catch (error) {
+          console.error('Error assigning to Factory:', error);
+          message.error('Failed to assign Manager to Factory');
+          setSelectedFactory(null);
+          setIsModalVisible(false);
+      }
+  };
+
+  const removeManager = async () => {
+    try {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = today.getFullYear();
+      const formattedDate = `${year}-${month}-${day}`;
+  
+      const managerData = managers.find(mg => mg.factory === selectedFactory.factoryID && mg.departure_date === null)
+      const data = 
+      {
+        ...managerData,
+        departure_date : formattedDate
+      }
+
+
+      const manager = managers.find(mg => mg.factory === selectedFactory.factoryID && mg.departure_date === null);
+      if (manager) {
+        const factoryManagerID = manager.factory_manager_id;
+        // Use factoryManagerID in your API request
+        await apiClient.put(`${API_URL_FAC_MANAGER}${factoryManagerID}/`, data);
+        message.success('Removed Manager Successfully!');
+        setSelectedFactory(null);
+        getFactoryManagers();
+      } else {
+        console.error('No manager found with the specified factory and null departure date.');
+        message.error('Failed to find the manager to remove.');
+      }
+    } catch (error) {
+      console.error('Error at removing manager: ', error);
+      message.error('Failed to Remove Manager from Factory');
+    } finally {
+      setSelectedFactoryID(null);
+    }
+  };
+  
+
+
   return ( 
     <OrderContainer>
        <SideBar>
@@ -225,12 +329,54 @@ const [selectedFactoryID, setSelectedFactoryID] = useState(null); // to know wha
             </div>
           </form>
         </FormContainer>
+        <Modal
+                title={`Assign New Manager For: ${selectedFactory? selectedFactory.name : ''}`}
+                visible={isModalVisible}
+                onOk={handleOk}
+                onCancel={() => setIsModalVisible(false)}
+            >
+                <Form form={form} layout="vertical">
+                    <Form.Item name="Selected Factory" label="Assign:" rules={[{ required: true }]}>
+                        <SelectANT>
+                        {user
+                            .filter(
+                              usr => 
+                                usr.is_active === true && 
+                                !managers.some(man => man.manager === usr.id && man.departure_date === null) &&
+                                UserDivision.some(div => div.user === usr.id && div.division === 1)
+                            )
+                            .map(op => (
+                              <SelectANT.Option key={op.id} value={op.id}>
+                                {`${op.first_name} ${op.last_name}`}
+                              </SelectANT.Option>
+                            ))}
+
+                        </SelectANT>
+                    </Form.Item>
+                </Form>
+            </Modal>
     </MainContent>
     {selectedFactory && ( //Show modal only if a factory is selected
         <ModalComponent onClose={closeModal}>
           {(selectedFactory.status === 'Active' &&
               <BtnEdit onClick={() => {startEditing()}}>  <FontAwesomeIcon icon={faPenToSquare} /></BtnEdit>)}
-          <h2>{selectedFactory.name}</h2>
+{selectedFactory.status === 'Active' &&
+  (!managers.some(mg => mg.factory === selectedFactory.factoryID && mg.departure_date === null)) && (
+    <BtnEdit manager onClick={() => {setIsModalVisible(true); setSelectedFactoryID(selectedFactory.factoryID)}}>
+      <FontAwesomeIcon icon={faUserTie} /> Add Manager
+    </BtnEdit>
+)}
+
+
+{(selectedFactory.status === 'Active' && 
+  managers.find(mg => mg.factory === selectedFactory.factoryID && mg.departure_date === null) && (
+    <BtnEdit isdisabledBtn onClick={() => {removeManager(); setSelectedFactoryID(selectedFactory.factoryID)}}>
+      <FontAwesomeIcon icon={faUserTie} /> Remove Manager
+    </BtnEdit>
+))}
+
+          <SubTitle2>Manager:</SubTitle2>
+          <p>{`${user.find(usr => usr.id === (managers.find(mg => mg.factory === selectedFactory.factoryID && mg.departure_date === null)?.manager || ''))?.first_name || 'Unassigned'} ${user.find(usr => usr.id === (managers.find(mg => mg.factory === selectedFactory.factoryID && mg.departure_date === null)?.manager || 'Unassigned'))?.last_name || ''}`}</p>
           <SubTitle2>Address:</SubTitle2>
           <p>{selectedFactory.address}</p>
           <SubTitle2>Phone:</SubTitle2>

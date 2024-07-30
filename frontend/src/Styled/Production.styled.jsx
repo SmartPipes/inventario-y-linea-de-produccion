@@ -66,15 +66,16 @@ overflow-y: auto;
 
 `;
 
+
 const BtnEdit = styled.button`
     padding: 0.5rem 1rem;
-    background: #FCDC2A;
+    background: ${(props) => props.manager ? '#3572EF' : props.isdisabledBtn ? '#EE4E4E' : '#FCDC2A'};
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
-
+    margin-left: 10px;
 `;
 
 

@@ -50,6 +50,7 @@ export const Production = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [allItemsFulfilled, setAllItemsFulfilled] = useState(false);
+    const [PODetails, setPODetails] = useState([]);
 
 
     useEffect(() => {
@@ -114,6 +115,7 @@ export const Production = () => {
         getPL();
         getPLP();
         getPhases();
+        getPODetails();
         },[]);
 
     const {
@@ -147,6 +149,16 @@ export const Production = () => {
           console.error('Error at fetching phases', error)
       }
   }
+
+  const getPODetails = async () => {
+    try {
+        const response = await apiClient.get(API_URL_PO_DETAILS);
+        setPODetails(response.data);
+
+    } catch (error) {
+        console.error('Error at fetching phases', error)
+    }
+}
 
       const openModalWarehouse = (warehouse_id) => {
         if (typeof warehouse_id === 'object' && 'otherWH' in warehouse_id) {
@@ -514,7 +526,6 @@ const getProductionOrders = async () => {
         }else{
           d++;
         }});
-        console.log(p,ip,d)
         setPendingOrders(p);
         setIPOrders(ip);
         setFinishedOrders(d);
@@ -655,6 +666,52 @@ const columns = [
 }
 ];
 
+const columnProducts = products.map(pro => {
+  const totalQty = PODetails
+      .filter(det => det.product === pro.value)
+      .reduce((sum, det) => sum + det.product_quantity, 0);
+  
+  return { product: pro.label, quantity: totalQty };
+});
+
+
+// const data = columnProducts
+
+// // Chart configuration
+// const config = {
+//   data,
+//   xField: 'product',
+//   yField: 'quantity',
+//   label: {
+//     position: 'middle',
+//     style: {
+//       fill: '#FFFFFF',
+//       opacity: 0.6,
+//     },
+//     formatter: (item) => {
+//       const maxLength = 10; // Adjust the max length as needed
+//       if (item.product.length > maxLength) {
+//         return item.product.substring(0, maxLength) + '...';
+//       }
+//       return item.product;
+//     },
+//   },
+//   xAxis: {
+//     label: {
+//       autoHide: true,
+//       autoRotate: true,
+//       rotate: -45,
+//     },
+//   },
+//   meta: {
+//     product: { alias: 'Product' },
+//     quantity: { alias: 'Quantity' },
+//   },
+//   columnWidthRatio: 0.4,
+//   color: '#3fa9f5',
+// };
+
+
 
   return (
       <MainContent>
@@ -683,6 +740,15 @@ const columns = [
             </Card>
           </Col>
         </Row>
+        {/* <Row gutter={8} style={{marginTop: '15px'}}>
+            <Col span={8}>
+            <Card title="Produced Products" bordered={false} style={{ width: '100%' }}>
+              <div style={{ width: '100%',}}>
+                <Column {...config}/>
+                </div>
+            </Card>
+            </Col>
+        </Row> */}
         <Table
                 columns={columns}
                 dataSource={PL}
