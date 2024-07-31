@@ -1,7 +1,6 @@
 import React from 'react';
-// import InventoryTable from '../components/InventoryTable';
 
-export const InventoryPage = () => {
+const InventoryPage = () => {
     return (
         <div>
             Inventory Data
@@ -9,3 +8,4 @@ export const InventoryPage = () => {
     );
 };
 
+export default InventoryPage;

@@ -1,11 +1,11 @@
 # views.py del módulo users
-
+from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import User, Division, DivisionUser, PaymentMethod
-from .serializers import UserSerializer, DivisionSerializer, DivisionUserSerializer, PaymentMethodSerializer, UserDetailSerializer,LoginSerializer
+from .serializers import UserSerializer, DivisionSerializer, DivisionUserSerializer, PaymentMethodSerializer, UserDetailSerializer, UserCreateSerializer, UserUpdateSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

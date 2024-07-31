@@ -18,11 +18,10 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
-    id = models.AutoField(primary_key=True)
+    email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    birthdate = models.DateField(null=True, blank=True)  # Permitir nulos y valores en blanco
-    email = models.EmailField(unique=True)
+    birthdate = models.DateField(null=True, blank=True)
     phone = models.CharField(max_length=10, blank=True)
     password = models.CharField(max_length=200)
     role = models.CharField(max_length=10, choices=[('Admin', 'Admin'), ('User', 'User')])
@@ -32,9 +31,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'birthdate', 'phone', 'role', 'status']
 
     objects = UserManager()
+
+    def get_full_name(self):
+        return self.first_name
+
+    def get_short_name(self):
+        return self.first_name
+    
+    def __str__(self):
+        return self.email
 
     class Meta:
         db_table = 'use_Users'

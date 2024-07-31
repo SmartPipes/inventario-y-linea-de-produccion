@@ -11,7 +11,7 @@ import { ProductionNavBar } from './ProductionNavBar';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-export const Factory = () => {
+const Factory = () => {
 const [city, setCities] = useState([]);
 const [selectedFactory, setSelectedFactory] = useState(null); //to know what factory was selected for the modal
 const [factories, setFactories] = useState([]);
@@ -251,3 +251,4 @@ const [selectedFactoryID, setSelectedFactoryID] = useState(null); // to know wha
     </OrderContainer>
   )
 }
+export default Factory;

@@ -12,7 +12,7 @@ import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
-export const ProductionLine = () => {
+const ProductionLine = () => {
 const [PL, setPL] = useState([]);
 const [phases, setPhases] = useState([]);
 const [factory, setFactories] = useState([]);
@@ -382,3 +382,5 @@ const userID = 2;
     </OrderContainer>
   )
 }
+
+export default ProductionLine;

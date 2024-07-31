@@ -9,7 +9,7 @@ import ModalComponent from '../../modals/ProductionModals';
 import { ProductionNavBar } from './ProductionNavBar';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-export const ProductionPhase = () => {
+const ProductionPhase = () => {
 const [phases, setPhases] = useState([]);
 const [selectedPhase, setSelectedPhase] = useState(null); //to know what phase was selected
 const [isEditing, setIsEditing] = useState(false); // to know that its in editing mode
@@ -177,3 +177,4 @@ const [selectedPhaseID, setSelectedPhaseID] = useState(null); // to know what is
     </OrderContainer>
   )
 }
+export default ProductionPhase;

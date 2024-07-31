@@ -13,7 +13,7 @@ import { API_URL_PRODUCTS, API_URL_FACTORIES, API_URL_WAREHOUSES, API_URL_ORDERS
 import { apiClient } from '../../../ApiClient'
 
 
-export const Production = () => {
+const Production = () => {
     const [newOrder, setNewOrder] = useState(false);
     const [products, setProducts] = useState([]);
     const [factory, setFactories] = useState([]);
@@ -167,4 +167,5 @@ const getWarehouses = async () => {
   )
 }
 
+export default Production;
 //hacer otra cosa para epujar todo para abajo
