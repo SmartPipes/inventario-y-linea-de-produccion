@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Modal, Form, Input, Space, Button, Select, message } from 'antd';
-import { API_URL_WAREHOUSES, API_URL_CITIES } from '../Config';
+import { API_URL_WAREHOUSES, API_URL_CITIES, API_URL_USERS, API_URL_USER_WARE_ASSIGN } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
 
@@ -9,6 +9,8 @@ const { Option } = Select;
 const WarehousePage = () => {
     const [warehouses, setWarehouses] = useState([]);
     const [cities, setCities] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [assignments, setAssignments] = useState([]);
     const [filteredWarehouses, setFilteredWarehouses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -17,13 +19,17 @@ const WarehousePage = () => {
     const [currentWarehouse, setCurrentWarehouse] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [isAssignModalVisible, setIsAssignModalVisible] = useState(false);
     const [currentWarehouseId, setCurrentWarehouseId] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
 
     useEffect(() => {
         fetchWarehouses();
         fetchCities();
+        fetchUsers();
+        fetchAssignments();
     }, []);
 
     useEffect(() => {
@@ -68,6 +74,24 @@ const WarehousePage = () => {
         }
     };
 
+    const fetchUsers = async () => {
+        try {
+            const response = await apiClient.get(API_URL_USERS);
+            setUsers(response.data.filter(user => user.role === 'Admin'));
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
+
+    const fetchAssignments = async () => {
+        try {
+            const response = await apiClient.get(API_URL_USER_WARE_ASSIGN);
+            setAssignments(response.data);
+        } catch (error) {
+            console.error('Error fetching assignments:', error);
+        }
+    };
+
     const showModal = (warehouse = null) => {
         setCurrentWarehouse(warehouse);
         setEditMode(!!warehouse);
@@ -84,16 +108,16 @@ const WarehousePage = () => {
             const values = await form.validateFields();
             if (editMode) {
                 await apiClient.put(`${API_URL_WAREHOUSES}${currentWarehouse.warehouse_id}/`, values);
-                message.success('Almacén actualizado exitosamente');
+                message.success('Warehouse updated successfully');
             } else {
                 await apiClient.post(API_URL_WAREHOUSES, values);
-                message.success('Almacén agregado exitosamente');
+                message.success('Warehouse added successfully');
             }
             fetchWarehouses();
             setIsModalVisible(false);
         } catch (error) {
-            console.error('Error al guardar el almacén:', error);
-            message.error('Error al guardar el almacén');
+            console.error('Error saving warehouse:', error);
+            message.error('Error saving warehouse');
         }
     };
 
@@ -106,10 +130,10 @@ const WarehousePage = () => {
         try {
             await apiClient.delete(`${API_URL_WAREHOUSES}${currentWarehouseId}/`);
             fetchWarehouses();
-            message.success('Almacén eliminado exitosamente');
+            message.success('Warehouse deleted successfully');
         } catch (error) {
-            console.error('Error al eliminar el almacén:', error);
-            message.error('Error al eliminar el almacén');
+            console.error('Error deleting warehouse:', error);
+            message.error('Error deleting warehouse');
         } finally {
             setIsDeleteModalVisible(false);
         }
@@ -124,13 +148,48 @@ const WarehousePage = () => {
         setFilteredWarehouses(filtered);
     };
 
+    const showAssignModal = (warehouseId) => {
+        setCurrentWarehouseId(warehouseId);
+        setIsAssignModalVisible(true);
+    };
+
+    const handleAssignManager = async () => {
+        try {
+            await apiClient.post(API_URL_USER_WARE_ASSIGN, {
+                warehouse: currentWarehouseId,
+                manager_user: selectedUser,
+                assigned_date: new Date().toISOString().split('T')[0],
+            });
+            message.success('Manager assigned successfully');
+            fetchAssignments();
+            setIsAssignModalVisible(false);
+        } catch (error) {
+            console.error('Error assigning manager:', error);
+            message.error('Error assigning manager');
+        }
+    };
+
+    const handleRemoveManager = async (assignmentId) => {
+        try {
+            const removedDate = new Date().toISOString().split('T')[0];
+            await apiClient.patch(`${API_URL_USER_WARE_ASSIGN}${assignmentId}/`, {
+                removed_date: removedDate
+            });
+            message.success('Manager removed successfully');
+            fetchAssignments();
+        } catch (error) {
+            console.error('Error removing manager:', error);
+            message.error('Error removing manager');
+        }
+    };
+
     const columns = [
         { title: 'ID', dataIndex: 'warehouse_id', key: 'warehouse_id' },
         { title: 'Name', dataIndex: 'name', key: 'name' },
         { title: 'Address', dataIndex: 'address', key: 'address' },
         { title: 'Phone', dataIndex: 'phone', key: 'phone' },
         { title: 'State', dataIndex: 'status', key: 'status' },
-        { title: 'City', dataIndex: 'city', key: 'city', render: (text) => cities.find(city => city.city_id === text)?.city_name || 'Desconocido' },
+        { title: 'City', dataIndex: 'city', key: 'city', render: (text) => cities.find(city => city.city_id === text)?.city_name || 'Unknown' },
         {
             title: 'Action',
             key: 'action',
@@ -138,6 +197,12 @@ const WarehousePage = () => {
                 <Space size="middle">
                     <Button onClick={() => showModal(record)} type="link">Edit</Button>
                     <Button onClick={() => showDeleteModal(record.warehouse_id)} type="link" danger>Delete</Button>
+                    <Button onClick={() => showAssignModal(record.warehouse_id)} type="link">Assign Manager</Button>
+                    {assignments.filter(assign => assign.warehouse === record.warehouse_id && !assign.removed_date).map(assign => (
+                        <Button key={assign.user_warehouse_assignment_id} onClick={() => handleRemoveManager(assign.user_warehouse_assignment_id)} type="link" danger>
+                            Remove Manager
+                        </Button>
+                    ))}
                 </Space>
             )
         }
@@ -193,14 +258,36 @@ const WarehousePage = () => {
                 </Form>
             </Modal>
             <Modal
-                title="Confirmar Eliminación"
+                title="Assign Manager"
+                visible={isAssignModalVisible}
+                onOk={handleAssignManager}
+                onCancel={() => setIsAssignModalVisible(false)}
+            >
+                <Form layout="vertical">
+                    <Form.Item label="Select Manager" required>
+                        <Select
+                            showSearch
+                            placeholder="Select a manager"
+                            optionFilterProp="children"
+                            onChange={value => setSelectedUser(value)}
+                            filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                        >
+                            {users.map(user => (
+                                <Option key={user.id} value={user.id}>{`${user.first_name} ${user.last_name}`}</Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                </Form>
+            </Modal>
+            <Modal
+                title="Confirm Deletion"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
-                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
-                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
+                okText={`Delete${countdown > 0 ? ` (${countdown})` : ''}`}
+                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white', color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>¿Estás seguro de que quieres borrar este almacén? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
+                <p>Are you sure you want to delete this warehouse? Please wait {countdown} seconds to confirm deletion.</p>
             </Modal>
         </div>
     );

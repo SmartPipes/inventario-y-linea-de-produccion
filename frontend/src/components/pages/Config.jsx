@@ -21,6 +21,7 @@ export const API_URL_INVENTORYSUM = BASE_API_URL+"inventory/inventory-total-stoc
 export const API_URL_PRODUCTS = BASE_API_URL+"inventory/products/";
 //inventory warehouse
 export const API_URL_WAREHOUSES = BASE_API_URL+"inventory/warehouse/";
+export const API_URL_USER_WARE_ASSIGN = BASE_API_URL+"inventory/user-warehouse-assignment/";
 export const API_URL_PO_DETAILS = BASE_API_URL+"production-line/production-order-details/";
 export const API_URL_PO_RAWM_DETAILS = BASE_API_URL+"production-line/ProductionOrderWarehouseRetrievalDetail/"
 export const API_URL_CATEGORIES = BASE_API_URL+"inventory/category/";
