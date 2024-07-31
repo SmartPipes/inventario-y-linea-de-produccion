@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, ProductRawMaterialList
+from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, ProductRawMaterialList, RestockRequestWarehouse, RestockRequestWarehouseRawMaterial, UserWarehouseAssignment
 from datetime import datetime
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -137,3 +137,18 @@ class InventoryTotalStockSerializer(serializers.Serializer):
     item_id = serializers.IntegerField()
     item_type = serializers.CharField(max_length=12)
     total_stock = serializers.IntegerField()
+    
+class RestockRequestWarehouseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RestockRequestWarehouse
+        fields = '__all__'
+        
+class RestockRequestWarehouseRawMaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RestockRequestWarehouseRawMaterial
+        fields = '__all__'
+        
+class UserWarehouseAssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserWarehouseAssignment
+        fields = '__all__'        

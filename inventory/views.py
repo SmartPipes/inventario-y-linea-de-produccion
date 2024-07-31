@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, ProductRawMaterialList
-from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, ProductRawMaterialListSerializer, InventoryTotalStockSerializer
+from .models import Product, RawMaterial, Inventory, Category, State, City, Warehouse, Supplier, OperationLog, RestockRequest, ProductRawMaterialList, RestockRequestWarehouse, RestockRequestWarehouseRawMaterial, UserWarehouseAssignment
+from .serializers import ProductSerializer, RawMaterialSerializer, InventorySerializer, CategorySerializer, StateSerializer, CitySerializer, WarehouseSerializer, SupplierSerializer, OperationLogSerializer, RestockRequestSerializer, ProductRawMaterialListSerializer, InventoryTotalStockSerializer, RestockRequestWarehouseSerializer, RestockRequestWarehouseRawMaterialSerializer, UserWarehouseAssignmentSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
@@ -41,6 +41,11 @@ class WarehouseViewSet(viewsets.ModelViewSet):
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    
+class UserWarehouseAssignmentViewSet(viewsets.ModelViewSet):
+    queryset = UserWarehouseAssignment.objects.all()
+    serializer_class = UserWarehouseAssignmentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]    
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
@@ -67,3 +72,15 @@ class InventoryTotalStockViewSet(viewsets.ViewSet):
         queryset = Inventory.objects.values('item_id', 'item_type').annotate(total_stock=Sum('stock')).order_by('item_id')
         serializer = InventoryTotalStockSerializer(queryset, many=True)
         return Response(serializer.data)
+
+class RestockRequestWarehouseView(viewsets.ModelViewSet):
+    queryset = RestockRequestWarehouse.objects.all()
+    serializer_class = RestockRequestWarehouseSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class RestockRequestWarehouseRawMaterialView(viewsets.ModelViewSet):
+    queryset = RestockRequestWarehouseRawMaterial.objects.all()
+    serializer_class = RestockRequestWarehouseRawMaterialSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    

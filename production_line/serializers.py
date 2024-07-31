@@ -45,3 +45,4 @@ class ProductionOrderWarehouseRetrievalDetailSerializer(serializers.ModelSeriali
     class Meta:
         model = ProductionOrderWarehouseRetrievalDetail
         fields = '__all__'
+        

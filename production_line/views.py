@@ -1,4 +1,5 @@
-from rest_framework import viewsets
+from rest_framework import viewsets,mixins,status
+from django.db.models import Sum
 from .models import Factory, Phase, ProductionLine, ProductionPhase, ProductionOrder, ProductionOrderDetail, ProductionOrderPhase, FactoryManager, ProductionOrderWarehouseRetrievalDetail
 from .serializers import FactorySerializer, PhaseSerializer, ProductionLineSerializer, ProductionPhaseSerializer, ProductionOrderSerializer, ProductionOrderDetailSerializer, ProductionOrderPhaseSerializer, FactoryManagerSerializer, ProductionOrderWarehouseRetrievalDetailSerializer
 

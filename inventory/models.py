@@ -182,12 +182,17 @@ class RestockRequest(models.Model):
         db_table = 'inv_restock_request'
 
 class RestockRequestWarehouse(models.Model):
-    restock_request = models.ForeignKey(RestockRequest, on_delete=models.CASCADE)
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='restock_request_warehouse')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=15, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected'), ('In Progress', 'In Progress')], default='Pending')
+    from_warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='restock_request_warehouse1')
+    requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    to_factory = models.ForeignKey('production_line.Factory', on_delete=models.CASCADE, related_name='restock_request_Factory')
+    production_order_id = models.ForeignKey('production_line.ProductionOrder',on_delete=models.CASCADE, related_name='restock_request_PO')
 
     class Meta:
         db_table = 'inv_restock_request_warehouse'
-        unique_together = (('restock_request', 'warehouse'),)
+
+
 
 class RestockRequestWarehouseRawMaterial(models.Model):
     restock_request_warehouse = models.ForeignKey(RestockRequestWarehouse, on_delete=models.CASCADE)
