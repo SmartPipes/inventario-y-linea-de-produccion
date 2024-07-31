@@ -20,8 +20,10 @@ const WarehousePage = () => {
     const [searchText, setSearchText] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [isAssignModalVisible, setIsAssignModalVisible] = useState(false);
+    const [isManageModalVisible, setIsManageModalVisible] = useState(false);
     const [currentWarehouseId, setCurrentWarehouseId] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [currentAssignment, setCurrentAssignment] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
 
@@ -155,31 +157,57 @@ const WarehousePage = () => {
 
     const handleAssignManager = async () => {
         try {
-            await apiClient.post(API_URL_USER_WARE_ASSIGN, {
+            const assignedDate = new Date().toISOString().split('T')[0]; // Only take the date part
+            const response = await apiClient.post(API_URL_USER_WARE_ASSIGN, {
                 warehouse: currentWarehouseId,
                 manager_user: selectedUser,
-                assigned_date: new Date().toISOString().split('T')[0],
+                assigned_date: assignedDate,
             });
             message.success('Manager assigned successfully');
             fetchAssignments();
             setIsAssignModalVisible(false);
         } catch (error) {
             console.error('Error assigning manager:', error);
-            message.error('Error assigning manager');
+            if (error.response) {
+                console.error('Server Response:', error.response.data);
+                message.error(`Error assigning manager: ${error.response.data.detail || 'Unknown error'}`);
+            } else {
+                message.error('Error assigning manager');
+            }
         }
     };
 
-    const handleRemoveManager = async (assignmentId) => {
+    const showManageModal = (warehouseId) => {
+        const assignment = assignments.find(assign => assign.warehouse === warehouseId && !assign.removed_date);
+        if (assignment) {
+            setCurrentAssignment(assignment);
+            setIsManageModalVisible(true);
+        } else {
+            message.error('No manager assigned to this warehouse.');
+        }
+    };
+
+    const handleRemoveManager = async () => {
         try {
-            const removedDate = new Date().toISOString().split('T')[0];
-            await apiClient.patch(`${API_URL_USER_WARE_ASSIGN}${assignmentId}/`, {
+            const removedDate = new Date().toISOString().split('T')[0]; // Only take the date part
+            console.log(`PATCH ${API_URL_USER_WARE_ASSIGN}${currentAssignment.user_warehouse_assignment_id}/`, {
                 removed_date: removedDate
             });
+            const response = await apiClient.patch(`${API_URL_USER_WARE_ASSIGN}${currentAssignment.user_warehouse_assignment_id}/`, {
+                removed_date: removedDate
+            });
+            console.log('Response:', response.data);
             message.success('Manager removed successfully');
             fetchAssignments();
+            setIsManageModalVisible(false);
         } catch (error) {
             console.error('Error removing manager:', error);
-            message.error('Error removing manager');
+            if (error.response) {
+                console.error('Server Response:', error.response.data);
+                message.error(`Error removing manager: ${error.response.data.detail || 'Unknown error'}`);
+            } else {
+                message.error('Error removing manager');
+            }
         }
     };
 
@@ -193,18 +221,20 @@ const WarehousePage = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (_, record) => (
-                <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Edit</Button>
-                    <Button onClick={() => showDeleteModal(record.warehouse_id)} type="link" danger>Delete</Button>
-                    <Button onClick={() => showAssignModal(record.warehouse_id)} type="link">Assign Manager</Button>
-                    {assignments.filter(assign => assign.warehouse === record.warehouse_id && !assign.removed_date).map(assign => (
-                        <Button key={assign.user_warehouse_assignment_id} onClick={() => handleRemoveManager(assign.user_warehouse_assignment_id)} type="link" danger>
-                            Remove Manager
-                        </Button>
-                    ))}
-                </Space>
-            )
+            render: (_, record) => {
+                const assignment = assignments.find(assign => assign.warehouse === record.warehouse_id && !assign.removed_date);
+                return (
+                    <Space size="middle">
+                        <Button onClick={() => showModal(record)} type="link">Edit</Button>
+                        <Button onClick={() => showDeleteModal(record.warehouse_id)} type="link" danger>Delete</Button>
+                        {assignment ? (
+                            <Button onClick={() => showManageModal(record.warehouse_id)} type="link">Manage Manager</Button>
+                        ) : (
+                            <Button onClick={() => showAssignModal(record.warehouse_id)} type="link">Assign Manager</Button>
+                        )}
+                    </Space>
+                );
+            }
         }
     ];
 
@@ -278,6 +308,17 @@ const WarehousePage = () => {
                         </Select>
                     </Form.Item>
                 </Form>
+            </Modal>
+            <Modal
+                title="Manage Manager"
+                visible={isManageModalVisible}
+                onOk={handleRemoveManager}
+                onCancel={() => setIsManageModalVisible(false)}
+                okText="Remove Manager"
+                okButtonProps={{ danger: true }}
+            >
+                <p>Manager: {currentAssignment && `${users.find(user => user.id === currentAssignment.manager_user)?.first_name} ${users.find(user => user.id === currentAssignment.manager_user)?.last_name}`}</p>
+                <p>Assigned Date: {currentAssignment && new Date(currentAssignment.assigned_date).toLocaleDateString()}</p>
             </Modal>
             <Modal
                 title="Confirm Deletion"
