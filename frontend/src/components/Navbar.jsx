@@ -3,7 +3,7 @@ import Logo from './Logo';
 import { NavLinkWrapper, NavbarWrapper, StyledNavLink } from '../Styled/Navbar.styled';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCaretDown, faUserPlus } from '@fortawesome/free-solid-svg-icons'; // Añadido faUserPlus para el icono de Registro
-
+import Logout from './pages/Login/Logout';
 export const Navbar = () => {
 
   const links = [
@@ -24,6 +24,7 @@ export const Navbar = () => {
             {link.page !== "User" && link.page !== "Register" && <FontAwesomeIcon icon={faCaretDown} width="12px" color="#FAFBF3" style={{ marginLeft: '4px' }} />}
           </StyledNavLink>
         ))}
+        <Logout />
       </NavLinkWrapper>
     </NavbarWrapper>
   );

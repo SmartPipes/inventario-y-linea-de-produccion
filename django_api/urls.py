@@ -17,4 +17,6 @@ urlpatterns = [
     path('api/production-line/', include('production_line.urls')),
     path('api/sales/', include('sales.urls')),
     path('api/delivery/', include('delivery.urls')),
+    path('activate/', include('activation.urls')),
+    path('password-reset/', include('password_reset.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

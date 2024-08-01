@@ -1,4 +1,5 @@
-import axios from "axios"; // Ajusta la importación si es necesario
+// frontend/src/components/actions/auth.js
+import axios from 'axios';
 import {
     LOGIN_SUCCESS,
     LOGIN_FAIL,
@@ -6,37 +7,34 @@ import {
     USER_LOADED_FAIL,
     AUTHENTICATED_SUCCESS,
     AUTHENTICATED_FAIL,
-    PASSWORD_RESET_SUCCESS,
-    PASSWORD_RESET_FAIL,
-    PASSWORD_RESET_CONFIRM_SUCCESS,
-    PASSWORD_RESET_CONFIRM_FAIL,
     SIGNUP_SUCCESS,
     SIGNUP_FAIL,
-    ACTIVATION_SUCCESS,
-    ACTIVATION_FAIL,
     LOGOUT
-} from "./types";
+} from './types';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+// Acción para cargar el perfil del usuario
 export const load_user = () => async dispatch => {
-    if (localStorage.getItem('access')) {
+    const accessToken = localStorage.getItem('access');
+    if (accessToken) {
         const config = {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `JWT ${localStorage.getItem('access')}`,
+                'Authorization': `Bearer ${accessToken}`,
                 'Accept': 'application/json'
             }
         };
 
         try {
             const res = await axios.get(`${apiUrl}/auth/users/me/`, config);
-
+            console.log('User data:', res.data);
             dispatch({
                 type: USER_LOADED_SUCCESS,
                 payload: res.data
             });
         } catch (err) {
+            console.error('Error loading user:', err);
             dispatch({
                 type: USER_LOADED_FAIL
             });
@@ -48,6 +46,7 @@ export const load_user = () => async dispatch => {
     }
 };
 
+// Acción para verificar si el usuario está autenticado
 export const checkAuthenticated = () => async dispatch => {
     if (localStorage.getItem('access')) {
         const config = {
@@ -84,6 +83,7 @@ export const checkAuthenticated = () => async dispatch => {
     }
 };
 
+// Acción para iniciar sesión
 export const login = (email, password) => async dispatch => {
     const config = {
         headers: {
@@ -113,6 +113,7 @@ export const login = (email, password) => async dispatch => {
     }
 };
 
+// Acción para registrar un usuario
 export const registerUser = (formData) => async dispatch => {
     const config = {
         headers: {
@@ -138,4 +139,20 @@ export const registerUser = (formData) => async dispatch => {
             type: SIGNUP_FAIL
         });
     }
+};
+
+// Acción para cerrar sesión
+export const logout = () => dispatch => {
+    // Elimina los tokens del almacenamiento local
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    
+    // Actualiza el estado de Redux
+    dispatch({
+        type: LOGOUT
+    });
+    
+    // Redirige al usuario a la página de inicio de sesión
+    // Puedes usar la navegación programática si estás usando React Router
+    // window.location.href = '/login';
 };

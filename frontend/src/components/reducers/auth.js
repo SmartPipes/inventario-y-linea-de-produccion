@@ -15,11 +15,11 @@ const initialState = {
     refresh: localStorage.getItem('refresh'),
     isAuthenticated: null,
     user: null,
-    loading: true, // Añadir una propiedad de loading
-    error: null // Añadir una propiedad para almacenar errores
+    loading: true, // Propiedad para manejar el estado de carga
+    error: null // Propiedad para manejar errores
 };
 
-export default function(state = initialState, action) {
+export default function authReducer(state = initialState, action) {
     const { type, payload } = action;
 
     switch(type) {
@@ -31,8 +31,8 @@ export default function(state = initialState, action) {
                 user: state.user // Mantén al usuario si ya está cargado
             };
         case LOGIN_SUCCESS:
-            localStorage.setItem('access', payload.access);
-            localStorage.setItem('refresh', payload.refresh);
+            localStorage.setItem('access', payload.access); // Guardar el token de acceso
+            localStorage.setItem('refresh', payload.refresh); // Guardar el token de actualización
             return {
                 ...state,
                 isAuthenticated: true,
@@ -64,8 +64,8 @@ export default function(state = initialState, action) {
         case LOGIN_FAIL:
         case SIGNUP_FAIL:
         case LOGOUT:
-            localStorage.removeItem('access');
-            localStorage.removeItem('refresh');
+            localStorage.removeItem('access'); // Limpiar el token de acceso
+            localStorage.removeItem('refresh'); // Limpiar el token de actualización
             return {
                 ...state,
                 access: null,
@@ -73,7 +73,7 @@ export default function(state = initialState, action) {
                 isAuthenticated: false,
                 user: null,
                 loading: false,
-                error: payload
+                error: payload // Almacena el error en el estado
             };
         default:
             return state;

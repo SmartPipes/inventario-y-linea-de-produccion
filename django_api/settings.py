@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'sales',
     'delivery',
     'djoser',
+    'activation',
+    'password_reset',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -91,7 +93,7 @@ SIMPLE_JWT = {
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
-    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}/',
+    'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}/',
     'SEND_ACTIVATION_EMAIL': True,
     'SEND_CONFIRMATION_EMAIL': True,
     'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
