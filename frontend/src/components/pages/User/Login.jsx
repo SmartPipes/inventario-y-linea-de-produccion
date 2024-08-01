@@ -3,7 +3,7 @@ import { Form, Input, Button, Typography, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css'; 
 import backgroundImage from '../../../../public/BackGround.jpg'; 
-import { apiClient, login } from '../../../ApiClient'; 
+import { login } from '../../../ApiClient'; 
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
@@ -17,6 +17,7 @@ const Login = ({ setToken }) => {
 
       if (response.access) {
         message.success('Inicio de sesión exitoso!');
+        localStorage.setItem('access_token', response.access);  // Guarda el token en localStorage
         setToken(response.access);
         navigate('/home');
       } else {
