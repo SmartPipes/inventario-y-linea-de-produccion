@@ -5,8 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faBars } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { Dropdown, Menu, Button } from 'antd';
+import { logout as performLogout } from '../ApiClient';
 
-export const Navbar = ({ userRole, userName }) => {
+export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -30,7 +31,11 @@ export const Navbar = ({ userRole, userName }) => {
 
   const handleMenuClick = ({ key }) => {
     if (key === 'logout') {
-      handleLogout();
+      performLogout();
+      setToken(null);
+      setUserRole(null);
+      setUserName(null);
+      navigate('/');
     } else if (key === 'manage_users') {
       navigate('/user');
     }
