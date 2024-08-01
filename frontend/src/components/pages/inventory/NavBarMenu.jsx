@@ -28,7 +28,6 @@ const NavBarMenu = ({ title }) => {
                 <NavItem><Link to="/inventory/informacion-general">General information</Link></NavItem>
                 <NavItem><Link to="/inventory/operation-log">Operations</Link></NavItem>
                 <NavItem><Link to="/inventory">Products</Link></NavItem>
-                <NavItem><Link to="/inventory/reportes">Reports</Link></NavItem>
                 <DropdownContainer>
                     <NavItem onClick={toggleConfig}>Settings</NavItem>
                     <DropdownMenu isOpen={isConfigOpen}>

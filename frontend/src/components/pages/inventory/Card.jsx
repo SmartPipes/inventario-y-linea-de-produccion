@@ -29,17 +29,15 @@ const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, 
     };
 
     return (
-        <InventoryCard onClick={handleCardClick}>
-            <CardImage src={image_icon} alt={item_name} />
-            <CardBody>
-                <CardHeader>
+        <InventoryCard onClick={handleCardClick} className="inventory-card">
+            <CardHeader>
+                <CardBody>
                     <CardTitle>{item_name}</CardTitle>
-                </CardHeader>
-                <CardFooter>
                     <PriceTag>Price: ${item_price}</PriceTag>
                     {totalStock !== null && <StockTag>Total Stock: {totalStock}</StockTag>}
-                </CardFooter>
-            </CardBody>
+                </CardBody>
+                <CardImage src={image_icon} alt={item_name} />
+            </CardHeader>
         </InventoryCard>
     );
 };

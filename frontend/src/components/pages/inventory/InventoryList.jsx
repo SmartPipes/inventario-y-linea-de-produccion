@@ -7,6 +7,7 @@ import NewItemPage from './NewItemPage';
 import Card from './Card';
 import QuantityModal from './QuantityModal';
 import debounce from 'lodash/debounce';
+import { InventoryContainer, InventorySubContainer } from '../../../Styled/Inventory.styled';
 
 const InventoryList = () => {
     const [items, setItems] = useState([]);
@@ -161,16 +162,17 @@ const InventoryList = () => {
             {loading ? (
                 <Spin size="large" />
             ) : filteredItems.length > 0 ? (
-                <Row gutter={[8, 8]}>
-                    {filteredItems.map(item => (
-                        <Col key={item.inventory_id} xs={24} sm={12} md={8} lg={6} xl={4} style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Card 
+                <InventoryContainer>
+                    <InventorySubContainer>
+                        {filteredItems.map(item => (
+                            <Card
+                                key={item.inventory_id}
                                 {...item}
-                                onCardClick={() => handleCardClick(item)} // Pass the onCardClick function
+                                onCardClick={() => handleCardClick(item)}
                             />
-                        </Col>
-                    ))}
-                </Row>
+                        ))}
+                    </InventorySubContainer>
+                </InventoryContainer>
             ) : (
                 <Empty description="No items found" />
             )}
