@@ -3,11 +3,12 @@ import Logo from './Logo';
 import { NavLinkWrapper, NavbarWrapper, StyledNavLink, HamburgerMenu, NavMenu } from '../Styled/Navbar.styled';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faBars } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Dropdown, Menu, Button } from 'antd';
 
 export const Navbar = ({ userRole, userName }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const links = [
     { page: "Sales", href: "/sales" },
@@ -27,8 +28,16 @@ export const Navbar = ({ userRole, userName }) => {
     window.location.reload();
   };
 
+  const handleMenuClick = ({ key }) => {
+    if (key === 'logout') {
+      handleLogout();
+    } else if (key === 'manage_users') {
+      navigate('/user');
+    }
+  };
+
   const menu = (
-    <Menu>
+    <Menu onClick={handleMenuClick}>
       <Menu.Item key="user" disabled>
         <div>
           <strong>Nombre:</strong> {userName}
@@ -38,7 +47,12 @@ export const Navbar = ({ userRole, userName }) => {
         </div>
       </Menu.Item>
       <Menu.Divider />
-      <Menu.Item key="logout" onClick={handleLogout}>
+      {userRole === 'Admin' && (
+        <Menu.Item key="manage_users">
+          Manage Users
+        </Menu.Item>
+      )}
+      <Menu.Item key="logout">
         Logout
       </Menu.Item>
     </Menu>
