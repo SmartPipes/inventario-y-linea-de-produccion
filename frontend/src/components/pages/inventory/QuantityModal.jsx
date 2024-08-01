@@ -10,38 +10,17 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial, fetch
     const [newQuantity, setNewQuantity] = useState('');
     const [currentQuantity, setCurrentQuantity] = useState(0);
     const [warehouses, setWarehouses] = useState([]);
+    const [filteredWarehouses, setFilteredWarehouses] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState('');
     const [rawMaterials, setRawMaterials] = useState([]);
     const [selectedMaterial, setSelectedMaterial] = useState(selectedRawMaterial);
 
     useEffect(() => {
-        const fetchWarehouses = async () => {
-            try {
-                const response = await apiClient.get(API_URL_WAREHOUSES);
-                setWarehouses(response.data);
-                if (response.data.length > 0) {
-                    setSelectedWarehouse(response.data[0].warehouse_id);
-                }
-            } catch (error) {
-                console.error('Error fetching warehouses:', error);
-                message.error('Error fetching warehouses.');
-            }
-        };
-
-        const fetchRawMaterials = async () => {
-            try {
-                const response = await apiClient.get(API_URL_INV);
-                const mergedInventory = mergeInventory(response.data);
-                setRawMaterials(mergedInventory);
-            } catch (error) {
-                console.error('Error fetching raw materials:', error);
-                message.error('Error fetching raw materials.');
-            }
-        };
-
-        fetchWarehouses();
-        fetchRawMaterials();
-    }, []);
+        if (isVisible) {
+            fetchWarehouses();
+            fetchRawMaterials();
+        }
+    }, [isVisible]);
 
     useEffect(() => {
         if (selectedRawMaterial) {
@@ -50,10 +29,44 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial, fetch
     }, [selectedRawMaterial]);
 
     useEffect(() => {
+        if (selectedMaterial) {
+            const relevantWarehouses = rawMaterials
+                .filter((item) => item.item_id === selectedMaterial.item_id && item.item_type === selectedMaterial.item_type)
+                .map((item) => item.warehouse);
+            const uniqueWarehouses = [...new Set(relevantWarehouses)];
+            setFilteredWarehouses(warehouses.filter((warehouse) => uniqueWarehouses.includes(warehouse.warehouse_id)));
+            if (uniqueWarehouses.length > 0) {
+                setSelectedWarehouse(uniqueWarehouses[0]);
+            }
+        }
+    }, [selectedMaterial, rawMaterials, warehouses]);
+
+    useEffect(() => {
         if (selectedMaterial && selectedWarehouse) {
             updateCurrentQuantity(selectedMaterial, selectedWarehouse);
         }
     }, [selectedWarehouse, selectedMaterial, rawMaterials]);
+
+    const fetchWarehouses = async () => {
+        try {
+            const response = await apiClient.get(API_URL_WAREHOUSES);
+            setWarehouses(response.data);
+        } catch (error) {
+            console.error('Error fetching warehouses:', error);
+            message.error('Error fetching warehouses.');
+        }
+    };
+
+    const fetchRawMaterials = async () => {
+        try {
+            const response = await apiClient.get(API_URL_INV);
+            const mergedInventory = mergeInventory(response.data);
+            setRawMaterials(mergedInventory);
+        } catch (error) {
+            console.error('Error fetching raw materials:', error);
+            message.error('Error fetching raw materials.');
+        }
+    };
 
     const mergeInventory = (inventoryData) => {
         const mergedInventory = {};
@@ -86,18 +99,14 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial, fetch
 
         if (selectedMaterial && selectedWarehouse) {
             try {
-                // Llamar a onApply y obtener la respuesta
                 await onApply(newQuantity, selectedWarehouse, selectedMaterial);
 
-                // Actualizar rawMaterials y currentQuantity después de aplicar los cambios
-                const updatedRawMaterials = await apiClient.get(API_URL_INV).then(response => mergeInventory(response.data));
-                setRawMaterials(updatedRawMaterials);
-                updateCurrentQuantity(selectedMaterial, selectedWarehouse);
+                // Fetch updated raw materials and warehouses
+                await fetchItems(); // Ensure `fetchItems` is passed and used correctly
+                fetchWarehouses();
+                fetchRawMaterials();
 
-                // Limpiar el campo newQuantity
                 setNewQuantity('');
-                
-                // Cerrar el modal
                 onClose();
             } catch (error) {
                 console.error('Error applying changes:', error);
@@ -121,7 +130,7 @@ const QuantityModal = ({ isVisible, onClose, onApply, selectedRawMaterial, fetch
                         value={selectedWarehouse}
                         onChange={(value) => setSelectedWarehouse(value)}
                     >
-                        {warehouses.map((warehouse) => (
+                        {filteredWarehouses.map((warehouse) => (
                             <Option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
                                 {warehouse.name}
                             </Option>

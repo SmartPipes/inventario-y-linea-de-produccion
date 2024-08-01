@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Input, Button, Row, Col, Spin, Empty, message } from 'antd';
 import { apiClient } from '../../../ApiClient';
 import { API_URL_INV } from '../Config';
@@ -6,6 +6,7 @@ import NavBarMenu from './NavBarMenu';
 import NewItemPage from './NewItemPage';
 import Card from './Card';
 import QuantityModal from './QuantityModal';
+import debounce from 'lodash/debounce';
 
 const InventoryList = () => {
     const [items, setItems] = useState([]);
@@ -21,10 +22,14 @@ const InventoryList = () => {
     }, []);
 
     useEffect(() => {
-        handleSearchChange(searchText);
+        debounceSearch(searchText);
     }, [searchText, items]);
 
-    const fetchItems = async () => {
+    const debounceSearch = useCallback(debounce((searchText) => {
+        handleSearchChange(searchText);
+    }, 100), [items]);
+
+    const fetchItems = useCallback(async () => {
         setLoading(true);
         try {
             const response = await apiClient.get(API_URL_INV);
@@ -36,32 +41,31 @@ const InventoryList = () => {
             console.error('Error fetching inventory items:', error);
         }
         setLoading(false);
-    };
+    }, []);
 
-    const handleSearchChange = (searchText) => {
-        setSearchText(searchText);
+    const handleSearchChange = useCallback((searchText) => {
         const filtered = items.filter(item =>
             (item.item_name && item.item_name.toLowerCase().includes(searchText.toLowerCase())) ||
             (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
         );
         setFilteredItems(filtered);
-    };
+    }, [items]);
 
-    const handleCardClick = (rawMaterial) => {
+    const handleCardClick = useCallback((rawMaterial) => {
         setSelectedRawMaterial(rawMaterial);
         setIsQuantityModalVisible(true);
-    };
+    }, []);
 
-    const handleQuantityModalClose = () => {
+    const handleQuantityModalClose = useCallback(() => {
         setIsQuantityModalVisible(false);
         setSelectedRawMaterial(null);
-    };
+    }, []);
 
-    const handleAddItemModalClose = () => {
+    const handleAddItemModalClose = useCallback(() => {
         setIsAddItemModalVisible(false);
-    };
+    }, []);
 
-    const handleApplyQuantity = async (quantity, warehouse, material) => {
+    const handleApplyQuantity = useCallback(async (quantity, warehouse, material) => {
         try {
             const response = await apiClient.get(API_URL_INV);
             const allItems = response.data;
@@ -86,10 +90,7 @@ const InventoryList = () => {
 
                 if (updateResponse.status === 200) {
                     message.success('Cantidad actualizada exitosamente.');
-
-                    // Vuelve a obtener el inventario para asegurarte de que los datos estén actualizados
                     await fetchItems();
-
                     setIsQuantityModalVisible(false);
                     setSelectedRawMaterial(null);
                 } else {
@@ -100,7 +101,6 @@ const InventoryList = () => {
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
-
             if (error.response) {
                 console.error('Server Response:', error.response.data);
                 message.error(`Error al actualizar la cantidad: ${error.response.data.detail || 'Error desconocido'}`);
@@ -108,9 +108,9 @@ const InventoryList = () => {
                 message.error('Error al actualizar la cantidad');
             }
         }
-    };
+    }, [fetchItems]);
 
-    const getUniqueItems = (data) => {
+    const getUniqueItems = useCallback((data) => {
         const uniqueProductsMap = {};
         const rawMaterials = [];
 
@@ -125,9 +125,9 @@ const InventoryList = () => {
         });
 
         return [...Object.values(uniqueProductsMap), ...rawMaterials];
-    };
+    }, []);
 
-    const aggregateStock = (data) => {
+    const aggregateStock = useCallback((data) => {
         const aggregatedItems = data.reduce((acc, item) => {
             const existingItem = acc.find(i => i.item_id === item.item_id && i.item_type === item.item_type);
             if (existingItem) {
@@ -138,7 +138,7 @@ const InventoryList = () => {
             return acc;
         }, []);
         return aggregatedItems;
-    };
+    }, []);
 
     return (
         <div>
@@ -147,7 +147,7 @@ const InventoryList = () => {
                 <Input
                     placeholder="Search item..."
                     value={searchText}
-                    onChange={e => handleSearchChange(e.target.value)}
+                    onChange={e => setSearchText(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
                 <Button type="primary" onClick={() => setIsAddItemModalVisible(true)}>Add Item</Button>
@@ -179,7 +179,7 @@ const InventoryList = () => {
                 onClose={handleQuantityModalClose} 
                 onApply={handleApplyQuantity} 
                 selectedRawMaterial={selectedRawMaterial}
-                fetchItems={fetchItems} // Pass fetchItems as a prop
+                fetchItems={fetchItems} // Pasa fetchItems como prop
             />
         </div>
     );

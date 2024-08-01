@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
-import { Home } from './components/pages/Home';
+import  Home  from './components/pages/Home';
 import { ProductionLine } from './components/pages/production/ProductionLine';
 import { ProductionPhase } from './components/pages/production/ProductionPhase.jsx';
 import { Factory } from './components/pages/production/Factory.jsx';
@@ -27,12 +27,14 @@ import CartDetailsPage from './components/pages/Delivery/CartDetailsPage.jsx'; /
 import SaleDetailsPage from './components/pages/Delivery/SaleDetailsPage.jsx';
 import ThirdPartyServicePage from './components/pages/Delivery/ThirdPartyServicePage.jsx'; // Import the SaleDetailsPage component
 import OrdersPage from './components/pages/Delivery/OrdersPage.jsx';
+import Login from './components/pages/User/Login.jsx';
 
 const router = createBrowserRouter([{
   path: "/",
   element: <App />,
   children: [
-    { path: "", element: <Home /> },
+    { path: "login", element: <Login /> },
+    { path: "home", element: <Home /> },
     { path: "/production/production-lines", element: <ProductionLine /> },
     { path: "/production/production-phases", element: <ProductionPhase /> },
     { path: "inventory", element: <InventoryPage /> },
