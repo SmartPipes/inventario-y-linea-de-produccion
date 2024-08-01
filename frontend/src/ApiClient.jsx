@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 const API_URL = 'https://smartpipes.cloud/api';
-// const TOKEN_ENDPOINT = '/token/';
-// const REFRESH_ENDPOINT = '/token/refresh/';
+const TOKEN_ENDPOINT = '/token/';
+const REFRESH_ENDPOINT = '/token/refresh/';
 
-// let ACCESS_TOKEN = localStorage.getItem('access_token') || '';
-// let REFRESH_TOKEN = localStorage.getItem('refresh_token') || '';
+let ACCESS_TOKEN = localStorage.getItem('access_token') || '';
+let REFRESH_TOKEN = localStorage.getItem('refresh_token') || '';
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -15,23 +15,23 @@ const apiClient = axios.create({
 });
 
 // Request interceptor to add Authorization header
-// apiClient.interceptors.request.use(async config => {
-//   console.log('Intercepted request');
+apiClient.interceptors.request.use(async config => {
+  console.log('Intercepted request');
 
-//   // If no access token, login to get tokens
-//   if (!ACCESS_TOKEN) {
-//     console.log('No access token found, logging in...');
-//     await login('smartpipes@gmail.com', 'HPT2024sp');
-//   }
+  // If no access token, login to get tokens
+  if (!ACCESS_TOKEN) {
+    console.log('No access token found, logging in...');
+    await login('smartpipes@gmail.com', 'HPT2024SP');
+  }
   
-//   // If access token exists, add it to the request headers
-//   if (ACCESS_TOKEN) {
-//     config.headers['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
-//     console.log('Access token set in request:', ACCESS_TOKEN);
-//   }
+  // If access token exists, add it to the request headers
+  if (ACCESS_TOKEN) {
+    config.headers['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
+    console.log('Access token set in request:', ACCESS_TOKEN);
+  }
 
- // return config;
-//});
+ return config;
+});
 
 // Response interceptor to handle token refresh
 apiClient.interceptors.response.use(
