@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
-import  Home  from './components/pages/Home';
+import Home from './components/pages/Home';
 import { ProductionLine } from './components/pages/production/ProductionLine';
 import { ProductionPhase } from './components/pages/production/ProductionPhase.jsx';
 import { Factory } from './components/pages/production/Factory.jsx';
@@ -19,13 +19,13 @@ import OperationLogPage from './components/pages/inventory/OperationLogPage.jsx'
 import RestockRequestPage from './components/pages/inventory/RestockRequestPage.jsx';
 import ProductPage from './components/pages/inventory/ProductPage.jsx';
 import RawMaterialPage from './components/pages/inventory/RawMaterialPage.jsx';
-import {ProductionOrders} from './components/pages/production/ProductionOrders.jsx'
-import RestockRequestWarehousePage from './components/pages/inventory/RestockRequestWarehousePage.jsx';  // Import the new component
-import CartsPage from './components/pages/Delivery/CartsPage.jsx'; // Import the CartsPage component
-import PaymentsPage from './components/pages/Delivery/PaymentsPage.jsx'; // Import the PaymentsPage component
-import CartDetailsPage from './components/pages/Delivery/CartDetailsPage.jsx'; // Import the CartDetailsPage component
+import { ProductionOrders } from './components/pages/production/ProductionOrders.jsx';
+import RestockRequestWarehousePage from './components/pages/inventory/RestockRequestWarehousePage.jsx';
+import CartsPage from './components/pages/Delivery/CartsPage.jsx';
+import PaymentsPage from './components/pages/Delivery/PaymentsPage.jsx';
+import CartDetailsPage from './components/pages/Delivery/CartDetailsPage.jsx';
 import SaleDetailsPage from './components/pages/Delivery/SaleDetailsPage.jsx';
-import ThirdPartyServicePage from './components/pages/Delivery/ThirdPartyServicePage.jsx'; // Import the SaleDetailsPage component
+import ThirdPartyServicePage from './components/pages/Delivery/ThirdPartyServicePage.jsx';
 import OrdersPage from './components/pages/Delivery/OrdersPage.jsx';
 import Login from './components/pages/User/Login.jsx';
 
@@ -52,8 +52,7 @@ const router = createBrowserRouter([{
     { path: "sales", element: <Sales /> },
     { path: "delivery", element: <Delivery /> },
     { path: "user", element: <User /> },
-    {path: "production/orders", element:<ProductionOrders/>},
-    { path: "/delivery", element: <Delivery /> },
+    { path: "production/orders", element: <ProductionOrders /> },
     { path: "/delivery/orders", element: <OrdersPage /> },
     { path: "/delivery/carts", element: <CartsPage /> },
     { path: "/delivery/payments", element: <PaymentsPage /> },
