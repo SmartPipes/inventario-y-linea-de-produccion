@@ -1,29 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { API_URL_INVENTORYSUM } from '../Config';
-import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody, CardFooter, PriceTag, StockTag } from '../../../Styled/Inventory.styled';
-import { apiClient } from '../../../ApiClient';
+import { InventoryCard, CardHeader, CardTitle, CardImage, CardBody, PriceTag, StockTag } from '../../../Styled/Inventory.styled';
 
-const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse, onCardClick }) => {
-    const [totalStock, setTotalStock] = useState(null);
-
-    useEffect(() => {
-        const fetchTotalStock = async () => {
-            try {
-                const response = await apiClient.get(API_URL_INVENTORYSUM);
-                const stockData = response.data.find(item => item.item_id === item_id && item.item_type === item_type);
-                if (stockData) {
-                    setTotalStock(stockData.total_stock);
-                }
-            } catch (error) {
-                console.error('Error fetching total stock:', error);
-                // Puedes agregar un mensaje de error aquí si es necesario
-            }
-        };
-
-        fetchTotalStock();
-    }, [item_id, item_type]);
-
+const Card = ({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse, totalStock, onCardClick }) => {
     const handleCardClick = () => {
         onCardClick({ inventory_id, item_id, item_name, item_description, image_icon, item_price, stock, item_type, warehouse });
     };
@@ -52,7 +31,8 @@ Card.propTypes = {
     stock: PropTypes.number.isRequired,
     item_type: PropTypes.string.isRequired,
     warehouse: PropTypes.string.isRequired,
+    totalStock: PropTypes.number, // Recibir totalStock como prop
     onCardClick: PropTypes.func.isRequired,
 };
 
-export default Card;
+export default React.memo(Card);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Input, Button, Row, Col, Spin, Empty, message } from 'antd';
+import { Input, Button, Spin, Empty, message } from 'antd';
 import { apiClient } from '../../../ApiClient';
-import { API_URL_INV } from '../Config';
+import { API_URL_INV, API_URL_INVENTORYSUM } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import NewItemPage from './NewItemPage';
 import Card from './Card';
@@ -16,7 +16,7 @@ const InventoryList = () => {
     const [isQuantityModalVisible, setIsQuantityModalVisible] = useState(false);
     const [isAddItemModalVisible, setIsAddItemModalVisible] = useState(false);
     const [selectedRawMaterial, setSelectedRawMaterial] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchItems();
@@ -28,16 +28,27 @@ const InventoryList = () => {
 
     const debounceSearch = useCallback(debounce((searchText) => {
         handleSearchChange(searchText);
-    }, 100), [items]);
+    }, 50), [items]);
 
     const fetchItems = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await apiClient.get(API_URL_INV);
-            const uniqueItems = getUniqueItems(response.data);
+            const [inventoryResponse, stockResponse] = await Promise.all([
+                apiClient.get(API_URL_INV),
+                apiClient.get(API_URL_INVENTORYSUM)
+            ]);
+            const uniqueItems = getUniqueItems(inventoryResponse.data);
             const aggregatedItems = aggregateStock(uniqueItems);
-            setItems(aggregatedItems);
-            setFilteredItems(aggregatedItems);
+            const stockData = stockResponse.data.reduce((acc, item) => {
+                acc[`${item.item_id}_${item.item_type}`] = item.total_stock;
+                return acc;
+            }, {});
+            const itemsWithStock = aggregatedItems.map(item => ({
+                ...item,
+                totalStock: stockData[`${item.item_id}_${item.item_type}`] || 0
+            }));
+            setItems(itemsWithStock);
+            setFilteredItems(itemsWithStock);
         } catch (error) {
             console.error('Error fetching inventory items:', error);
         }
@@ -168,6 +179,7 @@ const InventoryList = () => {
                             <Card
                                 key={item.inventory_id}
                                 {...item}
+                                totalStock={item.totalStock} // Pasar totalStock como prop
                                 onCardClick={() => handleCardClick(item)}
                             />
                         ))}
@@ -181,7 +193,7 @@ const InventoryList = () => {
                 onClose={handleQuantityModalClose} 
                 onApply={handleApplyQuantity} 
                 selectedRawMaterial={selectedRawMaterial}
-                fetchItems={fetchItems} // Pasa fetchItems como prop
+                fetchItems={fetchItems}
             />
         </div>
     );
