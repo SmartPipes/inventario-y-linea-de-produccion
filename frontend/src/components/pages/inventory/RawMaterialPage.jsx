@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Modal, Form, Input, Space, Button, message, Upload, Select } from 'antd';
-import { UploadOutlined, EyeOutlined } from '@ant-design/icons';
+import { UploadOutlined, EyeOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { API_URL_RAW_MATERIALS, API_URL_CATEGORIES, API_URL_SUPPLIERS } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
@@ -26,6 +27,7 @@ const RawMaterialPage = () => {
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
     const [removeImage, setRemoveImage] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchRawMaterials();
@@ -219,9 +221,17 @@ const RawMaterialPage = () => {
                 <Space size="middle">
                     <Button onClick={() => showModal(record)} type="link">Editar</Button>
                     <Button onClick={() => showDeleteModal(record.raw_material_id)} type="link" danger>Eliminar</Button>
+                    <Button
+                        onClick={() => navigate(`/inventory/request-restock?raw_material_id=${record.raw_material_id}`)}
+                        type="link"
+                        icon={<ShoppingCartOutlined />}
+                    >
+                        Restock
+                    </Button>
                 </Space>
             )
         }
+        
     ];
 
     const showDeleteModal = (rawMaterialId) => {

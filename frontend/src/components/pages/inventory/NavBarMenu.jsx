@@ -8,14 +8,14 @@ import {
 
 const NavBarMenu = ({ title }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isConfigOpen, setIsConfigOpen] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(null);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
-    const toggleConfig = () => {
-        setIsConfigOpen(!isConfigOpen);
+    const handleDropdownClick = (dropdown) => {
+        setOpenDropdown(openDropdown === dropdown ? null : dropdown);
     };
 
     return (
@@ -26,11 +26,27 @@ const NavBarMenu = ({ title }) => {
             </HamburgerMenu>
             <NavMenu isOpen={isMenuOpen}>
                 <NavItem><Link to="/inventory/informacion-general">General information</Link></NavItem>
-                <NavItem><Link to="/inventory/operation-log">Operations</Link></NavItem>
+                <DropdownContainer>
+                    <NavItem onClick={() => handleDropdownClick('operations')}>Operations</NavItem>
+                    <DropdownMenu isOpen={openDropdown === 'operations'}>
+                        <DropdownItem isLabel>Reabastecimiento</DropdownItem>
+                        <DropdownItem><Link to="/inventory/request-restock">Restock</Link></DropdownItem>
+                        <DropdownItem isLabel>Traslados</DropdownItem>
+                        <DropdownItem><Link to="/inventory/receipts">Receipts</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/deliveries">Deliveries</Link></DropdownItem>
+                    </DropdownMenu>
+                </DropdownContainer>
+                <DropdownContainer>
+                    <NavItem onClick={() => handleDropdownClick('reports')}>Reports</NavItem>
+                    <DropdownMenu isOpen={openDropdown === 'reports'}>
+                        <DropdownItem><Link to="/inventory/stock">Stock</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/operation-log">Movement History</Link></DropdownItem>
+                    </DropdownMenu>
+                </DropdownContainer>
                 <NavItem><Link to="/inventory">Products</Link></NavItem>
                 <DropdownContainer>
-                    <NavItem onClick={toggleConfig}>Settings</NavItem>
-                    <DropdownMenu isOpen={isConfigOpen}>
+                    <NavItem onClick={() => handleDropdownClick('settings')}>Settings</NavItem>
+                    <DropdownMenu isOpen={openDropdown === 'settings'}>
                         <DropdownItem isLabel>Warehouse Management</DropdownItem>
                         <DropdownItem><Link to="/inventory/warehouses">Warehouses</Link></DropdownItem>
                         <DropdownItem isLabel>Supplier Management</DropdownItem>
@@ -39,7 +55,6 @@ const NavBarMenu = ({ title }) => {
                         <DropdownItem><Link to="/inventory/categories">Product Categories</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/products">Products</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/raw-materials">Raw Materials</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/request-restock">Restock Requests</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/request-restock-warehouse">Restock Requests Warehouse</Link></DropdownItem>
                     </DropdownMenu>
                 </DropdownContainer>

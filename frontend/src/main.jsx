@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import Home from './components/pages/Home';
+import ReceiptsPage from './components/pages/inventory/ReceiptsPage';
+import ReceiptDetailsPage from './components/pages/inventory/ReceiptDetailsPage';
 import { ProductionLine } from './components/pages/production/ProductionLine';
 import { ProductionPhase } from './components/pages/production/ProductionPhase.jsx';
 import { Factory } from './components/pages/production/Factory.jsx';
@@ -46,6 +48,8 @@ const router = createBrowserRouter([{
     { path: "inventory/operation-log", element: <OperationLogPage /> },
     { path: "inventory/request-restock-warehouse", element: <RestockRequestWarehousePage /> },
     { path: "inventory/products", element: <ProductPage /> },
+    { path: "inventory/receipts", element: <ReceiptsPage /> },
+    { path: "inventory/receipts/:id", element: <ReceiptDetailsPage /> },
     { path: "inventory/raw-materials", element: <RawMaterialPage /> },
     { path: "/production/factories", element: <Factory /> },
     { path: "production", element: <Production /> },
