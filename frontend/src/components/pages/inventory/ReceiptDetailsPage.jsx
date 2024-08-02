@@ -52,16 +52,8 @@ const ReceiptDetailsPage = () => {
             await apiClient.patch(`${API_URL_RESTOCKREQUEST}${id}/`, { status: 'Approved' });
 
             const stockData = {
-                raw_material_id: restockRequest.raw_material,
-                warehouse_id: restockRequest.warehouse,
-                quantity: restockRequest.quantity,
-                item_type: 'RawMaterial',
-                item_name: rawMaterial.name,
-                item_description: rawMaterial.description,
-                item_price: parseFloat(rawMaterial.purchase_price),
-                price_type: 'purchase_price',
-                warehouse_name: warehouse.name,
-                image_icon: rawMaterial.image_icon,
+                inventory_id: restockRequest.inventory_id,
+                stock: restockRequest.quantity,
             };
 
             console.log('Data being sent to API:', stockData);
@@ -86,7 +78,7 @@ const ReceiptDetailsPage = () => {
     return (
         <div style={{ padding: '20px' }}>
             <h2>Receipt Details</h2>
-            <Descriptions bordered style={{ maxWidth: '50%' }}>
+            <Descriptions bordered>
                 <Descriptions.Item label="Request Date">{restockRequest.requested_at}</Descriptions.Item>
                 <Descriptions.Item label="Product">
                     <img src={rawMaterial.image_icon} alt={rawMaterial.name} style={{ width: '30px', marginRight: '10px' }} />
@@ -101,7 +93,7 @@ const ReceiptDetailsPage = () => {
                 Validate
             </Button>
         </div>
-    );
+    );  
 };
 
 export default ReceiptDetailsPage;

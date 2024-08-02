@@ -110,8 +110,14 @@ const RestockRequestPage = () => {
                 requested_by: 1,  // Change to the logged-in user ID
                 warehouse: selectedWarehouse  // Change to the appropriate warehouse ID
             };
-            await apiClient.post(API_URL_RESTOCKREQUEST, requestData);
-            message.success('Restock request created successfully');
+            const response = await apiClient.post(API_URL_RESTOCKREQUEST, requestData);
+            if (response.status === 201) {
+                const inventoryData = response.data;
+                form.setFieldsValue({ inventory_id: inventoryData.inventory_id });
+                message.success('Restock request created successfully');
+            } else {
+                message.error('Failed to create restock request');
+            }
         } catch (error) {
             console.error('Error creating restock request:', error);
             message.error('Error creating restock request');

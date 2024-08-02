@@ -5,6 +5,7 @@ const LogoImg = styled.img`
     width: 150px;
 `;
 
+
 const NavbarWrapper = styled.nav`
   display: flex;
   justify-content: space-between;

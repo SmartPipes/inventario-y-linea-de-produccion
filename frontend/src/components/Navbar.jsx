@@ -95,3 +95,4 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
     </NavbarWrapper>
   );
 };
+
