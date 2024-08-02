@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'djoser',
     'activation',
     'password_reset',
+    'django_filters',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -61,7 +62,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
+
 
 
 

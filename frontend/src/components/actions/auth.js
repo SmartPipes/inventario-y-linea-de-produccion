@@ -1,4 +1,4 @@
-// frontend/src/components/actions/auth.js
+//frontend/src/components/actions/auth.js
 import axios from 'axios';
 import {
     LOGIN_SUCCESS,
@@ -27,11 +27,34 @@ export const load_user = () => async dispatch => {
         };
 
         try {
-            const res = await axios.get(`${apiUrl}/auth/users/me/`, config);
-            console.log('User data:', res.data);
+            // Obtener los datos básicos del usuario
+            const userRes = await axios.get(`${apiUrl}/auth/users/me/`, config);
+            const userData = userRes.data;
+
+            // Obtener información adicional filtrada
+            const divisionRes = await axios.get(`${apiUrl}/users/divisions/`, {
+                ...config,
+                params: { manager_user: userData.id } // Aplicar el filtro para divisiones del usuario
+            });
+            const divisionUserRes = await axios.get(`${apiUrl}/users/division-users/`, {
+                ...config,
+                params: { user: userData.id } // Aplicar el filtro para usuarios en divisiones
+            });
+            const paymentMethodsRes = await axios.get(`${apiUrl}/users/payment-methods/`, {
+                ...config,
+                params: { client_id: userData.id } // Aplicar el filtro para métodos de pago del usuario
+            });
+
+            const userInfo = {
+                ...userData,
+                divisions: divisionRes.data,
+                divisionUsers: divisionUserRes.data,
+                paymentMethods: paymentMethodsRes.data,
+            };
+
             dispatch({
                 type: USER_LOADED_SUCCESS,
-                payload: res.data
+                payload: userInfo
             });
         } catch (err) {
             console.error('Error loading user:', err);
@@ -75,7 +98,6 @@ export const checkAuthenticated = () => async dispatch => {
                 type: AUTHENTICATED_FAIL
             });
         }
-
     } else {
         dispatch({
             type: AUTHENTICATED_FAIL

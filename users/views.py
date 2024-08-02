@@ -6,22 +6,50 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import User, Division, DivisionUser, PaymentMethod
 from .serializers import UserSerializer, DivisionSerializer, DivisionUserSerializer, PaymentMethodSerializer, UserDetailSerializer, UserCreateSerializer, UserUpdateSerializer
+from django_filters import rest_framework as filters
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+class DivisionFilter(filters.FilterSet):
+    manager_user = filters.NumberFilter(field_name='manager_user')
+
+    class Meta:
+        model = Division
+        fields = ['manager_user']
+
 class DivisionViewSet(viewsets.ModelViewSet):
     queryset = Division.objects.all()
     serializer_class = DivisionSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = DivisionFilter
+
+class DivisionUserFilter(filters.FilterSet):
+    user = filters.NumberFilter(field_name='user')
+
+    class Meta:
+        model = DivisionUser
+        fields = ['user']
 
 class DivisionUserViewSet(viewsets.ModelViewSet):
     queryset = DivisionUser.objects.all()
     serializer_class = DivisionUserSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = DivisionUserFilter
+
+class PaymentMethodFilter(filters.FilterSet):
+    client_id = filters.NumberFilter(field_name='client_id')
+
+    class Meta:
+        model = PaymentMethod
+        fields = ['client_id']
 
 class PaymentMethodsViewSet(viewsets.ModelViewSet):
     queryset = PaymentMethod.objects.all()
     serializer_class = PaymentMethodSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = PaymentMethodFilter
 
 class GetUserInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -42,4 +70,3 @@ class GetUserInfoAPIView(APIView):
             return Response(serializer.data)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-            

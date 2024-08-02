@@ -1,3 +1,4 @@
+// frontend/src/components/reducers/auth.js
 import {
     LOGIN_SUCCESS,
     LOGIN_FAIL,
@@ -38,7 +39,7 @@ export default function authReducer(state = initialState, action) {
                 isAuthenticated: true,
                 access: payload.access,
                 refresh: payload.refresh,
-                user: payload.user || state.user,
+                user: payload.user || state.user, // Usa los datos del usuario si están disponibles
                 loading: false
             };
         case SIGNUP_SUCCESS:
@@ -50,7 +51,12 @@ export default function authReducer(state = initialState, action) {
         case USER_LOADED_SUCCESS:
             return {
                 ...state,
-                user: payload,
+                user: {
+                    ...payload,
+                    divisions: payload.divisions,
+                    divisionUsers: payload.divisionUsers,
+                    paymentMethods: payload.paymentMethods,
+                },
                 isAuthenticated: true,
                 loading: false
             };
