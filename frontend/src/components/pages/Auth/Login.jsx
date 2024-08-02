@@ -42,6 +42,7 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
             localStorage.setItem('access_token', response.access);
             localStorage.setItem('user_role', userInfo.role);
             localStorage.setItem('user_name', `${userInfo.first_name} ${userInfo.last_name}`);
+            console.log('User id:', userInfo.id);
             setToken(response.access);
             setUserRole(userInfo.role);
             setUserName(`${userInfo.first_name} ${userInfo.last_name}`);
