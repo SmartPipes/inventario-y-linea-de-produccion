@@ -15,7 +15,6 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
   const getUserInfo = async (email) => {
     try {
       const response = await apiClient.get(API_URL_USERS);
-      // Encuentra el usuario actual en la lista
       const currentUser = response.data.find(user => user.email === email);
       return currentUser;
     } catch (error) {
@@ -91,7 +90,7 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
         }}
       />
       <Card
-        title={<Title level={2} style={{ color: '#fff' }}>Bienvenido Admin</Title>}
+        title={<Title level={2} style={{ color: '#fff' }}>Welcome Admin</Title>}
         style={{
           width: 400,
           borderRadius: 10,
@@ -104,7 +103,7 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
         }}
       >
         <Paragraph style={{ color: '#fff' }}>
-          Por favor, inicia sesión con tu correo electrónico y contraseña para continuar.
+        Please log in with your email and password to continue.
         </Paragraph>
         <Form
           name="login"
@@ -119,14 +118,14 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
               { type: 'email', message: 'El correo electrónico no es válido!' },
             ]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Correo Electrónico" />
+            <Input prefix={<UserOutlined />} placeholder="Email" />
           </Form.Item>
 
           <Form.Item
             name="password"
             rules={[{ required: true, message: 'Por favor, introduce tu contraseña!' }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="Contraseña" />
+            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
           </Form.Item>
 
           <Form.Item>
