@@ -4,6 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import generics
 from .models import User, Division, DivisionUser, PaymentMethod
 from .serializers import UserSerializer, DivisionSerializer, DivisionUserSerializer, PaymentMethodSerializer, UserDetailSerializer, UserCreateSerializer, UserUpdateSerializer
 from django_filters import rest_framework as filters
@@ -50,6 +51,14 @@ class PaymentMethodsViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentMethodSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PaymentMethodFilter
+
+class DefaultPaymentMethodView(generics.ListAPIView):
+    serializer_class = PaymentMethodSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return PaymentMethod.objects.filter(client_id=user.id, is_default=True)
 
 class GetUserInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
