@@ -134,9 +134,6 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
             </Button>
           </Form.Item>
           <Form.Item>
-            <Button type="link" style={{ width: '100%', padding: '10px 0', fontSize: '14px', color: '#fff' }}>
-              ¿Olvidaste tu contraseña?
-            </Button>
           </Form.Item>
         </Form>
       </Card>
