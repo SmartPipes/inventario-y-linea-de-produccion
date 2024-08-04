@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Form, Input, Space, Button, Select, message, Tooltip } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Tooltip, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { API_URL_SUPPLIERS } from '../Config';
 import NavBarMenu from './NavBarMenu';
@@ -132,6 +132,23 @@ const SupplierPage = () => {
         setFilteredSuppliers(filtered);
     };
 
+    const getRatingColor = (rating) => {
+        switch (rating) {
+            case 'A':
+                return 'green';
+            case 'B':
+                return 'blue';
+            case 'C':
+                return 'yellow';
+            case 'D':
+                return 'orange';
+            case 'E':
+                return 'red';
+            default:
+                return 'default';
+        }
+    };
+
     const columns = [
         { title: 'ID', dataIndex: 'supplier_id', key: 'supplier_id' },
         { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -139,7 +156,16 @@ const SupplierPage = () => {
         { title: 'Email', dataIndex: 'email', key: 'email' },
         { title: 'Phone', dataIndex: 'phone', key: 'phone' },
         { title: 'Address', dataIndex: 'address', key: 'address' },
-        { title: 'Rating', dataIndex: 'rating', key: 'rating' },
+        {
+            title: 'Rating',
+            dataIndex: 'rating',
+            key: 'rating',
+            render: (rating) => (
+                <Tag color={getRatingColor(rating)}>
+                    {rating}
+                </Tag>
+            )
+        },
         {
             title: 'Action',
             key: 'action',

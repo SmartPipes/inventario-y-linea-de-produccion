@@ -7,7 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Dropdown, Menu, Button } from 'antd';
 import { logout as performLogout } from '../ApiClient';
 
-export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName }) => {
+export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName, isInventoryMenuOpen, closeInventoryMenu }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -62,6 +62,9 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    if (!isMenuOpen && isInventoryMenuOpen) {
+      closeInventoryMenu();
+    }
   };
 
   const handleLogout = () => {
@@ -80,9 +83,14 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
     if (key === 'logout') {
       handleLogout();
       navigate('/login');
-    }else if (key === 'manage_users') {
+    } else if (key === 'manage_users') {
       navigate('/user');
     }
+    setIsMenuOpen(false);
+  };
+
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
   };
 
   const menu = (
@@ -121,7 +129,7 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
       <NavMenu isOpen={isMenuOpen}>
         <NavLinkWrapper>
           {links.map((link) => (
-            <StyledNavLink activeclassname="active" key={link.page} to={link.href}>
+            <StyledNavLink activeclassname="active" key={link.page} to={link.href} onClick={handleLinkClick}>
               {link.page}
             </StyledNavLink>
           ))}

@@ -51,14 +51,13 @@ const NavBarMenu = ({ title }) => {
                 <FontAwesomeIcon icon={faBars} size="lg" />
             </HamburgerMenu>
             <NavMenu isOpen={isMenuOpen}>
-                <NavItem><Link to="/inventory/informacion-general">General information</Link></NavItem>
                 <Dropdown overlay={operationsMenu} placement="bottomLeft" trigger={['click']}>
                     <NavItem>Operations</NavItem>
                 </Dropdown>
                 <Dropdown overlay={reportsMenu} placement="bottomLeft" trigger={['click']}>
                     <NavItem>Reports</NavItem>
                 </Dropdown>
-                <NavItem><Link to="/inventory">Products</Link></NavItem>
+                <NavItem><Link to="/inventory">Inventory</Link></NavItem>
                 <Dropdown overlay={settingsMenu} placement="bottomLeft" trigger={['click']}>
                     <NavItem>Settings</NavItem>
                 </Dropdown>

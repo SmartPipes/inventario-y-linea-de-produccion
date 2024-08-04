@@ -13,7 +13,7 @@ const NavbarWrapper = styled.nav`
   padding: 1rem 4rem;
   position: relative;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  z-index: 1000; /* Asegura que el menú principal esté por debajo */
+  z-index: 1010; /* Asegura que el menú principal esté por debajo */
 `;
 
 const NavLinkWrapper = styled.div`

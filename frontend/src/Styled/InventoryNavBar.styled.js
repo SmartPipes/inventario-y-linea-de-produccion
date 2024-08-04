@@ -8,7 +8,6 @@ export const NavContainer = styled.nav`
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
     position: relative;
-    z-index: 999;
     flex-wrap: wrap;
 `;
 
