@@ -52,7 +52,7 @@ const NavBarMenu = ({ title }) => {
                         <DropdownItem isLabel>Supplier Management</DropdownItem>
                         <DropdownItem><Link to="/inventory/suppliers">Suppliers</Link></DropdownItem>
                         <DropdownItem isLabel>Products</DropdownItem>
-                        <DropdownItem><Link to="/inventory/categories">Product Categories</Link></DropdownItem>
+                        <DropdownItem><Link to="/inventory/categories">Categories</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/products">Products</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/raw-materials">Raw Materials</Link></DropdownItem>
                         <DropdownItem><Link to="/inventory/request-restock-warehouse">Restock Requests Warehouse</Link></DropdownItem>

@@ -48,11 +48,19 @@ const ReceiptDetailsPage = () => {
     };
 
     const handleValidate = async () => {
+        if (!restockRequest || !rawMaterial || !warehouse) {
+            message.error('Cannot validate request. Missing data.');
+            return;
+        }
+
         try {
             await apiClient.patch(`${API_URL_RESTOCKREQUEST}${id}/`, { status: 'Approved' });
 
             const stockData = {
                 inventory_id: restockRequest.inventory_id,
+                item_id: rawMaterial.raw_material_id,
+                item_type: 'RawMaterial',
+                warehouse_id: warehouse.warehouse_id,
                 stock: restockRequest.quantity,
             };
 

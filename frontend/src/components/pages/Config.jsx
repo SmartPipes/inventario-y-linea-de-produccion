@@ -20,6 +20,7 @@ export const API_URL_INV = BASE_API_URL+"inventory/inventory/"
 export const API_URL_INVENTORYSUM = BASE_API_URL+"inventory/inventory-total-stock/"
 //INVENTORY PRODUCTS
 export const API_URL_PRODUCTS = BASE_API_URL+"inventory/products/";
+export const API_URL_BULK_RAWMLIST = BASE_API_URL+"inventory/bulk-product-raw-material-list/";
 //inventory warehouse
 export const API_URL_WAREHOUSES = BASE_API_URL+"inventory/warehouse/";
 export const API_URL_USER_WARE_ASSIGN = BASE_API_URL+"inventory/user-warehouse-assignment/";
