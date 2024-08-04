@@ -5,7 +5,7 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = '__all__'
-        
+
 class SaleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sale
@@ -26,3 +26,9 @@ class SaleDetailSerializer(serializers.ModelSerializer):
         model = SaleDetail
         fields = '__all__'
 
+class BulkSaleDetailSerializer(serializers.ListSerializer):
+    child = SaleDetailSerializer()
+
+    def create(self, validated_data):
+        sale_details = [SaleDetail(**item) for item in validated_data]
+        return SaleDetail.objects.bulk_create(sale_details)

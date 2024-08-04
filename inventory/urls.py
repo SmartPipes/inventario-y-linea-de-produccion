@@ -4,7 +4,7 @@ from .views import (
     ProductViewSet, RawMaterialViewSet, InventoryViewSet, CategoryViewSet, 
     StateViewSet, CityViewSet, WarehouseViewSet, SupplierViewSet, 
     OperationLogViewSet, RestockRequestViewSet, 
-    ProductRawMaterialListSet, InventoryTotalStockViewSet, RestockRequestWarehouseView,RestockRequestWarehouseRawMaterialView, UserWarehouseAssignmentViewSet
+    ProductRawMaterialListSet, InventoryTotalStockViewSet, RestockRequestWarehouseView, RestockRequestWarehouseRawMaterialView, UserWarehouseAssignmentViewSet, UpdateInventoryView, BulkProductRawMaterialListView
 )
 
 router = DefaultRouter()
@@ -24,7 +24,11 @@ router.register(r'Restock-Request-Warehouse', RestockRequestWarehouseView)
 router.register(r'Restock-Request-Warehouse-Rawm', RestockRequestWarehouseRawMaterialView)
 router.register(r'user-warehouse-assignment', UserWarehouseAssignmentViewSet)
 
+
 urlpatterns = [
     path('', include(router.urls)),
+    path('update-inventory/', UpdateInventoryView.as_view(), name='update-inventory'),
+    path('bulk-product-raw-material-list/', BulkProductRawMaterialListView.as_view(), name='bulk-product-raw-material-list'),
+
 ]
 		

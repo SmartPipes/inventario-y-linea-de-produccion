@@ -43,9 +43,18 @@ class OperationLogSerializer(serializers.ModelSerializer):
         return dt.strftime('%Y-%m-%d %H:%M')
 
 class RestockRequestSerializer(serializers.ModelSerializer):
+    inventory_id = serializers.SerializerMethodField()
+
     class Meta:
         model = RestockRequest
         fields = '__all__'
+
+    def get_inventory_id(self, obj):
+        try:
+            inventory = Inventory.objects.get(item_id=obj.raw_material.raw_material_id, item_type='RawMaterial', warehouse=obj.warehouse.warehouse_id)
+            return inventory.inventory_id
+        except Inventory.DoesNotExist:
+            return None
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -61,12 +70,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
-
-class ProductRawMaterialListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductRawMaterialList
-        fields = '__all__'
-
+        
 class RawMaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = RawMaterial
@@ -151,4 +155,53 @@ class RestockRequestWarehouseRawMaterialSerializer(serializers.ModelSerializer):
 class UserWarehouseAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserWarehouseAssignment
-        fields = '__all__'        
+        fields = '__all__'    
+        
+class UpdateInventorySerializer(serializers.Serializer):
+    inventory_id = serializers.IntegerField(required=False, allow_null=True)
+    item_id = serializers.IntegerField(required=True)
+    item_type = serializers.CharField(max_length=12, required=True)
+    warehouse_id = serializers.IntegerField(required=True)
+    stock = serializers.IntegerField(required=True)
+
+    def update_or_create_inventory(self):
+        inventory_id = self.validated_data.get('inventory_id')
+        item_id = self.validated_data['item_id']
+        item_type = self.validated_data['item_type']
+        warehouse_id = self.validated_data['warehouse_id']
+        quantity = self.validated_data['stock']
+
+        if inventory_id:
+            try:
+                inventory = Inventory.objects.get(pk=inventory_id)
+                inventory.stock += quantity
+                inventory.save()
+                return inventory
+            except Inventory.DoesNotExist:
+                pass
+
+        # Si no se encontró el inventario o no se proporcionó, creamos uno nuevo
+        inventory, created = Inventory.objects.update_or_create(
+            item_id=item_id,
+            item_type=item_type,
+            warehouse_id=warehouse_id,
+            defaults={'stock': quantity}
+        )
+        if not created:
+            inventory.stock += quantity
+            inventory.save()
+        
+        return inventory
+            
+class ProductRawMaterialListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductRawMaterialList
+        fields = '__all__'
+
+class BulkProductRawMaterialListSerializer(serializers.ListSerializer):
+    child = ProductRawMaterialListSerializer()
+
+    def create(self, validated_data):
+        material_list = [ProductRawMaterialList(**item) for item in validated_data]
+        return ProductRawMaterialList.objects.bulk_create(material_list)
+            

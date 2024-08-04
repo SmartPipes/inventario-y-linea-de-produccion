@@ -134,8 +134,8 @@ class OperationLog(models.Model):
 
 class UserWarehouseAssignment(models.Model):
     user_warehouse_assignment_id = models.AutoField(primary_key=True)
-    assigned_date = models.DateField()
-    removed_date = models.DateField(null=True, blank=True)
+    assigned_date = models.DateTimeField()
+    removed_date = models.DateTimeField(null=True, blank=True)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     manager_user = models.ForeignKey(User, on_delete=models.CASCADE)  # Relacionada con la tabla User
 
