@@ -119,40 +119,40 @@ export const Sales = () => {
 
   const columns = [
     {
-      title: 'Cliente',
+      title: 'Client',
       dataIndex: 'client_id',
       key: 'client_id',
       render: (clientId) => getClientInfo(clientId),
     },
     {
-      title: 'ID de Venta',
+      title: 'Sale ID',
       dataIndex: 'sale_id',
       key: 'sale_id',
     },
     {
-      title: 'Fecha de Venta',
+      title: 'Sale Date',
       dataIndex: 'sale_id',
       key: 'sale_date',
       render: getSaleDate,
     },
     {
-      title: 'Método de Pago',
+      title: 'Payment Method',
       dataIndex: 'sale_id',
       key: 'payment_method',
       render: getPaymentMethod,
     },
     {
-      title: 'Cantidad Total',
+      title: 'Total Quantity',
       key: 'total_quantity',
       render: (_, record) => calculateTotalQuantity(record.sale_id),
     },
     {
-      title: 'Precio Total',
+      title: 'Total Price',
       key: 'total_price',
       render: (_, record) => formatPrice(calculateTotalPrice(record.sale_id)),
     },
     {
-      title: 'Acciones',
+      title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Button
@@ -165,7 +165,7 @@ export const Sales = () => {
           }}
           onClick={() => showModal(record.sale_id)}
         >
-          Detalles
+          Details
         </Button>
       ),
     },
@@ -173,10 +173,10 @@ export const Sales = () => {
 
   return (
     <div style={{ padding: '20px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <Title level={2} style={{ color: '#333', marginBottom: '20px' }}>Ventas</Title>
+      <Title level={2} style={{ color: '#333', marginBottom: '20px' }}>Sales</Title>
       <Space direction="vertical" style={{ width: '100%', marginBottom: '20px' }}>
         <Search
-          placeholder="Buscar por Cliente, ID de Venta o Fecha"
+          placeholder="Search by Customer, Sales ID or Date"
           onChange={e => handleSearchChange(e.target.value)}
           enterButton
           allowClear
@@ -193,13 +193,13 @@ export const Sales = () => {
       />
 
       <Modal
-        title={`Detalles de la Venta ID: ${currentSaleId}`}
+        title={`Sale Details ID: ${currentSaleId}`}
         open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         footer={[
           <Button key="close" onClick={handleCancel}>
-            Cerrar
+            Close
           </Button>
         ]}
         styles={{
@@ -210,10 +210,10 @@ export const Sales = () => {
         {modalDetails.map(detail => (
           <div key={detail.sale_detail_id} style={{ marginBottom: '20px', padding: '10px', borderBottom: '1px solid #e0e0e0' }}>
             <Descriptions bordered column={1}>
-              <Descriptions.Item label="ID del Producto">{detail.product}</Descriptions.Item>
-              <Descriptions.Item label="Nombre">{getProductDetails(detail.product).name}</Descriptions.Item>
-              <Descriptions.Item label="Cantidad">{detail.quantity}</Descriptions.Item>
-              <Descriptions.Item label="Precio">{formatPrice(detail.price)}</Descriptions.Item>
+              <Descriptions.Item label="Product ID">{detail.product}</Descriptions.Item>
+              <Descriptions.Item label="Name">{getProductDetails(detail.product).name}</Descriptions.Item>
+              <Descriptions.Item label="Quantity">{detail.quantity}</Descriptions.Item>
+              <Descriptions.Item label="Price">{formatPrice(detail.price)}</Descriptions.Item>
             </Descriptions>
           </div>
         ))}

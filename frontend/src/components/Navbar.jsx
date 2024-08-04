@@ -112,7 +112,7 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
 
   return (
     <NavbarWrapper>
-      <Link to="/">
+      <Link to="/home">
         <Logo />
       </Link>
       <HamburgerMenu onClick={toggleMenu}>

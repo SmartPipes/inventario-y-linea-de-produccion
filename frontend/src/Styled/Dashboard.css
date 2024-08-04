@@ -1,5 +1,4 @@
 .dashboard-container {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
     backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 12px;
@@ -13,15 +12,14 @@
   
   .glass-card {
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10    px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.0);
+    backdrop-filter: blur(13px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
   .glass-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.475);
   }
   
   .card-title {
@@ -32,25 +30,25 @@
   }
   
   .card-value {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     color: #000000;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   .green-card {
-    background-color: rgba(56, 142, 60, 0.2);
+    background-color: rgba(46, 112, 49, 0.2);
   }
   
   .blue-card {
-    background-color: rgba(2, 136, 209, 0.2);
+    background-color: rgba(46, 112, 49, 0.2);
   }
   
   .yellow-card {
-    background-color: rgba(0, 53, 245, 0.2);
+    background-color: rgba(46, 112, 49, 0.2);
   }
   
   .red-card {
-    background-color: rgba(216, 27, 96, 0.2);
+    background-color: rgba(46, 112, 49, 0.2);
   }
   

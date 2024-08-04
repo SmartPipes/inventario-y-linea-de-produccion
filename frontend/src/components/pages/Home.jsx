@@ -50,9 +50,9 @@ export const Home = React.memo(() => {
         }));
 
         const adaptedSalesData = salesResp.data.map(sale => ({
-          name: `Venta ${sale.sale_id}`,
-          value: parseFloat(sale.total)
-        }));
+            name: `Venta ${sale.sale_id}`,
+            value: parseFloat(sale.total),
+          }));
 
         const adaptedDeliveryData = deliveryResp.data.reduce((acc, delivery) => {
           const dateKey = delivery.delivery_date.split('T')[0];
@@ -84,6 +84,17 @@ export const Home = React.memo(() => {
   }, []);
 
   const totalSales = useMemo(() => salesData.reduce((acc, sale) => acc + sale.value, 0), [salesData]);
+    // Adaptar datos para gráfico de barras apiladas de usuarios por rol
+    const usersByRole = usersData.reduce((acc, user) => {
+        const role = user.category;
+        if (!acc[role]) {
+          acc[role] = { role, count: 0 };
+        }
+        acc[role].count += 1;
+        return acc;
+      }, {});
+    
+  const usersByRoleData = Object.values(usersByRole);
 
   if (loading) {
     return <Spin size="large" />;
@@ -97,16 +108,16 @@ export const Home = React.memo(() => {
           <Card hoverable className="glass-card green-card">
             <Title level={4} className="card-title">
               <FaCogs style={{ marginRight: '8px'}} />
-              Total Producción
+              Total Production
             </Title>
-            <p className="card-value">{productionData.length} órdenes</p>
+            <p className="card-value">{productionData.length} Orders</p>
           </Card>
         </Col>
         <Col span={6}>
           <Card hoverable className="glass-card blue-card">
             <Title level={4} className="card-title">
               <FaBoxes style={{ marginRight: '8px' }} />
-              Inventario Total
+              Total Inventory
             </Title>
             <p className="card-value">{inventoryData.length} items</p>
           </Card>
@@ -115,7 +126,7 @@ export const Home = React.memo(() => {
           <Card hoverable className="glass-card yellow-card">
             <Title level={4} className="card-title">
               <FaDollarSign style={{ marginRight: '8px' }} />
-              Ventas Ganadas
+              Sales Profits
             </Title>
             <p className="card-value">${totalSales}</p>
           </Card>
@@ -124,15 +135,15 @@ export const Home = React.memo(() => {
           <Card hoverable className="glass-card red-card">
             <Title level={4} className="card-title">
               <FaTruck style={{ marginRight: '8px' }} />
-              Entregas Realizadas
-            </Title>
-            <p className="card-value">{deliveryData.length} entregas</p>
+              Deliveries made
+              </Title>
+            <p className="card-value">{deliveryData.length} Deliveries</p>
           </Card>
         </Col>
       </Row>
       <Row gutter={16} style={{ marginTop: '20px' }}>
         <Col span={12}>
-          <Card title="Inventario" bordered={false} className="glass-card">
+          <Card title="Stock Inventory" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={inventoryData}>
                 <XAxis dataKey="name" />
@@ -145,14 +156,14 @@ export const Home = React.memo(() => {
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="Estadísticas de Producción" bordered={false} className="glass-card">
+          <Card title="Production Statistics" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={productionData}>
                 <XAxis dataKey="name" />
                 <YAxis domain={[0, 'dataMax']} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" fill="#3a6351" />
+                <Bar dataKey="value" fill="rgba(31, 94, 34, 0.608)" />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -160,7 +171,7 @@ export const Home = React.memo(() => {
       </Row>
       <Row gutter={16} style={{ marginTop: '20px' }}>
         <Col span={12}>
-          <Card title="Estadísticas de Entregas" bordered={false} className="glass-card">
+          <Card title="Delivery Statistics" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={deliveryData}>
                 <defs>
@@ -180,32 +191,31 @@ export const Home = React.memo(() => {
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="Ventas Totales" bordered={false} className="glass-card">
+        <Card title="Total Sales and Benefits" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie data={salesData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#3a6351">
-                  {salesData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                  ))}
-                </Pie>
+              <BarChart data={salesData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" />
                 <Tooltip />
                 <Legend />
-              </PieChart>
+                <Bar dataKey="value" stackId="a" fill="rgba(46, 112, 49, 0.52)" />
+              </BarChart>
             </ResponsiveContainer>
           </Card>
         </Col>
       </Row>
       <Row gutter={16} style={{ marginTop: '20px' }}>
         <Col span={24}>
-          <Card title="Usuarios Activos" bordered={false} className="glass-card">
+          <Card title="Active Users" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={usersData}>
+              <BarChart data={usersByRoleData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="category" />
+                <XAxis dataKey="role" />
                 <YAxis domain={[0, 'dataMax']} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="activeUsers" fill="#3a6351" />
+                <Bar dataKey="count" fill="rgba(2, 128, 8, 0.2)" />
               </BarChart>
             </ResponsiveContainer>
           </Card>
