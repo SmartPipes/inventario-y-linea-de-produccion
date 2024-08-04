@@ -11,7 +11,7 @@ const NavbarWrapper = styled.nav`
   justify-content: space-between;
   align-items: center;
   background: #364936;
-  padding: 1rem 3rem;
+  padding: 1rem 4rem;
   position: relative;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 `;

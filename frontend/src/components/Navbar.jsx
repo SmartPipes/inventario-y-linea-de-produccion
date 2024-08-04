@@ -11,12 +11,54 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const links = [
-    { page: "Sales", href: "/sales" },
-    { page: "Production", href: "/production" },
-    { page: "Inventory", href: "/inventory" },
-    { page: "Delivery", href: "/delivery" },
-  ];
+  // Define los enlaces según la división almacenada en localStorage
+  const division = localStorage.getItem('user_division');
+  let divisionName = '';
+
+  switch (division) {
+    case '1':
+      divisionName = 'Production';
+      break;
+    case '2':
+      divisionName = 'Inventory';
+      break;
+    case '3':
+      divisionName = 'Sales';
+      break;
+    case '4':
+      divisionName = 'Delivery';
+      break;
+    default:
+      divisionName = 'General';
+      break;
+  }
+
+  let links = [];
+  if (division === '2') {
+    links = [
+      { page: "Inventory", href: "/inventory" },
+    ];
+  } else if (division === '1') {
+    links = [
+      { page: "Production", href: "/production" }
+    ];
+  } else if (division === '3') {
+    links = [
+      { page: "Sales", href: "/sales" },
+    ];
+  } else if (division === '4') {
+    links = [
+      { page: "Delivery", href: "/delivery" }
+    ];
+  } else {
+    // Muestra todos los enlaces si no hay división específica
+    links = [
+      { page: "Sales", href: "/sales" },
+      { page: "Production", href: "/production" },
+      { page: "Inventory", href: "/inventory" },
+      { page: "Delivery", href: "/delivery" }
+    ];
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -26,17 +68,18 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_name');
-    window.location.reload();
+    localStorage.removeItem('user_division');
+    performLogout();
+    setToken(null);
+    setUserRole(null);
+    setUserName(null);
+    navigate('/');
   };
 
   const handleMenuClick = ({ key }) => {
     if (key === 'logout') {
-      performLogout();
-      setToken(null);
-      setUserRole(null);
-      setUserName(null);
-      navigate('/');
-    } else if (key === 'manage_users') {
+      handleLogout();
+    } else if (key === 'manage_users' && userRole === 'Admin') {
       navigate('/user');
     }
   };
@@ -49,6 +92,9 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
         </div>
         <div>
           <strong>Rol:</strong> {userRole}
+        </div>
+        <div>
+          <strong>División:</strong> {divisionName}
         </div>
       </Menu.Item>
       <Menu.Divider />
@@ -95,4 +141,3 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
     </NavbarWrapper>
   );
 };
-
