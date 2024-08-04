@@ -79,7 +79,6 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName 
   const handleMenuClick = ({ key }) => {
     if (key === 'logout') {
       handleLogout();
-    } else if (key === 'manage_users' && userRole === 'Admin') {
       navigate('/user');
     }
   };
