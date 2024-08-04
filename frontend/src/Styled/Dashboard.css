@@ -3,52 +3,205 @@
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  }
-  
-  .dashboard-title {
+    max-width: 100%;
+    width: 100%;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.card-item {
+    flex: 1 1 calc(33.33% - 20px);
+    margin: 10px;
+}
+
+.dashboard-title {
     color: #3a6351;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  .glass-card {
+    font-size: 2em;
+    text-align: center;
+}
+
+.glass-card {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.0);
     backdrop-filter: blur(13px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .glass-card:hover {
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.glass-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.475);
-  }
-  
-  .card-title {
+}
+
+.card-title {
     display: flex;
     align-items: center;
     color: #3a6351;
     text-shadow: 0 1px 2px rgba(14, 75, 67, 0.51);
-  }
-  
-  .card-value {
+    font-size: 1.5em;
+}
+
+.card-value {
     font-size: 20px;
     font-weight: bold;
     color: #000000;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  .green-card {
+}
+
+.green-card, .blue-card, .yellow-card, .red-card {
     background-color: rgba(46, 112, 49, 0.2);
-  }
-  
-  .blue-card {
-    background-color: rgba(46, 112, 49, 0.2);
-  }
-  
-  .yellow-card {
-    background-color: rgba(46, 112, 49, 0.2);
-  }
-  
-  .red-card {
-    background-color: rgba(46, 112, 49, 0.2);
-  }
-  
+}
+
+/* Tablets (portrait) */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        padding: 25px;
+    }
+
+    .dashboard-title {
+        font-size: 1.8em;
+    }
+
+    .glass-card {
+        margin-bottom: 18px;
+    }
+
+    .card-title {
+        font-size: 1.1em;
+    }
+
+    .card-value {
+        font-size: 19px;
+    }
+
+    .card-item {
+        flex: 1 1 calc(50% - 20px);
+    }
+}
+
+/* Tablets (landscape) */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 20px;
+    }
+
+    .dashboard-title {
+        font-size: 1.5em;
+    }
+
+    .glass-card {
+        margin-bottom: 15px;
+    }
+
+    .card-title {
+        font-size: 1em;
+    }
+
+    .card-value {
+        font-size: 18px;
+    }
+
+    .card-item {
+        flex: 1 1 calc(50% - 20px);
+    }
+}
+
+/* iPads (portrait) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .dashboard-container {
+        padding: 20px;
+    }
+
+    .dashboard-title {
+        font-size: 1.5em;
+    }
+
+    .glass-card {
+        margin-bottom: 15px;
+        padding: 15px;
+    }
+
+    .card-title {
+        font-size: 1.2em;
+    }
+
+    .card-value {
+        font-size: 18px;
+    }
+
+    .card-item {
+        flex: 1 1 calc(50% - 20px);
+    }
+}
+
+/* Mobile devices (portrait) */
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: 10px;
+    }
+
+    .dashboard-title {
+        font-size: 1.2em;
+    }
+
+    .glass-card {
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+
+    .card-title {
+        font-size: 0.9em;
+    }
+
+    .card-value {
+        font-size: 16px;
+    }
+
+    .card-container {
+        flex-direction: column;
+    }
+
+    .card-item {
+        flex: 1 1 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Mobile devices (landscape) */
+@media (max-width: 320px) {
+    .dashboard-container {
+        padding: 5px;
+    }
+
+    .dashboard-title {
+        font-size: 1em;
+    }
+
+    .glass-card {
+        margin-bottom: 8px;
+        padding: 8px;
+    }
+
+    .card-title {
+        font-size: 0.8em;
+    }
+
+    .card-value {
+        font-size: 14px;
+    }
+
+    .card-container {
+        flex-direction: column;
+    }
+
+    .card-item {
+        flex: 1 1 100%;
+        margin: 5px 0;
+    }
+}

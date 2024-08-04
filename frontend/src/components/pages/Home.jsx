@@ -102,9 +102,8 @@ export const Home = React.memo(() => {
 
   return (
     <div className="dashboard-container">
-      {/*<Title level={2} className="dashboard-title">Dashboard - Smart Pipes</Title>*/}
-      <Row gutter={16}>
-        <Col span={6}>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} md={8} lg={6}>
           <Card hoverable className="glass-card green-card">
             <Title level={4} className="card-title">
               <FaCogs style={{ marginRight: '8px'}} />
@@ -113,7 +112,7 @@ export const Home = React.memo(() => {
             <p className="card-value">{productionData.length} Orders</p>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={24} sm={12} md={8} lg={6}>
           <Card hoverable className="glass-card blue-card">
             <Title level={4} className="card-title">
               <FaBoxes style={{ marginRight: '8px' }} />
@@ -122,7 +121,7 @@ export const Home = React.memo(() => {
             <p className="card-value">{inventoryData.length} items</p>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={24} sm={12} md={8} lg={6}>
           <Card hoverable className="glass-card yellow-card">
             <Title level={4} className="card-title">
               <FaDollarSign style={{ marginRight: '8px' }} />
@@ -131,18 +130,18 @@ export const Home = React.memo(() => {
             <p className="card-value">${totalSales}</p>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={24} sm={12} md={8} lg={6}>
           <Card hoverable className="glass-card red-card">
             <Title level={4} className="card-title">
               <FaTruck style={{ marginRight: '8px' }} />
               Deliveries made
-              </Title>
+            </Title>
             <p className="card-value">{deliveryData.length} Deliveries</p>
           </Card>
         </Col>
       </Row>
-      <Row gutter={16} style={{ marginTop: '20px' }}>
-        <Col span={12}>
+      <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
+        <Col xs={24} md={12}>
           <Card title="Stock Inventory" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={inventoryData}>
@@ -155,7 +154,7 @@ export const Home = React.memo(() => {
             </ResponsiveContainer>
           </Card>
         </Col>
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Card title="Production Statistics" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={productionData}>
@@ -169,8 +168,8 @@ export const Home = React.memo(() => {
           </Card>
         </Col>
       </Row>
-      <Row gutter={16} style={{ marginTop: '20px' }}>
-        <Col span={12}>
+      <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
+        <Col xs={24} md={12}>
           <Card title="Delivery Statistics" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={deliveryData}>
@@ -190,8 +189,8 @@ export const Home = React.memo(() => {
             </ResponsiveContainer>
           </Card>
         </Col>
-        <Col span={12}>
-        <Card title="Total Sales and Benefits" bordered={false} className="glass-card">
+        <Col xs={24} md={12}>
+          <Card title="Total Sales and Benefits" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={salesData}>
                 <XAxis dataKey="name" />
@@ -205,8 +204,8 @@ export const Home = React.memo(() => {
           </Card>
         </Col>
       </Row>
-      <Row gutter={16} style={{ marginTop: '20px' }}>
-        <Col span={24}>
+      <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
+        <Col xs={24}>
           <Card title="Active Users" bordered={false} className="glass-card">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={usersByRoleData}>
