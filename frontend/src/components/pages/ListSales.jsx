@@ -10,6 +10,7 @@ const ListSale = () => {
   const [sales, setSales] = useState([]);
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [payments, setPayments] = useState([]); // Estado para almacenar los pagos
   const [filteredSales, setFilteredSales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -32,12 +33,14 @@ const ListSale = () => {
         saleDetailsResponse,
         salesResponse,
         usersResponse,
-        productsResponse
+        productsResponse,
+        paymentsResponse // Petición para obtener los pagos
       ] = await Promise.all([
         apiClient.get('/sales/sale-details/'),
         apiClient.get('/sales/sales/'),
         apiClient.get('/users/users/'),
-        apiClient.get('/inventory/products/')
+        apiClient.get('/inventory/products/'),
+        apiClient.get('/sales/payments/') // URL para obtener los métodos de pago
       ]);
 
       setSaleDetails(saleDetailsResponse.data);
@@ -45,6 +48,7 @@ const ListSale = () => {
       setFilteredSales(salesResponse.data);
       setUsers(usersResponse.data);
       setProducts(productsResponse.data);
+      setPayments(paymentsResponse.data); // Almacena los métodos de pago
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -64,6 +68,11 @@ const ListSale = () => {
   const getProductDetails = (productId) => {
     const product = products.find(product => product.product_id === productId);
     return product || { name: 'Producto desconocido', price: 'No disponible' };
+  };
+
+  const getPaymentMethod = (saleId) => {
+    const payment = payments.find(payment => payment.sale_id === saleId);
+    return payment ? payment.payment_method : 'Pendiente';
   };
 
   const formatPrice = (price) => {
@@ -127,6 +136,12 @@ const ListSale = () => {
       render: getSaleDate,
     },
     {
+      title: 'Método de Pago',
+      dataIndex: 'sale_id',
+      key: 'payment_method',
+      render: getPaymentMethod,
+    },
+    {
       title: 'Cantidad Total',
       key: 'total_quantity',
       render: (_, record) => calculateTotalQuantity(record.sale_id),
@@ -179,7 +194,7 @@ const ListSale = () => {
 
       <Modal
         title={`Detalles de la Venta ID: ${currentSaleId}`}
-        open={isModalVisible}  
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         footer={[
