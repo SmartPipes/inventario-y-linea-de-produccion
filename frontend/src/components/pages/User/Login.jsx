@@ -2,7 +2,7 @@
   import { Form, Input, Button, Typography, Card, message } from 'antd';
   import { UserOutlined, LockOutlined } from '@ant-design/icons';
   import 'antd/dist/reset.css';
-  import backgroundImage from '../../../../public/BackGround.jpg';
+  import backgroundImage from '../../../../../media/BackGround.jpg';
   import { login, apiClient } from '../../../ApiClient';
   import { useNavigate } from 'react-router-dom';
   import { API_URL_USERS } from '../Config';

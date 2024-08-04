@@ -13,7 +13,7 @@ import {
 import Barcode from 'react-barcode';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import logo from '../../../../public/SmartPipesLogo.png';
+import logo from '../../../../../media//inventory/product_icons/SmartPipesLogo.png';
 
 const { Option } = Select;
 
