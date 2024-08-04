@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Form, Input, Space, Button, Select, message } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Tooltip } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { API_URL_SUPPLIERS } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
 
 const { Option } = Select;
+
+const buttonColor = '#97b25e';
 
 const SupplierPage = () => {
     const [suppliers, setSuppliers] = useState([]);
@@ -18,7 +21,7 @@ const SupplierPage = () => {
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [currentSupplierId, setCurrentSupplierId] = useState(null);
     const [countdown, setCountdown] = useState(3);
-    const [deleteEnabled, setDeleteEnabled] = useState(false);  
+    const [deleteEnabled, setDeleteEnabled] = useState(false);
 
     useEffect(() => {
         fetchSuppliers();
@@ -82,19 +85,19 @@ const SupplierPage = () => {
 
             if (editMode) {
                 await apiClient.put(`${API_URL_SUPPLIERS}${currentSupplier.supplier_id}/`, data);
-                message.success('Proveedor actualizado exitosamente');
+                message.success('Supplier updated successfully');
             } else {
                 await apiClient.post(API_URL_SUPPLIERS, data);
-                message.success('Proveedor agregado exitosamente');
+                message.success('Supplier added successfully');
             }
             fetchSuppliers();
             setIsModalVisible(false);
         } catch (error) {
-            console.error('Error al guardar el proveedor:', error);
+            console.error('Error saving supplier:', error);
             if (error.response && error.response.data) {
                 console.error('Server response:', error.response.data);
             }
-            message.error('Error al guardar el proveedor');
+            message.error('Error saving supplier');
         }
     };
 
@@ -107,10 +110,10 @@ const SupplierPage = () => {
         try {
             await apiClient.delete(`${API_URL_SUPPLIERS}${currentSupplierId}/`);
             fetchSuppliers();
-            message.success('Proveedor eliminado exitosamente');
+            message.success('Supplier deleted successfully');
         } catch (error) {
-            console.error('Error al eliminar el proveedor:', error);
-            message.error('Error al eliminar el proveedor');
+            console.error('Error deleting supplier:', error);
+            message.error('Error deleting supplier');
         } finally {
             setIsDeleteModalVisible(false);
         }
@@ -142,8 +145,22 @@ const SupplierPage = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Edit</Button>
-                    <Button onClick={() => showDeleteModal(record.supplier_id)} type="link" danger>Delete</Button>
+                    <Tooltip title="Edit">
+                        <Button
+                            onClick={() => showModal(record)}
+                            type="link"
+                            icon={<EditOutlined />}
+                            style={{ color: buttonColor }}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Remove">
+                        <Button
+                            onClick={() => showDeleteModal(record.supplier_id)}
+                            type="link"
+                            icon={<DeleteOutlined />}
+                            danger
+                        />
+                    </Tooltip>
                 </Space>
             )
         }
@@ -154,24 +171,28 @@ const SupplierPage = () => {
             <NavBarMenu title="Suppliers" />
             <div style={{ marginBottom: '16px' }}>
                 <Input
-                    placeholder="Search Suppiler..."
+                    placeholder="Search Supplier..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Add Supplier</Button>
+                <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
+                    Add Supplier
+                </Button>
             </div>
             <Table
                 columns={columns}
                 dataSource={filteredSuppliers}
                 rowKey="supplier_id"
                 loading={loading}
+                scroll={{ x: 'max-content' }} // Enable horizontal scrolling for small screens
             />
             <Modal
                 title={editMode ? 'Edit Supplier' : 'Add Supplier'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
+                okButtonProps={{ style: { backgroundColor: buttonColor, borderColor: buttonColor } }}
             >
                 <Form form={form} layout="vertical">
                     <Form.Item name="name" label="Name" rules={[{ required: true }]}>
@@ -205,10 +226,11 @@ const SupplierPage = () => {
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
-                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
+                okText={`Delete${countdown > 0 ? ` (${countdown})` : ''}`}
                 okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white', color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>Are you sure you want to delete this provider? Please wait {countdown} seconds to confirm the deletion.</p>            </Modal>
+                <p>Are you sure you want to delete this supplier? Please wait {countdown} seconds to confirm deletion.</p>
+            </Modal>
         </div>
     );
 };

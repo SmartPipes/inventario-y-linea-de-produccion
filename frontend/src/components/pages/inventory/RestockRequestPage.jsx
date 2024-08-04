@@ -4,6 +4,7 @@ import { TruckOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { apiClient } from '../../../ApiClient';
 import { useLocation } from 'react-router-dom';
+import NavBarMenu from './NavBarMenu';
 import { API_URL_RAW_MATERIALS, API_URL_SUPPLIERS, API_URL_RESTOCKREQUEST, API_URL_WAREHOUSES, API_URL_INVENTORYSUM, API_URL_INV } from '../Config';
 
 const { Option } = Select;
@@ -125,11 +126,12 @@ const RestockRequestPage = () => {
     };
 
     return (
-        <div style={{ padding: '20px' }}>
-            <h2>Restock Request</h2>
-            <Form form={form} onFinish={handleFinish} layout="vertical">
-                <Row gutter={16}>
-                    <Col span={12}>
+        <div>
+            <NavBarMenu title="Restock Request" />
+            
+            <Form style={{ padding: '50px' }} form={form} onFinish={handleFinish} layout="vertical">
+                <Row gutter={[16, 16]}>
+                    <Col xs={24} md={12}>
                         <Form.Item name="raw_material" label="Product" rules={[{ required: true, message: 'Please select a product' }]}>
                             <Select
                                 showSearch
@@ -171,7 +173,7 @@ const RestockRequestPage = () => {
                             <Input value={currentStock} readOnly />
                         </Form.Item>
                     </Col>
-                    <Col span={12}>
+                    <Col xs={24} md={12}>
                         <Form.Item label="Supplier">
                             <Input value={supplierDetails.name} readOnly />
                         </Form.Item>

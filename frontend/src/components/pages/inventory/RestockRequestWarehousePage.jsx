@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Form, Input, Space, Button, Select } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Tag, Tooltip } from 'antd';
+import { PrinterOutlined, DeleteOutlined } from '@ant-design/icons';
 import NavBarMenu from './NavBarMenu';
-import { apiClient } from '../../../ApiClient'; // Ensure the path is correct
+import { apiClient } from '../../../ApiClient';
 import {
     API_URL_RESTOCK_WH,
     API_URL_WAREHOUSES,
@@ -9,12 +10,14 @@ import {
     API_URL_FACTORIES,
     API_URL_ORDERS,
 } from '../Config';
-import Barcode from 'react-barcode'; // Import barcode library
+import Barcode from 'react-barcode';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import logo from '../../../../public/SmartPipesLogo.png'; // Import SmartPipes logo
+import logo from '../../../../public/SmartPipesLogo.png';
 
 const { Option } = Select;
+
+const buttonColor = '#97b25e';
 
 const RestockRequestWarehousePage = () => {
     const [data, setData] = useState([]);
@@ -25,13 +28,12 @@ const RestockRequestWarehousePage = () => {
     const [orders, setOrders] = useState([]);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-    const [isPrintModalVisible, setIsPrintModalVisible] = useState(false); // State for print modal
-    const [currentPrintRecord, setCurrentPrintRecord] = useState(null); // State for current record to print
+    const [isPrintModalVisible, setIsPrintModalVisible] = useState(false);
+    const [currentPrintRecord, setCurrentPrintRecord] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [currentDeleteId, setCurrentDeleteId] = useState(null);
 
     useEffect(() => {
-        // Fetch initial data for restock requests
         apiClient.get(API_URL_RESTOCK_WH)
             .then(response => {
                 setData(response.data);
@@ -41,7 +43,6 @@ const RestockRequestWarehousePage = () => {
                 console.error("There was an error fetching the data!", error);
             });
 
-        // Fetch data for select options
         apiClient.get(API_URL_WAREHOUSES)
             .then(response => {
                 setWarehouses(response.data);
@@ -88,13 +89,13 @@ const RestockRequestWarehousePage = () => {
             });
     };
 
-const handleDelete = () => {
+    const handleDelete = () => {
         if (!currentDeleteId) {
             message.error('No ID specified for deletion.');
             return;
         }
-    
-        const deleteUrl = `${API_URL_RESTOCK_WH}${currentDeleteId}`; // Ensure correct URL
+
+        const deleteUrl = `${API_URL_RESTOCK_WH}${currentDeleteId}`;
         console.log(deleteUrl);
         apiClient.delete(deleteUrl)
             .then(() => {
@@ -125,6 +126,7 @@ const handleDelete = () => {
         setCurrentPrintRecord(record);
         setIsPrintModalVisible(true);
     };
+
     const showDeleteModal = (id) => {
         setCurrentDeleteId(id);
         setIsDeleteModalVisible(true);
@@ -135,9 +137,27 @@ const handleDelete = () => {
         html2canvas(printContent).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF();
-            pdf.addImage(imgData, 'PNG', 10, 20, 190, 0); // Adjust position and size
+            pdf.addImage(imgData, 'PNG', 10, 20, 190, 0);
             pdf.save('restock-request.pdf');
         });
+    };
+
+    const renderStatusTag = (status) => {
+        let color;
+        switch (status) {
+            case 'Approved':
+                color = 'green';
+                break;
+            case 'Pending':
+                color = 'red';
+                break;
+            case 'In Progress':
+                color = 'yellow';
+                break;
+            default:
+                color = 'blue';
+        }
+        return <Tag color={color}>{status}</Tag>;
     };
 
     const columns = [
@@ -182,6 +202,7 @@ const handleDelete = () => {
             dataIndex: 'status',
             key: 'status',
             align: 'center',
+            render: (status) => renderStatusTag(status),
         },
         {
             title: 'Actions',
@@ -189,8 +210,12 @@ const handleDelete = () => {
             align: 'center',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showPrintModal(record)} type="link">Print Request</Button>
-                    <Button onClick={() => showDeleteModal(record.id)} type="link" danger>Delete</Button>
+                    <Tooltip title="Print">
+                        <Button onClick={() => showPrintModal(record)} type="link" icon={<PrinterOutlined />} style={{ color: buttonColor }} />
+                    </Tooltip>
+                    <Tooltip title="Remove">
+                        <Button onClick={() => showDeleteModal(record.id)} type="link" danger icon={<DeleteOutlined />} />
+                    </Tooltip>
                 </Space>
             )
         },
@@ -206,12 +231,15 @@ const handleDelete = () => {
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
-                <Button type="primary" onClick={() => setIsAddModalVisible(true)}>Add Request</Button>
+                <Button type="primary" onClick={() => setIsAddModalVisible(true)} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
+                    Add Request
+                </Button>
             </div>
             <Table
                 columns={columns}
                 dataSource={filteredData}
                 rowKey="id"
+                scroll={{ x: 'max-content' }}
             />
             <Modal
                 title="Restock Request"
@@ -282,7 +310,7 @@ const handleDelete = () => {
                         </Select>
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
                             Submit
                         </Button>
                     </Form.Item>
@@ -302,7 +330,7 @@ const handleDelete = () => {
                 onOk={() => setIsPrintModalVisible(false)}
                 onCancel={() => setIsPrintModalVisible(false)}
                 footer={
-                    <Button onClick={generatePDF} type="primary">
+                    <Button onClick={generatePDF} type="primary" style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
                         Download PDF
                     </Button>
                 }

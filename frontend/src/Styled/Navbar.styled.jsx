@@ -5,7 +5,6 @@ const LogoImg = styled.img`
     width: 150px;
 `;
 
-
 const NavbarWrapper = styled.nav`
   display: flex;
   justify-content: space-between;
@@ -14,6 +13,7 @@ const NavbarWrapper = styled.nav`
   padding: 1rem 4rem;
   position: relative;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  z-index: 1000; /* Asegura que el menú principal esté por debajo */
 `;
 
 const NavLinkWrapper = styled.div`
@@ -40,7 +40,7 @@ const StyledNavLink = styled(NavLink)`
 
   &.${(props) => props.activeclassname} {
     background: ${(props) => props.isproduction ? '' : '#97B25E'};
-    color: ${(props) => props.isproduction ? '#97B25E' : '#FAFBF3'}; 
+    color: ${(props) => props.isproduction ? '#97B25E' : '#FAFBF3'};
 
     &:hover {
       color: ${(props) => props.isproduction ? '#97B25E' : '#FAFBF3'};
@@ -53,8 +53,6 @@ const StyledNavLink = styled(NavLink)`
     text-align: center;
   }
 `;
-
-
 
 const HamburgerMenu = styled.div`
   display: none;
@@ -78,7 +76,7 @@ const NavMenu = styled.div`
     left: 0;
     width: 100%;
     background-color: #364936;
-    z-index: 1000;
+    z-index: 999; /* Asegura que el menú principal esté por debajo */
     border-top: 1px solid #ddd;
   }
 `;

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Form, Input, Space, Button, Select, message } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Tooltip } from 'antd';
+import { EditOutlined, DeleteOutlined, UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { API_URL_WAREHOUSES, API_URL_CITIES, API_URL_USERS, API_URL_USER_WARE_ASSIGN } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
 
 const { Option } = Select;
+
+const buttonColor = '#97b25e';
 
 const WarehousePage = () => {
     const [warehouses, setWarehouses] = useState([]);
@@ -225,12 +228,39 @@ const WarehousePage = () => {
                 const assignment = assignments.find(assign => assign.warehouse === record.warehouse_id && !assign.removed_date);
                 return (
                     <Space size="middle">
-                        <Button onClick={() => showModal(record)} type="link">Edit</Button>
-                        <Button onClick={() => showDeleteModal(record.warehouse_id)} type="link" danger>Delete</Button>
+                        <Tooltip title="Edit">
+                            <Button
+                                onClick={() => showModal(record)}
+                                type="link"
+                                icon={<EditOutlined />}
+                                style={{ color: buttonColor }}
+                            />
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                            <Button
+                                onClick={() => showDeleteModal(record.warehouse_id)}
+                                type="link"
+                                icon={<DeleteOutlined />}
+                                danger
+                            />
+                        </Tooltip>
                         {assignment ? (
-                            <Button onClick={() => showManageModal(record.warehouse_id)} type="link">Manage Manager</Button>
+                            <Tooltip title="Manage Manager">
+                                <Button
+                                    onClick={() => showManageModal(record.warehouse_id)}
+                                    type="link"
+                                    icon={<UserDeleteOutlined />}
+                                />
+                            </Tooltip>
                         ) : (
-                            <Button onClick={() => showAssignModal(record.warehouse_id)} type="link">Assign Manager</Button>
+                            <Tooltip title="Assign Manager">
+                                <Button
+                                    onClick={() => showAssignModal(record.warehouse_id)}
+                                    type="link"
+                                    icon={<UserAddOutlined />}
+                                    style={{ color: buttonColor }}
+                                />
+                            </Tooltip>
                         )}
                     </Space>
                 );
@@ -248,19 +278,23 @@ const WarehousePage = () => {
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Add Warehouse</Button>
+                <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
+                    Add Warehouse
+                </Button>
             </div>
             <Table
                 columns={columns}
                 dataSource={filteredWarehouses}
                 rowKey="warehouse_id"
                 loading={loading}
+                scroll={{ x: 'max-content' }}
             />
             <Modal
                 title={editMode ? 'Edit Warehouse' : 'Add Warehouse'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
+                okButtonProps={{ style: { backgroundColor: buttonColor, borderColor: buttonColor } }}
             >
                 <Form form={form} layout="vertical">
                     <Form.Item name="name" label="Name" rules={[{ required: true }]}>
@@ -292,6 +326,7 @@ const WarehousePage = () => {
                 visible={isAssignModalVisible}
                 onOk={handleAssignManager}
                 onCancel={() => setIsAssignModalVisible(false)}
+                okButtonProps={{ style: { backgroundColor: buttonColor, borderColor: buttonColor } }}
             >
                 <Form layout="vertical">
                     <Form.Item label="Select Manager" required>

@@ -3,12 +3,13 @@ import styled from 'styled-components';
 export const NavContainer = styled.nav`
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* Alinea todo a la izquierda */
+    justify-content: space-between;
     padding: 10px 20px;
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
     position: relative;
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan */
+    z-index: 999;
+    flex-wrap: wrap;
 `;
 
 export const NavLogo = styled.div`
@@ -20,8 +21,8 @@ export const NavLogo = styled.div`
 export const NavItem = styled.div`
     margin: 0 10px;
     position: relative;
-    padding: 8px 12px; /* Establece el padding inicial */
-    cursor: pointer; /* Añade esta línea */
+    padding: 8px 12px;
+    cursor: pointer;
     a {
         text-decoration: none;
         color: #333;
@@ -47,7 +48,7 @@ export const NavMenu = styled.div`
         display: ${props => (props.isOpen ? 'flex' : 'none')};
         flex-direction: column;
         position: absolute;
-        top: 60px;
+        top: 100%; /* Ajustado para eliminar el espacio */
         left: 0;
         width: 100%;
         background-color: #f5f5f5;
@@ -63,8 +64,8 @@ export const NavSearchContainer = styled.div`
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
     position: relative;
-    justify-content: space-between; /* Distribuir espacio entre elementos */
-    gap: 20px; /* Espacio entre el botón y la barra de búsqueda */
+    justify-content: space-between;
+    gap: 20px;
     width: 100%;
 
     @media (max-width: 768px) {
@@ -89,7 +90,7 @@ export const NavSearch = styled.div`
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 5px;
-    flex-grow: 1; /* Asegura que la barra de búsqueda ocupe el máximo espacio disponible */
+    flex-grow: 1;
     margin-right: 20px;
     position: relative;
 
@@ -247,7 +248,7 @@ export const DropdownItem = styled.div`
     display: block;
     cursor: ${props => (props.isLabel ? 'default' : 'pointer')};
     font-weight: ${props => (props.isLabel ? 'bold' : 'normal')};
-    font-size: 14px; /* Ajusta el tamaño de fuente aquí */
+    font-size: 14px;
     &:hover {
         background-color: ${props => (props.isLabel ? 'transparent' : '#e0e0e0')};
     }
@@ -287,7 +288,7 @@ export const TableContainer = styled.div`
 export const Table = styled.table`
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* Asegura que la tabla tenga un ancho fijo */
+    table-layout: fixed;
 `;
 
 export const TableHead = styled.thead`
@@ -306,10 +307,10 @@ export const TableCell = styled.td`
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
-    white-space: nowrap; /* Evita que el texto se envuelva */
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 200px; /* Ajusta el ancho máximo según sea necesario */
+    max-width: 200px;
 `;
 
 export const TableHeaderCell = styled.th`
@@ -320,5 +321,5 @@ export const TableHeaderCell = styled.th`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 200px; /* Ajusta el ancho máximo según sea necesario */
+    max-width: 200px;
 `;

@@ -48,4 +48,5 @@ body{
 }
 `;
 
+
 export  {GlobalStyles, Titles, SubTitle, SubTitle2,ModalTitle, Labels, LoginStyle};

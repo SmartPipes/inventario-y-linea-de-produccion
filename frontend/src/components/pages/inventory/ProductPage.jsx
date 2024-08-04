@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Form, Input, Space, Button, Select, message, Upload, Tag, Row, Col } from 'antd';
-import { UploadOutlined, ExclamationCircleOutlined, CloseOutlined } from '@ant-design/icons';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Upload, Tag, Row, Col, Tooltip } from 'antd';
+import { UploadOutlined, ExclamationCircleOutlined, CloseOutlined, EditOutlined, DeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { API_URL_PRODUCTS, API_URL_RAWMLIST, API_URL_RAW_MATERIALS, API_URL_BULK_RAWMLIST } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
+import styled from 'styled-components';
 
 const { Option } = Select;
 const { confirm } = Modal;
+
+const buttonColor = '#97b25e';
+
+const ResponsiveTable = styled(Table)`
+  .ant-table {
+    @media (max-width: 768px) {
+      .ant-table-thead > tr > th, .ant-table-tbody > tr > td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+`;
+
+const ResponsiveModal = styled(Modal)`
+  @media (max-width: 768px) {
+    top: 20px;
+  }
+`;
 
 const ProductPage = () => {
     const [products, setProducts] = useState([]);
@@ -131,16 +152,16 @@ const ProductPage = () => {
 
             if (editMode) {
                 await apiClient.put(`${API_URL_PRODUCTS}${currentProduct.product_id}/`, formData, config);
-                message.success('Producto actualizado exitosamente');
+                message.success('Product updated successfully');
             } else {
                 await apiClient.post(API_URL_PRODUCTS, formData, config);
-                message.success('Producto agregado exitosamente');
+                message.success('Product added successfully');
             }
             fetchProducts();
             setIsModalVisible(false);
         } catch (error) {
-            console.error('Error al guardar el producto:', error);
-            message.error('Error al guardar el producto');
+            console.error('Error saving the product:', error);
+            message.error('Error saving the product');
         }
     };
 
@@ -148,10 +169,10 @@ const ProductPage = () => {
         try {
             await apiClient.delete(`${API_URL_PRODUCTS}${currentProductId}/`);
             fetchProducts();
-            message.success('Producto eliminado exitosamente');
+            message.success('Product deleted successfully');
         } catch (error) {
-            console.error('Error al eliminar el producto:', error);
-            message.error('Error al eliminar el producto');
+            console.error('Error deleting the product:', error);
+            message.error('Error deleting the product');
         } finally {
             setIsDeleteModalVisible(false);
         }
@@ -196,31 +217,31 @@ const ProductPage = () => {
             }));
 
             await apiClient.post(API_URL_BULK_RAWMLIST, dataToSend);
-            message.success('Materiales añadidos exitosamente');
+            message.success('Materials added successfully');
             setIsDeclareMaterialVisible(false);
             fetchRawMaterialList();
             setNewMaterials([]);
         } catch (error) {
-            console.error('Error al guardar los materiales:', error);
-            message.error('Error al guardar los materiales');
+            console.error('Error saving the materials:', error);
+            message.error('Error saving the materials');
         }
     };
 
     const handleClearMaterials = () => {
         confirm({
-            title: '¿Estás seguro de que quieres borrar todos los materiales?',
+            title: 'Are you sure you want to delete all materials?',
             icon: <ExclamationCircleOutlined />,
-            content: 'Esta acción no se puede deshacer.',
+            content: 'This action cannot be undone.',
             onOk: async () => {
                 try {
                     await apiClient.delete(API_URL_BULK_RAWMLIST, {
                         params: { product_id: currentProduct.product_id }
                     });
-                    message.success('Todos los materiales han sido borrados');
+                    message.success('All materials have been deleted');
                     fetchRawMaterialList();
                 } catch (error) {
-                    console.error('Error al borrar los materiales:', error);
-                    message.error('Error al borrar los materiales');
+                    console.error('Error deleting the materials:', error);
+                    message.error('Error deleting the materials');
                 }
             }
         });
@@ -242,11 +263,11 @@ const ProductPage = () => {
 
     const columns = [
         { title: 'ID', dataIndex: 'product_id', key: 'product_id' },
-        { title: 'Nombre', dataIndex: 'name', key: 'name' },
-        { title: 'Descripción', dataIndex: 'description', key: 'description' },
-        { title: 'Precio', dataIndex: 'price', key: 'price' },
+        { title: 'Name', dataIndex: 'name', key: 'name' },
+        { title: 'Description', dataIndex: 'description', key: 'description' },
+        { title: 'Price', dataIndex: 'price', key: 'price' },
         {
-            title: 'Estado',
+            title: 'Status',
             dataIndex: 'status',
             key: 'status',
             render: (status) => (
@@ -254,7 +275,7 @@ const ProductPage = () => {
             )
         },
         {
-            title: 'Imagen',
+            title: 'Image',
             dataIndex: 'image_icon',
             key: 'image_icon',
             render: (text, record) => (
@@ -269,13 +290,34 @@ const ProductPage = () => {
             )
         },
         {
-            title: 'Acción',
+            title: 'Action',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Editar</Button>
-                    <Button onClick={() => showDeleteModal(record.product_id)} type="link" danger>Eliminar</Button>
-                    <Button onClick={() => showMaterialModal(record)} type="link">Lista de Materiales</Button>
+                    <Tooltip title="Edit">
+                        <Button
+                            onClick={() => showModal(record)}
+                            type="link"
+                            icon={<EditOutlined />}
+                            style={{ color: buttonColor }}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Remove">
+                        <Button
+                            onClick={() => showDeleteModal(record.product_id)}
+                            type="link"
+                            icon={<DeleteOutlined />}
+                            danger
+                        />
+                    </Tooltip>
+                    <Tooltip title="List Materials">
+                        <Button
+                            onClick={() => showMaterialModal(record)}
+                            type="link"
+                            icon={<UnorderedListOutlined />}
+                            style={{ color: buttonColor }}
+                        />
+                    </Tooltip>
                 </Space>
             )
         }
@@ -297,45 +339,49 @@ const ProductPage = () => {
 
     return (
         <div>
-            <NavBarMenu title="Productos" />
-            <div style={{ marginBottom: '16px' }}>
+            <NavBarMenu title="Products" />
+            <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                 <Input
-                    placeholder="Buscar producto..."
+                    placeholder="Search product..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
-                    style={{ width: 300, marginRight: '16px' }}
+                    style={{ width: '100%', maxWidth: '300px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Agregar Producto</Button>
+                <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
+                    Add Product
+                </Button>
             </div>
-            <Table
+            <ResponsiveTable
                 columns={columns}
                 dataSource={filteredProducts}
                 rowKey="product_id"
                 loading={loading}
+                scroll={{ x: '100%' }}
             />
-            <Modal
-                title={editMode ? 'Editar Producto' : 'Agregar Producto'}
+            <ResponsiveModal
+                title={editMode ? 'Edit Product' : 'Add Product'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
+                okButtonProps={{ style: { backgroundColor: buttonColor, borderColor: buttonColor } }}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
+                    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="description" label="Descripción" rules={[{ required: true }]}>
+                    <Form.Item name="description" label="Description" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="price" label="Precio" rules={[{ required: true }]}>
+                    <Form.Item name="price" label="Price" rules={[{ required: true }]}>
                         <Input type="number" />
                     </Form.Item>
-                    <Form.Item name="status" label="Estado" rules={[{ required: true }]}>
+                    <Form.Item name="status" label="Status" rules={[{ required: true }]}>
                         <Select>
                             <Option value="Active">Active</Option>
                             <Option value="Inactive">Inactive</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Imagen">
+                    <Form.Item label="Image">
                         <Upload
                             listType="picture"
                             fileList={fileList}
@@ -344,32 +390,33 @@ const ProductPage = () => {
                             accept="image/*"
                             onPreview={handlePreview}
                         >
-                            <Button icon={<UploadOutlined />}>Subir Imagen</Button>
+                            <Button icon={<UploadOutlined />} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
+                                Upload Image
+                            </Button>
                         </Upload>
                     </Form.Item>
                 </Form>
-            </Modal>
-            <Modal
-                title="Vista previa de la imagen"
+            </ResponsiveModal>
+            <ResponsiveModal
+                title="Image Preview"
                 visible={previewVisible}
                 footer={null}
                 onCancel={() => setPreviewVisible(false)}
-                zIndex={10000}
             >
-                <img alt="Vista previa" style={{ width: '100%' }} src={previewImage} />
-            </Modal>
-            <Modal
-                title="Confirmar Eliminación"
+                <img alt="Preview" style={{ width: '100%' }} src={previewImage} />
+            </ResponsiveModal>
+            <ResponsiveModal
+                title="Confirm Deletion"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
-                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
+                okText={`Delete${countdown > 0 ? ` (${countdown})` : ''}`}
                 okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white', color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>¿Estás seguro de que quieres borrar este producto? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
-            </Modal>
-            <Modal
-                title="Lista de Materiales"
+                <p>Are you sure you want to delete this product? Please wait {countdown} seconds to confirm deletion.</p>
+            </ResponsiveModal>
+            <ResponsiveModal
+                title="Material List"
                 visible={isMaterialModalVisible}
                 onCancel={() => setIsMaterialModalVisible(false)}
                 footer={null}
@@ -392,19 +439,23 @@ const ProductPage = () => {
                             </Col>
                         </Row>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                            <h4>Materiales Necesarios:</h4>
+                            <h4>Required Materials:</h4>
                             {getProductMaterials(currentProduct.product_id).length > 0 && (
-                                <Button type="danger" onClick={handleClearMaterials} style={{ backgroundColor: 'red', color: 'white' }}>
-                                    Borrar Todos los Materiales
+                                <Button
+                                    type="danger"
+                                    onClick={handleClearMaterials}
+                                    style={{ backgroundColor: 'red', color: 'white' }}
+                                >
+                                    Clear All Materials
                                 </Button>
                             )}
                         </div>
                         {getProductMaterials(currentProduct.product_id).length > 0 ? (
-                            <Table
+                            <ResponsiveTable
                                 dataSource={getProductMaterials(currentProduct.product_id)}
                                 columns={[
                                     {
-                                        title: 'Imagen',
+                                        title: 'Image',
                                         dataIndex: ['raw_material', 'image_icon'],
                                         key: 'raw_material_image',
                                         render: (image) => (
@@ -423,7 +474,7 @@ const ProductPage = () => {
                                         width: '60%',
                                     },
                                     {
-                                        title: 'Cantidad',
+                                        title: 'Quantity',
                                         dataIndex: 'quantity',
                                         key: 'quantity',
                                         width: '30%',
@@ -435,19 +486,26 @@ const ProductPage = () => {
                             />
                         ) : (
                             <div>
-                                <p>Materiales no declarados para este producto.</p>
-                                <Button type="primary" onClick={() => setIsDeclareMaterialVisible(true)}>Declarar Materiales</Button>
+                                <p>No materials declared for this product.</p>
+                                <Button
+                                    type="primary"
+                                    onClick={() => setIsDeclareMaterialVisible(true)}
+                                    style={{ backgroundColor: buttonColor, borderColor: buttonColor }}
+                                >
+                                    Declare Materials
+                                </Button>
                             </div>
                         )}
                     </div>
                 )}
-            </Modal>
-            <Modal
-                title="Declarar Materiales"
+            </ResponsiveModal>
+            <ResponsiveModal
+                title="Declare Materials"
                 visible={isDeclareMaterialVisible}
                 onCancel={handleCancelDeclareMaterials}
                 onOk={handleSaveMaterials}
-                okText="Guardar Materiales"
+                okText="Save Materials"
+                okButtonProps={{ style: { backgroundColor: buttonColor, borderColor: buttonColor } }}
             >
                 <div>
                     <h3>{currentProduct?.name}</h3>
@@ -462,9 +520,9 @@ const ProductPage = () => {
                     <Form.Item
                         name="raw_material"
                         label="Material"
-                        rules={[{ required: true, message: 'Por favor selecciona un material' }]}
+                        rules={[{ required: true, message: 'Please select a material' }]}
                     >
-                        <Select placeholder="Seleccionar material">
+                        <Select placeholder="Select material">
                             {getAvailableRawMaterials().map(material => (
                                 <Option key={material.raw_material_id} value={material.raw_material_id}>
                                     <img
@@ -479,16 +537,20 @@ const ProductPage = () => {
                     </Form.Item>
                     <Form.Item
                         name="quantity"
-                        label="Cantidad"
-                        rules={[{ required: true, message: 'Por favor ingresa la cantidad' }]}
+                        label="Quantity"
+                        rules={[{ required: true, message: 'Please enter the quantity' }]}
                     >
                         <Input type="number" min={1} style={{ width: 100 }} />
                     </Form.Item>
-                    <Button type="dashed" onClick={handleAddMaterial} style={{ width: '100%', marginBottom: 16 }}>
-                        Agregar
+                    <Button
+                        type="dashed"
+                        onClick={handleAddMaterial}
+                        style={{ width: '100%', marginBottom: 16, backgroundColor: buttonColor, borderColor: buttonColor }}
+                    >
+                        Add
                     </Button>
                 </Form>
-                <Table
+                <ResponsiveTable
                     dataSource={newMaterials}
                     columns={[
                         {
@@ -512,21 +574,23 @@ const ProductPage = () => {
                             width: '60%',
                         },
                         {
-                            title: 'Cantidad',
+                            title: 'Quantity',
                             dataIndex: 'quantity',
                             key: 'quantity',
                             width: '30%',
                         },
                         {
-                            title: 'Acción',
+                            title: 'Action',
                             key: 'action',
                             render: (_, record) => (
-                                <Button
-                                    icon={<CloseOutlined />}
-                                    onClick={() => handleRemoveMaterial(record.raw_material)}
-                                    type="link"
-                                    danger
-                                />
+                                <Tooltip title="Remove">
+                                    <Button
+                                        icon={<CloseOutlined />}
+                                        onClick={() => handleRemoveMaterial(record.raw_material)}
+                                        type="link"
+                                        danger
+                                    />
+                                </Tooltip>
                             ),
                             width: '10%',
                         },
@@ -535,7 +599,7 @@ const ProductPage = () => {
                     size="small"
                     rowKey="raw_material"
                 />
-            </Modal>
+            </ResponsiveModal>
         </div>
     );
 };

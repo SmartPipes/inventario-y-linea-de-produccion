@@ -2,62 +2,66 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
-import { 
-    NavContainer, NavItem, NavLogo, HamburgerMenu, NavMenu, DropdownContainer, DropdownMenu, DropdownItem 
+import { Dropdown, Menu } from 'antd';
+import {
+    NavContainer, NavItem, NavLogo, HamburgerMenu, NavMenu
 } from '../../../Styled/InventoryNavBar.styled';
 
 const NavBarMenu = ({ title }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [openDropdown, setOpenDropdown] = useState(null);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
-    const handleDropdownClick = (dropdown) => {
-        setOpenDropdown(openDropdown === dropdown ? null : dropdown);
-    };
+    const operationsMenu = (
+        <Menu>
+            <Menu.Item disabled>Reabastecimiento</Menu.Item>
+            <Menu.Item><Link to="/inventory/request-restock">Restock</Link></Menu.Item>
+            <Menu.Item disabled>Traslados</Menu.Item>
+            <Menu.Item><Link to="/inventory/receipts">Receipts</Link></Menu.Item>
+        </Menu>
+    );
+
+    const reportsMenu = (
+        <Menu>
+            <Menu.Item><Link to="/inventory/stock">Stock</Link></Menu.Item>
+            <Menu.Item><Link to="/inventory/operation-log">Movement History</Link></Menu.Item>
+        </Menu>
+    );
+
+    const settingsMenu = (
+        <Menu>
+            <Menu.Item disabled>Warehouse Management</Menu.Item>
+            <Menu.Item><Link to="/inventory/warehouses">Warehouses</Link></Menu.Item>
+            <Menu.Item disabled>Supplier Management</Menu.Item>
+            <Menu.Item><Link to="/inventory/suppliers">Suppliers</Link></Menu.Item>
+            <Menu.Item disabled>Products</Menu.Item>
+            <Menu.Item><Link to="/inventory/categories">Categories</Link></Menu.Item>
+            <Menu.Item><Link to="/inventory/products">Products</Link></Menu.Item>
+            <Menu.Item><Link to="/inventory/raw-materials">Raw Materials</Link></Menu.Item>
+            <Menu.Item><Link to="/inventory/request-restock-warehouse">Restock Requests Warehouse</Link></Menu.Item>
+        </Menu>
+    );
 
     return (
         <NavContainer>
             <NavLogo>{title}</NavLogo>
-            <HamburgerMenu onClick={toggleMenu}>
+            <HamburgerMenu onClick={toggleMenu} className="hamburger-right">
                 <FontAwesomeIcon icon={faBars} size="lg" />
             </HamburgerMenu>
             <NavMenu isOpen={isMenuOpen}>
                 <NavItem><Link to="/inventory/informacion-general">General information</Link></NavItem>
-                <DropdownContainer>
-                    <NavItem onClick={() => handleDropdownClick('operations')}>Operations</NavItem>
-                    <DropdownMenu isOpen={openDropdown === 'operations'}>
-                        <DropdownItem isLabel>Reabastecimiento</DropdownItem>
-                        <DropdownItem><Link to="/inventory/request-restock">Restock</Link></DropdownItem>
-                        <DropdownItem isLabel>Traslados</DropdownItem>
-                        <DropdownItem><Link to="/inventory/receipts">Receipts</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/deliveries">Deliveries</Link></DropdownItem>
-                    </DropdownMenu>
-                </DropdownContainer>
-                <DropdownContainer>
-                    <NavItem onClick={() => handleDropdownClick('reports')}>Reports</NavItem>
-                    <DropdownMenu isOpen={openDropdown === 'reports'}>
-                        <DropdownItem><Link to="/inventory/stock">Stock</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/operation-log">Movement History</Link></DropdownItem>
-                    </DropdownMenu>
-                </DropdownContainer>
+                <Dropdown overlay={operationsMenu} placement="bottomLeft" trigger={['click']}>
+                    <NavItem>Operations</NavItem>
+                </Dropdown>
+                <Dropdown overlay={reportsMenu} placement="bottomLeft" trigger={['click']}>
+                    <NavItem>Reports</NavItem>
+                </Dropdown>
                 <NavItem><Link to="/inventory">Products</Link></NavItem>
-                <DropdownContainer>
-                    <NavItem onClick={() => handleDropdownClick('settings')}>Settings</NavItem>
-                    <DropdownMenu isOpen={openDropdown === 'settings'}>
-                        <DropdownItem isLabel>Warehouse Management</DropdownItem>
-                        <DropdownItem><Link to="/inventory/warehouses">Warehouses</Link></DropdownItem>
-                        <DropdownItem isLabel>Supplier Management</DropdownItem>
-                        <DropdownItem><Link to="/inventory/suppliers">Suppliers</Link></DropdownItem>
-                        <DropdownItem isLabel>Products</DropdownItem>
-                        <DropdownItem><Link to="/inventory/categories">Categories</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/products">Products</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/raw-materials">Raw Materials</Link></DropdownItem>
-                        <DropdownItem><Link to="/inventory/request-restock-warehouse">Restock Requests Warehouse</Link></DropdownItem>
-                    </DropdownMenu>
-                </DropdownContainer>
+                <Dropdown overlay={settingsMenu} placement="bottomLeft" trigger={['click']}>
+                    <NavItem>Settings</NavItem>
+                </Dropdown>
             </NavMenu>
         </NavContainer>
     );

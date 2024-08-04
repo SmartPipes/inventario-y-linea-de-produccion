@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Space, Button, message } from 'antd';
+import { Table, Modal, Space, Button, message, Tag } from 'antd';
 import { 
     API_URL_OPERATION_LOG, 
     API_URL_USERS, 
@@ -10,6 +10,21 @@ import {
 } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
+import styled from 'styled-components';
+
+const ResponsiveTable = styled(Table)`
+    .ant-table-container {
+        overflow-x: auto;
+    }
+`;
+
+const ResponsiveModal = styled(Modal)`
+    @media (max-width: 768px) {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0;
+    }
+`;
 
 const OperationLogPage = () => {
     const [operationLogs, setOperationLogs] = useState([]);
@@ -143,7 +158,14 @@ const OperationLogPage = () => {
         { title: 'ID', dataIndex: 'operation_log_id', key: 'operation_log_id' },
         { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
         { title: 'Date/Hour', dataIndex: 'datetime', key: 'datetime' },
-        { title: 'Operation type', dataIndex: 'type_operation', key: 'type_operation' },
+        {
+            title: 'Operation Type',
+            dataIndex: 'type_operation',
+            key: 'type_operation',
+            render: (text) => (
+                <Tag color={text === 'Add' ? 'green' : 'volcano'}>{text}</Tag>
+            ),
+        },
         {
             title: 'Article',
             dataIndex: 'inventory_item',
@@ -176,13 +198,14 @@ const OperationLogPage = () => {
     return (
         <div>
             <NavBarMenu title="Operations Log" />
-            <Table
+            <ResponsiveTable
                 columns={columns}
                 dataSource={operationLogs}
                 rowKey="operation_log_id"
                 loading={loading}
+                scroll={{ x: '100%' }}
             />
-            <Modal
+            <ResponsiveModal
                 title="Confirm Deletion"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
@@ -191,7 +214,7 @@ const OperationLogPage = () => {
                 okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
             >
                 <p>Are you sure you want to delete this record? Please wait{countdown} seconds to confirm the deletion.</p>
-            </Modal>
+            </ResponsiveModal>
         </div>
     );
 };

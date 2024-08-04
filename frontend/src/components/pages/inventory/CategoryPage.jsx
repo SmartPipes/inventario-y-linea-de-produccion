@@ -1,8 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Form, Input, Space, Button, message } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, message, Tooltip } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { API_URL_CATEGORIES } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
+import styled from 'styled-components';
+
+const buttonColor = '#97b25e';
+
+const ResponsiveTable = styled(Table)`
+  .ant-table {
+    @media (max-width: 768px) {
+      .ant-table-thead > tr > th, .ant-table-tbody > tr > td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+`;
+
+const ResponsiveModal = styled(Modal)`
+  @media (max-width: 768px) {
+    top: 20px;
+  }
+`;
 
 const CategoryPage = () => {
     const [categories, setCategories] = useState([]);
@@ -70,25 +92,21 @@ const CategoryPage = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-            console.log('Form Values:', values); // Log the form values for debugging
             if (editMode) {
-                const response = await apiClient.put(`${API_URL_CATEGORIES}${currentCategory.category_id}/`, values);
-                console.log('Edit Response:', response); // Log the response for debugging
-                message.success('Categoría actualizada exitosamente');
+                await apiClient.put(`${API_URL_CATEGORIES}${currentCategory.category_id}/`, values);
+                message.success('Category updated successfully');
             } else {
-                const response = await apiClient.post(API_URL_CATEGORIES, values);
-                console.log('Create Response:', response); // Log the response for debugging
-                message.success('Categoría agregada exitosamente');
+                await apiClient.post(API_URL_CATEGORIES, values);
+                message.success('Category added successfully');
             }
             fetchCategories();
             setIsModalVisible(false);
         } catch (error) {
-            console.error('Error al guardar la categoría:', error);
+            console.error('Error saving category:', error);
             if (error.response) {
-                console.error('Server Response:', error.response.data); // Log the server response
-                message.error(`Error al guardar la categoría: ${error.response.data.detail || 'Error desconocido'}`);
+                message.error(`Error saving category: ${error.response.data.detail || 'Unknown error'}`);
             } else {
-                message.error('Error al guardar la categoría');
+                message.error('Error saving category');
             }
         }
     };
@@ -102,10 +120,10 @@ const CategoryPage = () => {
         try {
             await apiClient.delete(`${API_URL_CATEGORIES}${currentCategoryId}/`);
             fetchCategories();
-            message.success('Categoría eliminada exitosamente');
+            message.success('Category deleted successfully');
         } catch (error) {
-            console.error('Error al eliminar la categoría:', error);
-            message.error('Error al eliminar la categoría');
+            console.error('Error deleting category:', error);
+            message.error('Error deleting category');
         } finally {
             setIsDeleteModalVisible(false);
         }
@@ -122,15 +140,29 @@ const CategoryPage = () => {
 
     const columns = [
         { title: 'ID', dataIndex: 'category_id', key: 'category_id' },
-        { title: 'Nombre', dataIndex: 'name', key: 'name' },
-        { title: 'Descripción', dataIndex: 'description', key: 'description' },
+        { title: 'Name', dataIndex: 'name', key: 'name' },
+        { title: 'Description', dataIndex: 'description', key: 'description' },
         {
-            title: 'Acción',
+            title: 'Action',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Editar</Button>
-                    <Button onClick={() => showDeleteModal(record.category_id)} type="link" danger>Eliminar</Button>
+                    <Tooltip title="Edit">
+                        <Button
+                            onClick={() => showModal(record)}
+                            type="link"
+                            icon={<EditOutlined />}
+                            style={{ color: buttonColor }}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Remove">
+                        <Button
+                            onClick={() => showDeleteModal(record.category_id)}
+                            type="link"
+                            icon={<DeleteOutlined />}
+                            danger
+                        />
+                    </Tooltip>
                 </Space>
             )
         }
@@ -138,47 +170,51 @@ const CategoryPage = () => {
 
     return (
         <div>
-            <NavBarMenu title="Categorías" />
-            <div style={{ marginBottom: '16px' }}>
+            <NavBarMenu title="Categories" />
+            <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                 <Input
-                    placeholder="Buscar categoría..."
+                    placeholder="Search category..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
-                    style={{ width: 300, marginRight: '16px' }}
+                    style={{ width: '100%', maxWidth: '300px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Agregar Categoría</Button>
+                <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
+                    Add Category
+                </Button>
             </div>
-            <Table
+            <ResponsiveTable
                 columns={columns}
                 dataSource={filteredCategories}
                 rowKey="category_id"
                 loading={loading}
+                scroll={{ x: '100%' }}
             />
-            <Modal
-                title={editMode ? 'Editar Categoría' : 'Agregar Categoría'}
+            <ResponsiveModal
+                title={editMode ? 'Edit Category' : 'Add Category'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
+                okButtonProps={{ style: { backgroundColor: buttonColor, borderColor: buttonColor } }}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="Nombre" rules={[{ required: true }]}>
+                    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="description" label="Descripción" rules={[{ required: true }]}>
+                    <Form.Item name="description" label="Description" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
                 </Form>
-            </Modal>
-            <Modal
-                title="Confirmar Eliminación"
+            </ResponsiveModal>
+            <ResponsiveModal
+                title="Confirm Deletion"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
-                okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
-                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
+                okText={`Delete${countdown > 0 ? ` (${countdown})` : ''}`}
+                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white', color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>¿Estás seguro de que quieres borrar esta categoría? Por favor espera {countdown} segundos para confirmar la eliminación.</p>
-            </Modal>
+                <p>Are you sure you want to delete this category? Please wait {countdown} seconds to confirm deletion.</p>
+            </ResponsiveModal>
         </div>
     );
 };

@@ -8,6 +8,7 @@ export const API_URL_PL= BASE_API_URL+'production-line/production-lines/';
 export const API_URL_FACTORIES= BASE_API_URL+'production-line/factories/';
 //cities
 export const API_URL_CITIES= BASE_API_URL+'inventory/city/';
+export const API_URL_STATES= BASE_API_URL+'inventory/states/';
 //Users
 export const  API_URL_USERS= BASE_API_URL+'users/users/';
 export const API_URL_USER_LOGIN = BASE_API_URL+'users/login/';

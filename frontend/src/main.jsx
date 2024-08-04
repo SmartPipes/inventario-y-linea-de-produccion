@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import Home from './components/pages/Home';
 import ReceiptsPage from './components/pages/inventory/ReceiptsPage';
-import ReceiptDetailsPage from './components/pages/inventory/ReceiptDetailsPage';
 import { ProductionLine } from './components/pages/production/ProductionLine';
 import { ProductionPhase } from './components/pages/production/ProductionPhase.jsx';
 import { Factory } from './components/pages/production/Factory.jsx';
@@ -30,6 +29,9 @@ import SaleDetailsPage from './components/pages/Delivery/SaleDetailsPage.jsx';
 import ThirdPartyServicePage from './components/pages/Delivery/ThirdPartyServicePage.jsx';
 import OrdersPage from './components/pages/Delivery/OrdersPage.jsx';
 import Login from './components/pages/User/Login.jsx';
+import StockPage from './components/pages/inventory/StockPage.jsx'; // Importa el nuevo componente
+
+import './Styled/ResponsiveANTD.css';
 
 const router = createBrowserRouter([{
   path: "/",
@@ -49,7 +51,6 @@ const router = createBrowserRouter([{
     { path: "inventory/request-restock-warehouse", element: <RestockRequestWarehousePage /> },
     { path: "inventory/products", element: <ProductPage /> },
     { path: "inventory/receipts", element: <ReceiptsPage /> },
-    { path: "inventory/receipts/:id", element: <ReceiptDetailsPage /> },
     { path: "inventory/raw-materials", element: <RawMaterialPage /> },
     { path: "/production/factories", element: <Factory /> },
     { path: "production", element: <Production /> },
@@ -63,6 +64,7 @@ const router = createBrowserRouter([{
     { path: "/delivery/cart-details", element: <CartDetailsPage /> },
     { path: "/delivery/sale-details", element: <SaleDetailsPage /> },
     { path: "/delivery/ThirdPartyService", element: <ThirdPartyServicePage /> },
+    { path: "inventory/stock", element: <StockPage /> }, 
   ]
 }]);
 
