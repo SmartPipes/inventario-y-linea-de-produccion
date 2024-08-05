@@ -15,7 +15,8 @@ import {
     API_URL_DELIVERY_SALE_DETAILS,
     API_URL_DELIVERY_PAYMENTS,
     API_URL_PAYMENT_METHODS,
-    API_URL_DELIVERY_ORDERS
+    API_URL_DELIVERY_ORDERS,
+    API_URL_SALE_DELIVERY_DATA
 } from './Config';
 
 const Salesdetails = () => {
@@ -50,165 +51,92 @@ const Salesdetails = () => {
     const getExistingDeliveryOrder = async (saleId) => {
         try {
             const response = await apiClient.get(`${API_URL_DELIVERY_ORDERS}?sale=${saleId}`);
-            return response.data.length > 0 ? response.data[0] : null;  // Devuelve la primera orden encontrada
+            return response.data.length > 0 ? response.data[0] : null;
         } catch (error) {
             console.error('Error retrieving delivery order:', error);
             return null;
         }
     };
-    
+
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [paymentInProgress, setPaymentInProgress] = useState(null);
+
+    const processSale = async (fullPayload) => {
+        try {
+            const response = await apiClient.post(API_URL_SALE_DELIVERY_DATA, fullPayload);
+            console.log("Venta y datos de entrega registrados con éxito:", response.data);
+            setShowModal(false);
+            navigate('/sales');
+        } catch (error) {
+            console.error('Error sending sale and delivery data:', error);
+        } finally {
+            setIsProcessing(false);
+            setPaymentInProgress(null);
+        }
+    };
 
     const handleProceedToPayment = async () => {
+        if (isProcessing || paymentInProgress) return;
+        setIsProcessing(true);
+        setPaymentInProgress('card');
+
         try {
-            if (paymentMethod === 'Debito' || paymentMethod === 'Credito') {
-                const isValidPayment = cardNumber.length === 12 && cvv.length === 3 && expiryDate.length === 4;
-                if (!isValidPayment) {
-                    alert('Por favor, ingresa datos de tarjeta válidos.');
-                    return;
-                }
-                setTransactionId('FAKE_TRANSACTION_ID');
+            const isValidPayment = cardNumber.length === 16 && cvv.length === 3 && expiryDate.length === 5;
+            if (!isValidPayment) {
+                alert('Por favor, ingresa datos de tarjeta válidos.');
+                setIsProcessing(false);
+                setPaymentInProgress(null);
+                return;
+            }
 
-                // Proceso común de crear carrito, agregar detalles y registrar la venta
-                const cartPayload = { client_id: id };
-                const cartResponse = await apiClient.post(API_URL_DELIVERY_CARTS, cartPayload);
-                const cartData = cartResponse.data;
-
-                for (const item of cartItems) {
-                    const cartDetailPayload = {
-                        cart: cartData.cart_id,
-                        product: item.product_id,
-                        quantity: item.quantity.toString(),
-                    };
-                    await apiClient.post(API_URL_DELIVERY_CART_DETAILS, cartDetailPayload);
-                }
-
-                const salePayload = { total: subtotal, client_id: id };
-                const saleResponse = await apiClient.post(API_URL_DELIVERY_SALES, salePayload);
-                const saleData = saleResponse.data;
-
-                for (const item of cartItems) {
-                    const saleDetailPayload = {
-                        sale: saleData.sale_id,
-                        product: item.product_id,
-                        quantity: item.quantity,
-                        price: item.price,
-                    };
-                    await apiClient.post(API_URL_DELIVERY_SALE_DETAILS, saleDetailPayload);
-                }
-
-                // Registro del pago con tarjeta
-                const paymentPayload = {
-                    payment_method: paymentMethod,
-                    amount: subtotal,
-                    transaction_id: transactionId || null,
-                    sale_id: saleData.sale_id,
-                };
-                await apiClient.post(API_URL_DELIVERY_PAYMENTS, paymentPayload);
-                console.log("Pago registrado con éxito");
-
-                if (savePaymentMethod) {
-                    const paymentMethodPayload = {
-                        payment_type: paymentMethod,
-                        provider: paymentMethod === 'PayPal' ? 'PayPal' : 'Bank',
-                        account_number: paymentMethod === 'PayPal' ? 'N/A' : cardNumber,
-                        expire_date: paymentMethod === 'PayPal' ? null : expiryDate,
-                        name_on_account: paymentMethod === 'PayPal' ? 'PayPal Account' : cardHolder,
-                        client_id: id,
-                        is_default: false,
-                        address: address
-                    };
-
-                    await apiClient.post(API_URL_PAYMENT_METHODS, paymentMethodPayload);
-                    console.log("Forma de pago guardada:", paymentMethodPayload);
-                }
-
-                const deliveryOrderPayload = {
+            const fullPayload = {
+                sale: { total: subtotal, client_id: id },
+                sale_details: cartItems.map(item => ({
+                    product: item.product_id,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                delivery_order: {
                     delivery_date: new Date().toISOString(),
                     status: "pending",
                     delivery_address: address,
                     notes: "Delivery Details Check",
                     third_party_service: 1,
-                    sale: saleData.sale_id,
                     client: id
-                };
-                await apiClient.post(API_URL_DELIVERY_ORDERS, deliveryOrderPayload);
-                console.log("Orden de entrega registrada con éxito");
+                }
+            };
 
-                // Cerrar el modal
-                setShowModal(false);
-                navigate('/sales')
-            } else {
-                alert('Método de pago no válido.');
-                return;
-            }
-            
+            await processSale(fullPayload);
         } catch (error) {
-            console.error('Error processing payment:', error);
+            console.error('Error processing card payment:', error);
+            setIsProcessing(false);
+            setPaymentInProgress(null);
         }
     };
 
     const handlePayPalApprove = async (orderID) => {
-        try {
-            // Crear carrito
-            const cartPayload = { client_id: id };
-            const cartResponse = await apiClient.post(API_URL_DELIVERY_CARTS, cartPayload);
-            const cartData = cartResponse.data;
+        if (isProcessing || paymentInProgress) return;
+        setIsProcessing(true);
+        setPaymentInProgress('paypal');
 
-            // Agregar detalles del carrito
-            for (const item of cartItems) {
-                const cartDetailPayload = {
-                    cart: cartData.cart_id,
-                    product: item.product_id,
-                    quantity: item.quantity.toString(),
-                };
-                await apiClient.post(API_URL_DELIVERY_CART_DETAILS, cartDetailPayload);
-            }
-
-            // Registrar la venta
-            const salePayload = { total: subtotal, client_id: id };
-            const saleResponse = await apiClient.post(API_URL_DELIVERY_SALES, salePayload);
-            const saleData = saleResponse.data;
-
-            // Agregar detalles de la venta
-            for (const item of cartItems) {
-                const saleDetailPayload = {
-                    sale: saleData.sale_id,
-                    product: item.product_id,
-                    quantity: item.quantity,
-                    price: item.price,
-                };
-                await apiClient.post(API_URL_DELIVERY_SALE_DETAILS, saleDetailPayload);
-            }
-
-            // Registro del pago con PayPal
-            const paymentPayload = {
-                payment_method: 'PayPal',
-                amount: subtotal,
-                transaction_id: orderID,
-                sale_id: saleData.sale_id,
-            };
-            await apiClient.post(API_URL_DELIVERY_PAYMENTS, paymentPayload);
-            console.log("Pago con PayPal registrado con éxito");
-
-            // Crear orden de entrega solo una vez
-            const deliveryOrderPayload = {
+        const fullPayload = {
+            sale: { total: subtotal, client_id: id },
+            sale_details: cartItems.map(item => ({
+                product: item.product_id,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            delivery_order: {
                 delivery_date: new Date().toISOString(),
                 status: "pending",
                 delivery_address: address,
                 notes: "Delivery Details Check",
                 third_party_service: 1,
-                sale: saleData.sale_id,
                 client: id
-            };
-            await apiClient.post(API_URL_DELIVERY_ORDERS, deliveryOrderPayload);
-            console.log("Orden de entrega registrada con éxito");
+            }
+        };
 
-            // Cerrar el modal
-            setShowModal(false);
-            navigate('/sales')
-        } catch (error) {
-            console.error('Error processing PayPal payment:', error);
-        }
+        await processSale(fullPayload);
     };
 
     return (
@@ -386,7 +314,6 @@ const Salesdetails = () => {
                                 </Form.Group>
                             </>
                         ) : paymentMethod === 'PayPal' ? (
-
                             <PayPalScriptProvider options={{ "client-id": "AW2rBdOeXNJP62RYmTwawRjhAKssHrieIRwnr8fmpRkOz03yNxPAYxQ8r8aYnXVx8auQ9n70BRVmZYiY" }}>
                                 <PayPalButtons
                                     createOrder={(data, actions) => {
@@ -409,7 +336,6 @@ const Salesdetails = () => {
                                     }}
                                 />
                             </PayPalScriptProvider>
-
                         ) : null}
                     </Form>
                     <hr />
