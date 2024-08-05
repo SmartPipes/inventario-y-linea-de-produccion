@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Image, InputGroup, FormControl, Row, Col, Modal, Form, Table } from 'react-bootstrap';
 import { useCart } from '../../context/CartContext';
 import { FaTrashAlt } from 'react-icons/fa';
@@ -8,15 +7,24 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { apiClient } from '../../ApiClient';
 import { useNavigate } from 'react-router-dom';
 
+import {
+    API_URL_PRODUCTS,
+    API_URL_DELIVERY_CARTS,
+    API_URL_DELIVERY_CART_DETAILS,
+    API_URL_DELIVERY_SALES,
+    API_URL_DELIVERY_SALE_DETAILS,
+    API_URL_DELIVERY_PAYMENTS,
+    API_URL_PAYMENT_METHODS,
+} from './Config';
 
 const Salesdetails = () => {
-    const { cartItems, handleRemoveFromCart, handleIncrementQuantity, handleDecrementQuantity,handleAddToCart } = useCart();
+    const { cartItems, handleRemoveFromCart, handleIncrementQuantity, handleDecrementQuantity, handleAddToCart } = useCart();
     const [showModal, setShowModal] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('Debito');
     const [cardNumber, setCardNumber] = useState('');
     const [cardHolder, setCardHolder] = useState('');
     const [expiryDate, setExpiryDate] = useState('');
-    const [address, setaddress] = useState('');
+    const [address, setAddress] = useState('');
     const [cvv, setCvv] = useState('');
     const [transactionId, setTransactionId] = useState('');
     const subtotal = cartItems.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0).toFixed(2);
@@ -28,7 +36,7 @@ const Salesdetails = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await apiClient.get('https://smartpipes.cloud/api/inventory/products/');
+                const response = await apiClient.get(API_URL_PRODUCTS);
                 setProducts(response.data);
             } catch (error) {
                 console.error('Error fetching products:', error);
@@ -50,7 +58,7 @@ const Salesdetails = () => {
 
                 // Proceso común de crear carrito, agregar detalles y registrar la venta
                 const cartPayload = { client_id: id };
-                const cartResponse = await apiClient.post('https://smartpipes.cloud/api/sales/carts/', cartPayload);
+                const cartResponse = await apiClient.post(API_URL_DELIVERY_CARTS, cartPayload);
                 const cartData = cartResponse.data;
 
                 for (const item of cartItems) {
@@ -59,11 +67,11 @@ const Salesdetails = () => {
                         product: item.product_id,
                         quantity: item.quantity.toString(),
                     };
-                    await apiClient.post('https://smartpipes.cloud/api/sales/cart-details/', cartDetailPayload);
+                    await apiClient.post(API_URL_DELIVERY_CART_DETAILS, cartDetailPayload);
                 }
 
                 const salePayload = { total: subtotal, client_id: id };
-                const saleResponse = await apiClient.post('https://smartpipes.cloud/api/sales/sales/', salePayload);
+                const saleResponse = await apiClient.post(API_URL_DELIVERY_SALES, salePayload);
                 const saleData = saleResponse.data;
 
                 for (const item of cartItems) {
@@ -73,7 +81,7 @@ const Salesdetails = () => {
                         quantity: item.quantity,
                         price: item.price,
                     };
-                    await apiClient.post('https://smartpipes.cloud/api/sales/sale-details/', saleDetailPayload);
+                    await apiClient.post(API_URL_DELIVERY_SALE_DETAILS, saleDetailPayload);
                 }
 
                 // Registro del pago con tarjeta
@@ -83,7 +91,7 @@ const Salesdetails = () => {
                     transaction_id: transactionId || null,
                     sale_id: saleData.sale_id,
                 };
-                await apiClient.post('https://smartpipes.cloud/api/sales/payments/', paymentPayload);
+                await apiClient.post(API_URL_DELIVERY_PAYMENTS, paymentPayload);
                 console.log("Pago registrado con éxito");
 
                 if (savePaymentMethod) {
@@ -98,9 +106,8 @@ const Salesdetails = () => {
                         address: address
                     };
 
-                    // const response = await apiClient.post('https://smartpipes.cloud/api/users/payment-methods/', paymentMethodPayload);
-                    // console.log(paymentMethodPayload);
-                    // console.log("Forma de pago guardada:", response.data);
+                    await apiClient.post(API_URL_PAYMENT_METHODS, paymentMethodPayload);
+                    console.log("Forma de pago guardada:", paymentMethodPayload);
                 }
 
                 // Cerrar el modal
@@ -116,12 +123,11 @@ const Salesdetails = () => {
         }
     };
 
-
     const handlePayPalApprove = async (orderID) => {
         try {
             // Crear carrito
             const cartPayload = { client_id: id };
-            const cartResponse = await apiClient.post('https://smartpipes.cloud/api/sales/carts/', cartPayload);
+            const cartResponse = await apiClient.post(API_URL_DELIVERY_CARTS, cartPayload);
             const cartData = cartResponse.data;
 
             // Agregar detalles del carrito
@@ -131,12 +137,12 @@ const Salesdetails = () => {
                     product: item.product_id,
                     quantity: item.quantity.toString(),
                 };
-                await apiClient.post('https://smartpipes.cloud/api/sales/cart-details/', cartDetailPayload);
+                await apiClient.post(API_URL_DELIVERY_CART_DETAILS, cartDetailPayload);
             }
 
             // Registrar la venta
             const salePayload = { total: subtotal, client_id: id };
-            const saleResponse = await apiClient.post('https://smartpipes.cloud/api/sales/sales/', salePayload);
+            const saleResponse = await apiClient.post(API_URL_DELIVERY_SALES, salePayload);
             const saleData = saleResponse.data;
 
             // Agregar detalles de la venta
@@ -147,7 +153,7 @@ const Salesdetails = () => {
                     quantity: item.quantity,
                     price: item.price,
                 };
-                await apiClient.post('https://smartpipes.cloud/api/sales/sale-details/', saleDetailPayload);
+                await apiClient.post(API_URL_DELIVERY_SALE_DETAILS, saleDetailPayload);
             }
 
             // Registro del pago con PayPal
@@ -157,7 +163,7 @@ const Salesdetails = () => {
                 transaction_id: orderID,
                 sale_id: saleData.sale_id,
             };
-            await apiClient.post('https://smartpipes.cloud/api/sales/payments/', paymentPayload);
+            await apiClient.post(API_URL_DELIVERY_PAYMENTS, paymentPayload);
             console.log("Pago con PayPal registrado con éxito");
 
             // Cerrar el modal
@@ -167,7 +173,6 @@ const Salesdetails = () => {
             console.error('Error processing PayPal payment:', error);
         }
     };
-
 
     return (
         <Container className="mt-4">
@@ -212,15 +217,6 @@ const Salesdetails = () => {
                 <Col md={4}>
                     <Card className="p-3 mb-3 shadow-sm border-0">
                         <h4>Subtotal ({cartItems.length} productos): ${subtotal}</h4>
-                        {/* <Form.Group controlId="formSavePaymentMethod">
-    <Form.Check 
-        type="checkbox" 
-        label="Guardar forma de pago para futuras compras" 
-        checked={savePaymentMethod} 
-        onChange={(e) => setSavePaymentMethod(e.target.checked)} 
-    />
-</Form.Group> */}
-
                         <Button
                             style={{ backgroundColor: "#5cb85c", borderColor: "#5cb85c" }}
                             className="w-100"
@@ -230,30 +226,29 @@ const Salesdetails = () => {
                         </Button>
                     </Card>
                     <Card className="p-4 shadow-lg border-0 rounded">
-    <Card.Body>
-        <Card.Title as="h5" className="mb-4">Empareja con tu carrito</Card.Title>
-        {product.slice(0, 4).map(item => (
-            <div key={item.product_id} className="d-flex align-items-center mb-3 p-2 border rounded">
-                <Image src={item.image_icon} thumbnail style={{ width: '60px', height: '60px' }} />
-                <div className="ml-3 flex-grow-1">
-                    <p className="mb-1 font-weight-bold" style={{ fontSize: '1rem' }}>{item.name}</p>
-                    <Button
-                        variant="primary"
-                        style={{ justifyItems: 'center', background: 'rgb(92, 184, 92)', borderColor: 'rgb(92, 184, 92)'}}
-                        size="sm"
-                        onClick={() => handleAddToCart(item)}
-                    >
-                        Agregar al carrito
-                    </Button>
-                </div>
-                <div className="ml-auto font-weight-bold text-primary">
-                    <p1 style={{ color: 'rgb(92, 184, 92)' }}>${parseFloat(item.price).toFixed(2)}</p1>
-                </div>
-            </div>
-        ))}
-    </Card.Body>
-</Card>
-
+                        <Card.Body>
+                            <Card.Title as="h5" className="mb-4">Empareja con tu carrito</Card.Title>
+                            {product.slice(0, 4).map(item => (
+                                <div key={item.product_id} className="d-flex align-items-center mb-3 p-2 border rounded">
+                                    <Image src={item.image_icon} thumbnail style={{ width: '60px', height: '60px' }} />
+                                    <div className="ml-3 flex-grow-1">
+                                        <p className="mb-1 font-weight-bold" style={{ fontSize: '1rem' }}>{item.name}</p>
+                                        <Button
+                                            variant="primary"
+                                            style={{ justifyItems: 'center', background: 'rgb(92, 184, 92)', borderColor: 'rgb(92, 184, 92)' }}
+                                            size="sm"
+                                            onClick={() => handleAddToCart(item)}
+                                        >
+                                            Agregar al carrito
+                                        </Button>
+                                    </div>
+                                    <div className="ml-auto font-weight-bold text-primary">
+                                        <p1 style={{ color: 'rgb(92, 184, 92)' }}>${parseFloat(item.price).toFixed(2)}</p1>
+                                    </div>
+                                </div>
+                            ))}
+                        </Card.Body>
+                    </Card>
                 </Col>
             </Row>
 
@@ -328,7 +323,7 @@ const Salesdetails = () => {
                                         type="text"
                                         placeholder="Ingrese la direccion donde el paquete sera enviado"
                                         value={address}
-                                        onChange={(e) => setaddress(e.target.value)}
+                                        onChange={(e) => setAddress(e.target.value)}
                                         className="mb-3"
                                     />
                                 </Form.Group>

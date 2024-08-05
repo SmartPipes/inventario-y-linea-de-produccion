@@ -6,22 +6,40 @@ import { apiClient } from '../../ApiClient';
 import Sidebar from '../items/Sidebar';
 import { useCart } from '../../context/CartContext';
 
+import {
+    API_URL_PRODUCTS,
+    API_URL_INVENTORYSUM
+} from './Config';
+
 const SalesPage = () => {
     const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [category, setCategory] = useState('Todas las categorías');
     const [sortOption, setSortOption] = useState('Relevancia');
     const { handleAddToCart } = useCart();
-    
-    
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await apiClient.get('/inventory/products/');
-                setProducts(response.data);
+                const [productResponse, inventoryResponse] = await Promise.all([
+                    apiClient.get(API_URL_PRODUCTS),
+                    apiClient.get(API_URL_INVENTORYSUM)
+                ]);
+
+                const products = productResponse.data;
+                const inventory = inventoryResponse.data.filter(item => item.item_type === 'Product');
+
+                const productsWithStock = products.map(product => {
+                    const inventoryItem = inventory.find(item => item.item_id === product.product_id);
+                    return {
+                        ...product,
+                        stock: inventoryItem ? inventoryItem.total_stock : 0
+                    };
+                });
+
+                setProducts(productsWithStock);
             } catch (error) {
-                console.error('Error fetching products:', error);
+                console.error('Error fetching products or inventory:', error);
             }
         };
 
@@ -57,7 +75,6 @@ const SalesPage = () => {
     return (
         <div>
             <Container className="container-custom">
-
                 <h1>Store</h1>
                 <Form>
                     <InputGroup className="mb-3">
@@ -97,7 +114,7 @@ const SalesPage = () => {
                 <Row>
                     {filteredProducts.map(product => (
                         <Col key={product.product_id} xs={12} sm={6} md={4} lg={3}>
-                            <Card className="card-custom">
+                            <Card className={`card-custom ${product.stock === 0 ? 'bg-light text-muted' : ''}`}>
                                 <div className="card-img-container">
                                     <Card.Img src={product.image_icon} className="card-img-top" />
                                 </div>
@@ -106,7 +123,13 @@ const SalesPage = () => {
                                     <Card.Text className="card-text-custom">
                                         <strong>${product.price}</strong>
                                     </Card.Text>
-                                    <Button className="button-custom" onClick={() => handleAddToCart(product)}>AÑADIR AL CARRITO</Button>
+                                    <Button
+                                        className="button-custom"
+                                        onClick={() => handleAddToCart(product)}
+                                        disabled={product.stock === 0}
+                                    >
+                                        {product.stock === 0 ? 'Sin stock' : 'AÑADIR AL CARRITO'}
+                                    </Button>
                                 </Card.Body>
                             </Card>
                         </Col>
