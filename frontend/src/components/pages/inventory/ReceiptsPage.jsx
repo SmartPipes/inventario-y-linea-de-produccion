@@ -79,21 +79,23 @@ const ReceiptsPage = () => {
             message.error('Cannot validate request. Missing data.');
             return;
         }
-
+    
+        const userId = localStorage.getItem('user_id'); // Obtener el user_id desde el localStorage
+    
+        const stockData = {
+            inventory_id: selectedRestockRequest.inventory_id,
+            item_id: rawMaterial.raw_material_id,
+            item_type: 'RawMaterial',
+            warehouse_id: warehouse.warehouse_id,
+            stock: selectedRestockRequest.quantity,
+            user_id: userId // Agregar el user_id al stockData
+        };
+    
         try {
-            await apiClient.patch(`${API_URL_RESTOCKREQUEST}${selectedRestockRequest.restock_request_id}/`, { status: 'Approved' });
-
-            const stockData = {
-                inventory_id: selectedRestockRequest.inventory_id,
-                item_id: rawMaterial.raw_material_id,
-                item_type: 'RawMaterial',
-                warehouse_id: warehouse.warehouse_id,
-                stock: selectedRestockRequest.quantity,
-            };
-
             const response = await apiClient.post(API_URL_UPDATE_INVENTORY, stockData);
-
+    
             if (response.status === 200 || response.status === 201) {
+                await apiClient.patch(`${API_URL_RESTOCKREQUEST}${selectedRestockRequest.restock_request_id}/`, { status: 'Approved' });
                 message.success('Restock request validated successfully and inventory updated');
                 setIsModalVisible(false);
                 fetchRestockRequests();
@@ -105,7 +107,7 @@ const ReceiptsPage = () => {
             console.error('Error validating restock request:', error.response?.data || error.message);
             message.error('Error validating restock request');
         }
-    };
+    };    
 
     const handleStatusFilterChange = (value) => {
         setStatusFilter(value);
