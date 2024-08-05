@@ -18,12 +18,14 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
+    id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    birthdate = models.DateField(null=True, blank=True)
+    birthdate = models.DateField(null=True, blank=True) # Permitir nulos y valores en blanco
+    email = models.EmailField(unique=True)
     phone = models.CharField(max_length=10, blank=True)
     password = models.CharField(max_length=200)
+    address = models.CharField(max_length=255, null=True, blank=True)  # Nueva columna para añadir la dirección de envio
     role = models.CharField(max_length=10, choices=[('Admin', 'Admin'), ('User', 'User')])
     status = models.CharField(max_length=10, choices=[('Active', 'Active'), ('Inactive', 'Inactive')])
     is_staff = models.BooleanField(default=False)
@@ -35,6 +37,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    class Meta:
+        db_table = 'use_Users'
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
     def get_full_name(self):
         return self.first_name
 
@@ -43,13 +51,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.email
-
-    class Meta:
-        db_table = 'use_Users'
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"
-
 
 class Division(models.Model):
     division_id = models.AutoField(primary_key=True)
@@ -101,4 +102,3 @@ class PaymentMethod(models.Model):
 
     def __str__(self):
         return f'{self.name_on_account} - {self.payment_type}'
-
