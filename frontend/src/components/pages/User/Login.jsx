@@ -52,7 +52,7 @@
             if (userInfo.role === 'Client') {
               message.error('Rol de usuario no Permitido.');
               navigate('/login');
-            } else if (userInfo.role === 'Admin') {
+            } else if (userInfo.role === 'Admin' || userInfo.role === 'User') {
               console.log('User division:', userDivision);
               message.success('Inicio de sesión exitoso!');
               localStorage.setItem('access_token', response.access);

@@ -3,7 +3,7 @@ import { FormContainer, Label, Input, Button,ButtonContainer, Error, SelectStyle
 import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes, BtnEdit } from '../../../Styled/Production.styled';
 import { Titles, SubTitle, SubTitle2 } from '../../../Styled/Global.styled'
 import {useForm, Controller} from 'react-hook-form'
-import {API_URL_FACTORIES, API_URL_CITIES,API_URL_FAC_MANAGER,API_URL_USERS,API_URL_USR_DIV,API_URL_DIV_USR} from '../Config'
+import {API_URL_FACTORIES, API_URL_CITIES,API_URL_FAC_MANAGER,API_URL_USERS,API_URL_USR_DIV,API_URL_DIV_USR, API_URL_PL} from '../Config'
 import {apiClient} from '../../../ApiClient'
 import ModalComponent from '../../modals/ProductionModals';
 import Select from 'react-select'
@@ -25,6 +25,7 @@ const [managers, setManagers] = useState([]);
 const [user, setUser] = useState([]);
 const [DivUser, setDivUsers] = useState([]);
 const [UserDivision, setUserDivisions] = useState([]);
+const [PL, setPL] = useState([]);
 
 
     useEffect(() => {
@@ -32,6 +33,7 @@ const [UserDivision, setUserDivisions] = useState([]);
       getFactories();
       getFactoryManagers();
       getUsers();
+      fetchPL();
       },[]);
   
 
@@ -90,7 +92,14 @@ const [UserDivision, setUserDivisions] = useState([]);
       }
     }
       
-
+    const fetchPL = async () => {
+      try{
+        const response = await apiClient.get(API_URL_PL);
+        setPL(response.data);
+      }catch(error){
+        console.error('Error at fetching PL: ',error );
+      }
+    }
     // get the existan cities
     const getCities = async () => {
       try {
@@ -147,14 +156,20 @@ const [UserDivision, setUserDivisions] = useState([]);
   };
 
     //disables the factory
-    const disableFactory = async(id) => {
-      const disable = {...factories.find(factory =>factory.factory_id === id), status: "Inactive"}
+    const disableFactory = async (id) => {
+      const FacPL = PL.filter(pls => pls.factory === id && pls.status === 'Active');
+      console.log(FacPL);
+      if (FacPL.length > 0) {
+        message.error("You can't disable this factory, it currently has active production lines.");
+        return;
+      }
+      const disable = { ...factories.find(factory => factory.factory_id === id), status: "Inactive" };
       delete disable.factory_id;
       delete disable.created_at;
       delete disable.updated_at;
-      await apiClient.put(API_URL_FACTORIES+id+"/" , disable);
+      await apiClient.put(`${API_URL_FACTORIES}${id}/`, disable);
       getFactories();
-    }
+    };
   
     //enables the factory again
     const enableFactory = async (id) => {

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     API_URL_WAREHOUSES, API_URL_FACTORIES, API_URL_PRO_ORDERS, API_URL_USERS, API_URL_PL,
     API_URL_PRODUCTS, API_URL_RAW_MATERIALS, API_URL_PO_DETAILS, API_URL_PO_RAWM_DETAILS,
-    API_URL_ORDERS, API_URL_PO_PHASES, API_URL_PL_PH, API_URL_PHASES
+    API_URL_ORDERS, API_URL_PO_PHASES, API_URL_PL_PH, API_URL_PHASES, API_URL_RESTOCK_WH,API_URL_FAC_MANAGER
 } from '../Config';
 import { ProductionNavBar } from './ProductionNavBar';
-import { Table, Modal, Form, Input, Space, Button, Select, message, Descriptions, Steps } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Descriptions, Steps ,Alert} from 'antd';
 import { apiClient } from '../../../ApiClient';
 import { MainContent } from '../../../Styled/Production.styled';
 import { NavContainer } from '../../../Styled/InventoryNavBar.styled';
@@ -36,25 +36,63 @@ export const ProductionOrders = () => {
     const [currentPhase, setCurrentPhase] = useState([]); //this is the list of phases for the porduction line
     const [POP, setPOP] = useState([]); 
     const [stepPLP, setStepPLP] = useState(); //This is the step which the PO is currently at
+    const [WHOrders, setWHOrders] = useState([]);
+    const [isSelectDisabled, setIsSelectDisabled] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+    const [facManagers, setFacManagers] = useState([]);
 
 
     useEffect(() => {
-        getPL();
-        getPLP();
-        getPhases();
-        fetchWarehouses();
-        getProductionOrders();
-        getUsers();
-        getFactories();
-        getRawM();
-        getProducts();
-        getPODetails();
-        getPOWarehouseRetrieval();
+        fetchFactoryManagers().then(() => {
+            const userInfoJson = {
+                id: localStorage.getItem('user_id'),
+                role: localStorage.getItem('user_role'),
+                name: localStorage.getItem('user_name')
+            };
+            if (userInfoJson.role && userInfoJson.name) {
+                setUserInfo(userInfoJson);
+            }
+        });
     }, []);
+
+    useEffect(() => {
+        if (userInfo && facManagers.length > 0) {
+            getPL();
+            getPLP();
+            getPhases();
+            fetchWarehouses();
+            getProductionOrders();
+            getUsers();
+            getFactories();
+            getRawM();
+            getProducts();
+            getPODetails();
+            getPOWarehouseRetrieval();
+            fetchRequestWHOrders();
+        }
+    }, [userInfo, facManagers]);
 
     useEffect(() => {
         handleSearchChange(searchText);
     }, [searchText, orders]);
+
+    useEffect(() => {
+        if (currentOrder && WHOrders) {
+            const relatedOrders = WHOrders.filter(order => order.production_order_id === currentOrder.production_order_id);
+            const allApproved = relatedOrders.every(order => order.status === "Approved");
+            setIsSelectDisabled(!allApproved);
+        }
+    }, [currentOrder, WHOrders]);
+
+    const fetchFactoryManagers = async () => {
+        try {
+            const response = await apiClient.get(API_URL_FAC_MANAGER);
+            setFacManagers(response.data);
+        } catch (error) {
+            console.error('Error fetching factory managers:', error);
+        }
+    };
+    
 
     const fetchWarehouses = async () => {
         setLoading(true);
@@ -67,17 +105,40 @@ export const ProductionOrders = () => {
         setLoading(false);
     };
 
+    const fetchRequestWHOrders = async () => {
+        try{
+            const response = await apiClient.get(API_URL_RESTOCK_WH);
+            setWHOrders(response.data);
+        }catch(error){
+            console.error('Error at fetching WHOrders: ',error);
+        }
+    }
+
     const getProductionOrders = async () => {
         try {
             const response = await apiClient.get(API_URL_PRO_ORDERS);
-            setOrders(response.data);
-            setFilteredOrders(response.data); // Initialize filteredOrders with all orders
+            let ordersData = response.data;
+    
+            if (userInfo && userInfo.role !== 'Admin') {
+                const isManager = facManagers.find(man => man.manager === parseInt(userInfo.id) && man.departure_date === null)?.factory ?? null;
+                if (isManager) {
+                    ordersData = ordersData.filter(order => order.factory === isManager);
+                    console.log('HERE!')
+                } else {
+                   <Alert message="You dont have the right to see this information" type="warning" />
+                    return;
+                }
+            }
+    
+            setOrders(ordersData);
+            setFilteredOrders(ordersData); // Initialize filteredOrders with all orders
         } catch (error) {
             console.error('Error fetching orders:', error);
             setOrders([]);
             setFilteredOrders([]); // Initialize filteredOrders as an empty array in case of error
         }
-    }
+    };
+    
 
     const getPhases = async () => {
         try {
@@ -356,21 +417,30 @@ export const ProductionOrders = () => {
                 />
             </MainContent>
             <Modal
-                title={`Order ID: ${currentOrder ? currentOrder.production_order_id : ''} - Assign To a PL`}
-                visible={isModalVisible}
-                onOk={handleOk}
-                onCancel={() => setIsModalVisible(false)}
-            >
-                <Form form={form} layout="vertical">
-                    <Form.Item name="Production Line" label="Assign Order To" rules={[{ required: true }]}>
-                        <Select>
-                            {PL.filter(PL => PL.factory === 1 && PL.state === "Free" && PL.status === "Active").map(PL => (// EL 1 DE LA FACTORY DEBE DE SER CAMBIADO TOMANDO EL NUMERO DE FACTORY QUE SE LE TIENE ASIGNADO AL USER DE MANAGER DE LA FABRICA, TOMAR DEL CONTEXTO
-                                <Select.Option key={PL.productionLine_id} value={PL.productionLine_id}>{PL.name}</Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                </Form>
-            </Modal>
+            title={`Order ID: ${currentOrder ? currentOrder.production_order_id : ''} - Assign To a PL`}
+            visible={isModalVisible}
+            onOk={handleOk}
+            onCancel={() => setIsModalVisible(false)}
+        >
+            {!isSelectDisabled ? (
+               <Form form={form} layout="vertical">
+               <Form.Item name="Production Line" label="Assign Order To" rules={[{ required: true }]}>
+                   <Select disabled={isSelectDisabled}>
+                       {PL.filter(PL => 
+                           PL.state === "Free" && 
+                           PL.status === "Active" && 
+                           (userInfo.role === 'Admin' || 
+                           PL.factory === facManagers.find(man => man.manager === parseInt(userInfo.id) && man.departure_date === null)?.factory)
+                       ).map(PL => (
+                           <Select.Option key={PL.productionLine_id} value={PL.productionLine_id}>{PL.name}</Select.Option>
+                       ))}
+                   </Select>
+               </Form.Item>
+           </Form>
+            ) : (
+                <Alert message="All raw material needed hasn't arrived yet" type="warning" />
+            )}
+        </Modal>
             <Modal
                 title={`Order ID: ${currentOrder ? currentOrder.production_order_id : ''} - Details`}
                 visible={isModalVisibleDetails}

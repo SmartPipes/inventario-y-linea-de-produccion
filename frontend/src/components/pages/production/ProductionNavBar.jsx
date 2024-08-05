@@ -1,21 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { 
     NavContainer, NavItem, NavLogo, NavSearchContainer,
-     NavMenu, HamburgerMenu, NewButton, 
+    NavMenu, HamburgerMenu, NewButton, 
 } from '../../../Styled/InventoryNavBar.styled';
-import {StyledNavLink} from '../../../Styled/Navbar.styled';
+import { StyledNavLink } from '../../../Styled/Navbar.styled';
 
 export const ProductionNavBar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [userRole, setUserRole] = useState(null);
+
+    useEffect(() => {
+        const role = localStorage.getItem('user_role');
+        setUserRole(role);
+    }, []);
 
     const links = [
-        { page: "Factories", href: "/production/factories" },
-        { page: "Production Lines", href: "/production/production-lines" },
-        { page: "Production Phases", href: "/production/production-phases" },
-        { page: "Production Orders", href: "/production/orders" },           
-      ];
+        { page: "Production Orders", href: "/production/orders" },
+    ];
+
+    // Add these links only if the user role is Admin
+    if (userRole === 'Admin') {
+        links.unshift(
+            { page: "Factories", href: "/production/factories" },
+            { page: "Production Lines", href: "/production/production-lines" },
+            { page: "Production Phases", href: "/production/production-phases" }
+        );
+    }
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -36,8 +48,8 @@ export const ProductionNavBar = () => {
                     ))}
                 </NavMenu>
             </NavContainer>
-
         </>
     );
 };
 
+export default ProductionNavBar;

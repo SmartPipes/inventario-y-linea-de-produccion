@@ -3,13 +3,16 @@ import { FormContainer, Label, Input, Button, ButtonContainer, Error } from '../
 import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes, BtnEdit } from '../../../Styled/Production.styled';
 import { Titles, SubTitle } from '../../../Styled/Global.styled';
 import { useForm, Controller } from 'react-hook-form';
-import { API_URL_PHASES } from '../Config';
+import { API_URL_PHASES, API_URL_PL,API_URL_PL_PH } from '../Config';
 import { apiClient } from '../../../ApiClient';
 import ModalComponent from '../../modals/ProductionModals';
 import { ProductionNavBar } from './ProductionNavBar';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Select from 'react-select';
+import { message } from 'antd';
+
+//U cant disable a phase that its realtaed to  an active PL
 
 export const ProductionPhase = () => {
   const [phases, setPhases] = useState([]);
@@ -17,9 +20,13 @@ export const ProductionPhase = () => {
   const [isEditing, setIsEditing] = useState(false); // to know that its in editing mode
   const [selectedPhaseID, setSelectedPhaseID] = useState(null); // to know what is being edited
   const [showPhaseSelect, setShowPhaseSelect] = useState(false); // State to control the visibility of the phases select
+  const [PL, setPL] = useState([]);
+  const [PLPH, setPLPH] = useState([]);
 
   useEffect(() => {
     getPhases();
+    fetchPL();
+    fetchPLPH();
   }, []);
 
   const {
@@ -73,6 +80,24 @@ export const ProductionPhase = () => {
     }
   };
 
+  const fetchPL = async () => {
+    try{
+      const response = await apiClient.get(API_URL_PL);
+      setPL(response.data);
+    }catch (error){
+      console.error('Error at fetching PL: ',error);
+    }
+  }
+
+  const fetchPLPH = async () => {
+    try{
+      const response = await apiClient.get(API_URL_PL_PH);
+      setPLPH(response.data);
+    }catch (error){
+      console.error('Error at fetching PLPH: ',error);
+    }
+  }
+
   // For the modal of the phases
   const openModal = (name, description, id, status) => {
     setSelectedPhase({ name, description, id, status });
@@ -84,11 +109,29 @@ export const ProductionPhase = () => {
 
   // disables the phase
   const disablePhase = async (id) => {
+    // Find all production lines that have this phase
+    const filteredPLPH = PLPH.filter(obj => obj.phase === id);
+  
+    if (filteredPLPH.length > 0) {
+      // Check if any of the linked production lines are active
+      const activePLs = filteredPLPH.some(plph => {
+        const pl = PL.find(productionLine => productionLine.productionLine_id === plph.productionLine);
+        return pl && pl.status === "Active";
+      });
+  
+      if (activePLs) {
+        // If any linked production line is active, show an error message
+        message.error("You can't disable this phase right now, it is currently used by an active production line.");
+        return;
+      }
+    }
+  
+    // If no linked active production lines, disable the phase
     const disable = { ...phases.find(phase => phase.phase_id === id), status: "Inactive" };
     delete disable.phase_id;
     delete disable.created_at;
     delete disable.updated_at;
-    await apiClient.put(API_URL_PHASES + id + "/", disable);
+    await apiClient.put(`${API_URL_PHASES}${id}/`, disable);
     getPhases();
   };
 
