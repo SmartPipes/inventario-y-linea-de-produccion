@@ -11,5 +11,21 @@ export default defineConfig({
     watch: {
       usePolling: true
     }
+  },
+  build: {
+    sourcemap: false
+  },
+  optimizeDeps: {
+    exclude: [
+      '@antv/g2',
+      '@antv/g2-extension-plot',
+      '@antv/component',
+      '@antv/scale',
+      '@antv/g-canvas',
+      '@antv/g-plugin-dragndrop',
+      '@antv/util',
+      '@antv/g-camera-api',
+      '@antv/g-dom-mutation-observer-api'
+    ]
   }
 })

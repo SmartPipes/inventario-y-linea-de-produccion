@@ -160,7 +160,7 @@ const WarehousePage = () => {
 
     const handleAssignManager = async () => {
         try {
-            const assignedDate = new Date().toISOString().split('T')[0]; // Only take the date part
+            const assignedDate = new Date().toISOString(); // Incluir la fecha y hora
             const response = await apiClient.post(API_URL_USER_WARE_ASSIGN, {
                 warehouse: currentWarehouseId,
                 manager_user: selectedUser,
@@ -192,7 +192,7 @@ const WarehousePage = () => {
 
     const handleRemoveManager = async () => {
         try {
-            const removedDate = new Date().toISOString().split('T')[0]; // Only take the date part
+            const removedDate = new Date().toISOString(); // Incluir la fecha y hora
             console.log(`PATCH ${API_URL_USER_WARE_ASSIGN}${currentAssignment.user_warehouse_assignment_id}/`, {
                 removed_date: removedDate
             });
@@ -353,7 +353,7 @@ const WarehousePage = () => {
                 okButtonProps={{ danger: true }}
             >
                 <p>Manager: {currentAssignment && `${users.find(user => user.id === currentAssignment.manager_user)?.first_name} ${users.find(user => user.id === currentAssignment.manager_user)?.last_name}`}</p>
-                <p>Assigned Date: {currentAssignment && new Date(currentAssignment.assigned_date).toLocaleDateString()}</p>
+                <p>Assigned Date: {currentAssignment && new Date(currentAssignment.assigned_date).toLocaleString()}</p>
             </Modal>
             <Modal
                 title="Confirm Deletion"
