@@ -163,6 +163,8 @@ class UpdateInventorySerializer(serializers.Serializer):
     item_type = serializers.CharField(max_length=12, required=True)
     warehouse_id = serializers.IntegerField(required=True)
     stock = serializers.IntegerField(required=True)
+    user_id = serializers.IntegerField(required=True)
+    datetime = serializers.DateTimeField()  # Asegúrate de tener el campo datetime
 
     def update_or_create_inventory(self):
         inventory_id = self.validated_data.get('inventory_id')
@@ -170,12 +172,25 @@ class UpdateInventorySerializer(serializers.Serializer):
         item_type = self.validated_data['item_type']
         warehouse_id = self.validated_data['warehouse_id']
         quantity = self.validated_data['stock']
+        user_id = self.validated_data['user_id']
+        datetime = self.validated_data['datetime']  # Obtener la fecha y hora
 
         if inventory_id:
             try:
                 inventory = Inventory.objects.get(pk=inventory_id)
+                initial_stock = inventory.stock
                 inventory.stock += quantity
                 inventory.save()
+
+                # Crear un registro en OperationLog
+                OperationLog.objects.create(
+                    quantity=quantity,
+                    type_operation='Add' if quantity > 0 else 'Remove',
+                    inventory_item=inventory,
+                    op_log_user_id=user_id,
+                    warehouse_id=warehouse_id,
+                    datetime=datetime  # Usar la fecha y hora recibida
+                )
                 return inventory
             except Inventory.DoesNotExist:
                 pass
@@ -188,10 +203,23 @@ class UpdateInventorySerializer(serializers.Serializer):
             defaults={'stock': quantity}
         )
         if not created:
+            initial_stock = inventory.stock
             inventory.stock += quantity
             inventory.save()
-        
+
+        # Crear un registro en OperationLog
+        OperationLog.objects.create(
+            quantity=quantity,
+            type_operation='Add' if quantity > 0 else 'Remove',
+            inventory_item=inventory,
+            op_log_user_id=user_id,
+            warehouse_id=warehouse_id,
+            datetime=datetime  # Usar la fecha y hora recibida
+        )
+
         return inventory
+
+
             
 class ProductRawMaterialListSerializer(serializers.ModelSerializer):
     class Meta:

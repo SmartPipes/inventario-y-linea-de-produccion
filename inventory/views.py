@@ -23,6 +23,46 @@ class InventoryViewSet(viewsets.ModelViewSet):
     serializer_class = InventorySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        instance = serializer.instance
+
+        if instance.stock > 0:
+            OperationLog.objects.create(
+                quantity=instance.stock,
+                type_operation='Add',
+                inventory_item=instance,
+                op_log_user=request.user,
+                warehouse=instance.warehouse
+            )
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        old_stock = instance.stock
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        new_stock = serializer.validated_data['stock']
+        quantity_change = new_stock - old_stock
+        operation_type = 'Add' if quantity_change > 0 else 'Remove'
+        
+        OperationLog.objects.create(
+            quantity=abs(quantity_change),
+            type_operation=operation_type,
+            inventory_item=instance,
+            op_log_user=request.user,
+            warehouse=instance.warehouse
+        )
+        
+        return Response(serializer.data)
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all().order_by('category_id')
     serializer_class = CategorySerializer
