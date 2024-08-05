@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Space, Button, message, Tag } from 'antd';
+import { Table, Modal, Space, Button, message, Tag, Row, Col, Select } from 'antd';
 import { 
     API_URL_OPERATION_LOG, 
     API_URL_USERS, 
@@ -11,6 +11,11 @@ import {
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
 import styled from 'styled-components';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+
+const { Option } = Select;
 
 const ResponsiveTable = styled(Table)`
     .ant-table-container {
@@ -28,6 +33,7 @@ const ResponsiveModal = styled(Modal)`
 
 const OperationLogPage = () => {
     const [operationLogs, setOperationLogs] = useState([]);
+    const [filteredLogs, setFilteredLogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
     const [inventoryItems, setInventoryItems] = useState([]);
@@ -38,6 +44,10 @@ const OperationLogPage = () => {
     const [currentLogId, setCurrentLogId] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
+
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+    const [selectedOperationType, setSelectedOperationType] = useState(null);
 
     useEffect(() => {
         fetchOperationLogs();
@@ -65,11 +75,16 @@ const OperationLogPage = () => {
         }
     }, [isDeleteModalVisible]);
 
+    useEffect(() => {
+        applyFilters();
+    }, [selectedUser, selectedWarehouse, selectedOperationType, operationLogs]);
+
     const fetchOperationLogs = async () => {
         setLoading(true);
         try {
             const response = await apiClient.get(API_URL_OPERATION_LOG);
             setOperationLogs(response.data);
+            setFilteredLogs(response.data);
         } catch (error) {
             console.error('Error fetching operation logs:', error);
         }
@@ -154,6 +169,85 @@ const OperationLogPage = () => {
         }
     };
 
+    const applyFilters = () => {
+        let filtered = [...operationLogs];
+        if (selectedUser) {
+            filtered = filtered.filter(log => log.op_log_user === selectedUser);
+        }
+        if (selectedWarehouse) {
+            filtered = filtered.filter(log => log.warehouse === selectedWarehouse);
+        }
+        if (selectedOperationType) {
+            filtered = filtered.filter(log => log.type_operation === selectedOperationType);
+        }
+        setFilteredLogs(filtered);
+    };
+
+    const getFilterDescription = () => {
+        const filters = [];
+        if (selectedUser) {
+            filters.push(`Filter User: ${getUserById(selectedUser)}`);
+        }
+        if (selectedWarehouse) {
+            filters.push(`Filter Warehouse: ${getWarehouseById(selectedWarehouse)}`);
+        }
+        if (selectedOperationType) {
+            filters.push(`Filter Operation Type: ${selectedOperationType}`);
+        }
+        return filters.join(', ');
+    };
+
+    const downloadPDF = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(12);
+
+        doc.text('Operation Logs', 14, 16);
+        const filterDescription = getFilterDescription();
+        if (filterDescription) {
+            doc.text(filterDescription, 14, 24);
+        }
+        doc.autoTable({
+            head: [['ID', 'Quantity', 'Date/Hour', 'Operation Type', 'Article', 'User', 'Warehouse']],
+            body: filteredLogs.map(log => [
+                log.operation_log_id,
+                log.quantity,
+                log.datetime,
+                log.type_operation,
+                getItemName(log.inventory_item),
+                getUserById(log.op_log_user),
+                getWarehouseById(log.warehouse)
+            ]),
+            startY: filterDescription ? 28 : 20,
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [22, 160, 133] }
+        });
+
+        doc.save('operation_logs.pdf');
+    };
+
+    const downloadExcel = () => {
+        const data = filteredLogs.map(log => ({
+            ID: log.operation_log_id,
+            Quantity: log.quantity,
+            'Date/Hour': log.datetime,
+            'Operation Type': log.type_operation,
+            Article: getItemName(log.inventory_item),
+            User: getUserById(log.op_log_user),
+            Warehouse: getWarehouseById(log.warehouse)
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Operation Logs');
+
+        const filterDescription = getFilterDescription();
+        if (filterDescription) {
+            XLSX.utils.sheet_add_aoa(worksheet, [[filterDescription]], { origin: -1 });
+        }
+
+        XLSX.writeFile(workbook, 'operation_logs.xlsx');
+    };
+
     const columns = [
         { title: 'ID', dataIndex: 'operation_log_id', key: 'operation_log_id' },
         { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
@@ -198,9 +292,57 @@ const OperationLogPage = () => {
     return (
         <div>
             <NavBarMenu title="Operations Log" />
+            <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                <Col xs={24} sm={12} md={8}>
+                    <Select
+                        placeholder="Select User"
+                        onChange={setSelectedUser}
+                        style={{ width: '100%' }}
+                        value={selectedUser}
+                        allowClear
+                    >
+                        {users.map(user => (
+                            <Option key={user.id} value={user.id}>
+                                {`${user.first_name} ${user.last_name}`}
+                            </Option>
+                        ))}
+                    </Select>
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                    <Select
+                        placeholder="Select Warehouse"
+                        onChange={setSelectedWarehouse}
+                        style={{ width: '100%' }}
+                        value={selectedWarehouse}
+                        allowClear
+                    >
+                        {warehouses.map(warehouse => (
+                            <Option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
+                                {warehouse.name}
+                            </Option>
+                        ))}
+                    </Select>
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                    <Select
+                        placeholder="Operation Type"
+                        onChange={setSelectedOperationType}
+                        style={{ width: '100%' }}
+                        value={selectedOperationType}
+                        allowClear
+                    >
+                        <Option value="Add">Add</Option>
+                        <Option value="Remove">Remove</Option>
+                    </Select>
+                </Col>
+            </Row>
+            <Space style={{ marginBottom: 16 }}>
+                <Button type="primary" onClick={downloadPDF}>Download PDF</Button>
+                <Button type="primary" onClick={downloadExcel}>Download Excel</Button>
+            </Space>
             <ResponsiveTable
                 columns={columns}
-                dataSource={operationLogs}
+                dataSource={filteredLogs}
                 rowKey="operation_log_id"
                 loading={loading}
                 scroll={{ x: '100%' }}
@@ -211,9 +353,9 @@ const OperationLogPage = () => {
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 okText={`Eliminar${countdown > 0 ? ` (${countdown})` : ''}`}
-                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white',  color: deleteEnabled ? 'white' : 'black' } }}
+                okButtonProps={{ disabled: !deleteEnabled, style: { backgroundColor: deleteEnabled ? 'red' : 'white', color: deleteEnabled ? 'white' : 'black' } }}
             >
-                <p>Are you sure you want to delete this record? Please wait{countdown} seconds to confirm the deletion.</p>
+                <p>Are you sure you want to delete this record? Please wait {countdown} seconds to confirm the deletion.</p>
             </ResponsiveModal>
         </div>
     );
