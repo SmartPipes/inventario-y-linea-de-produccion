@@ -15,6 +15,7 @@ import {
     API_URL_DELIVERY_SALE_DETAILS,
     API_URL_DELIVERY_PAYMENTS,
     API_URL_PAYMENT_METHODS,
+    API_URL_DELIVERY_ORDERS
 } from './Config';
 
 const Salesdetails = () => {
@@ -45,6 +46,17 @@ const Salesdetails = () => {
 
         fetchProducts();
     }, []);
+
+    const getExistingDeliveryOrder = async (saleId) => {
+        try {
+            const response = await apiClient.get(`${API_URL_DELIVERY_ORDERS}?sale=${saleId}`);
+            return response.data.length > 0 ? response.data[0] : null;  // Devuelve la primera orden encontrada
+        } catch (error) {
+            console.error('Error retrieving delivery order:', error);
+            return null;
+        }
+    };
+    
 
     const handleProceedToPayment = async () => {
         try {
@@ -110,6 +122,18 @@ const Salesdetails = () => {
                     console.log("Forma de pago guardada:", paymentMethodPayload);
                 }
 
+                const deliveryOrderPayload = {
+                    delivery_date: new Date().toISOString(),
+                    status: "pending",
+                    delivery_address: address,
+                    notes: "Delivery Details Check",
+                    third_party_service: 1,
+                    sale: saleData.sale_id,
+                    client: id
+                };
+                await apiClient.post(API_URL_DELIVERY_ORDERS, deliveryOrderPayload);
+                console.log("Orden de entrega registrada con éxito");
+
                 // Cerrar el modal
                 setShowModal(false);
                 navigate('/sales')
@@ -165,6 +189,19 @@ const Salesdetails = () => {
             };
             await apiClient.post(API_URL_DELIVERY_PAYMENTS, paymentPayload);
             console.log("Pago con PayPal registrado con éxito");
+
+            // Crear orden de entrega solo una vez
+            const deliveryOrderPayload = {
+                delivery_date: new Date().toISOString(),
+                status: "pending",
+                delivery_address: address,
+                notes: "Delivery Details Check",
+                third_party_service: 1,
+                sale: saleData.sale_id,
+                client: id
+            };
+            await apiClient.post(API_URL_DELIVERY_ORDERS, deliveryOrderPayload);
+            console.log("Orden de entrega registrada con éxito");
 
             // Cerrar el modal
             setShowModal(false);

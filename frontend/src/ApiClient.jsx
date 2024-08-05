@@ -21,7 +21,7 @@ apiClient.interceptors.request.use(async config => {
   // If no access token, login to get tokens
   if (!ACCESS_TOKEN) {
     console.log('No access token found, logging in...');
-    await login('smartpipes@gmail.com', 'HPT2024SP');
+    await login('smartpipes@gmail.com', '123');
   }
   
   // If access token exists, add it to the request headers
@@ -61,7 +61,7 @@ apiClient.interceptors.response.use(
         } else {
           // If refresh fails, login again
           console.log('Token refresh failed, logging in again...');
-          await login('smartpipes@gmail.com', 'HPT2024sp');
+          await login('smartpipes@gmail.com', '123');
           originalRequest.headers['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
           return apiClient(originalRequest);
         }
