@@ -396,6 +396,7 @@ export const ProductionOrders = () => {
 
     return (
         <div>
+            <MainContent>
             <ProductionNavBar />
             <NavContainer>
                 <div style={{ marginBottom: '18px', marginTop: '18px', margiLeft: '2px', width: '99.9%' }}>
@@ -480,6 +481,7 @@ export const ProductionOrders = () => {
                     <Steps direction='vertical' current={stepPLP-1} items={currentPhase}/> {/*current should be dynamic and should be taken from pro_ProductionOrders-Phases*/}
                 </div>
             </Modal>
+            </MainContent>
         </div>
     );
 };

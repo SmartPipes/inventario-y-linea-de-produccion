@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const NavContainer = styled.nav`
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* Alinea todo a la izquierda */
+    justify-content: space-between;
     padding: 10px 20px;
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;

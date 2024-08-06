@@ -22,10 +22,6 @@ import ProductPage from './components/pages/inventory/ProductPage.jsx';
 import RawMaterialPage from './components/pages/inventory/RawMaterialPage.jsx';
 import { ProductionOrders } from './components/pages/production/ProductionOrders.jsx';
 import RestockRequestWarehousePage from './components/pages/inventory/RestockRequestWarehousePage.jsx';
-import CartsPage from './components/pages/Delivery/CartsPage.jsx';
-import PaymentsPage from './components/pages/Delivery/PaymentsPage.jsx';
-import CartDetailsPage from './components/pages/Delivery/CartDetailsPage.jsx';
-import SaleDetailsPage from './components/pages/Delivery/SaleDetailsPage.jsx';
 import ThirdPartyServicePage from './components/pages/Delivery/ThirdPartyServicePage.jsx';
 import OrdersPage from './components/pages/Delivery/OrdersPage.jsx';
 import Login from './components/pages/User/Login.jsx';
@@ -59,10 +55,6 @@ const router = createBrowserRouter([{
     { path: "user", element: <User /> },
     { path: "production/orders", element: <ProductionOrders /> },
     { path: "/delivery/orders", element: <OrdersPage /> },
-    { path: "/delivery/carts", element: <CartsPage /> },
-    { path: "/delivery/payments", element: <PaymentsPage /> },
-    { path: "/delivery/cart-details", element: <CartDetailsPage /> },
-    { path: "/delivery/sale-details", element: <SaleDetailsPage /> },
     { path: "/delivery/ThirdPartyService", element: <ThirdPartyServicePage /> },
     { path: "inventory/stock", element: <StockPage /> }, 
   ]

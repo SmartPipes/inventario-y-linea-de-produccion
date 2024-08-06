@@ -64,3 +64,4 @@ export const API_URL_DELIVERY_ORDER_DETAILS = BASE_API_URL + 'delivery/delivery-
 export const API_URL_THIRD_PARTY_SERVICES = BASE_API_URL + 'delivery/third-party-service/';
 
 export const API_URL_UPDATE_INVENTORY = BASE_API_URL + 'inventory/update-inventory/';
+export const API_URL_DELIVERY_DETAILS = BASE_API_URL+"delivery/delivery-order-details/";

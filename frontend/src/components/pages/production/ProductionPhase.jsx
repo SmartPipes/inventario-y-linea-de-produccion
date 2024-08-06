@@ -3,7 +3,7 @@ import { FormContainer, Label, Input, Button, ButtonContainer, Error } from '../
 import { SideBar, MainContent, OrderContainer, PlacedOrderBoxes, BtnEdit } from '../../../Styled/Production.styled';
 import { Titles, SubTitle } from '../../../Styled/Global.styled';
 import { useForm, Controller } from 'react-hook-form';
-import { API_URL_PHASES, API_URL_PL,API_URL_PL_PH } from '../Config';
+import { API_URL_PHASES, API_URL_PL, API_URL_PL_PH } from '../Config';
 import { apiClient } from '../../../ApiClient';
 import ModalComponent from '../../modals/ProductionModals';
 import { ProductionNavBar } from './ProductionNavBar';
@@ -12,14 +12,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Select from 'react-select';
 import { message } from 'antd';
 
-//U cant disable a phase that its realtaed to  an active PL
-
 export const ProductionPhase = () => {
   const [phases, setPhases] = useState([]);
-  const [selectedPhase, setSelectedPhase] = useState(null); // to know what phase was selected
-  const [isEditing, setIsEditing] = useState(false); // to know that its in editing mode
-  const [selectedPhaseID, setSelectedPhaseID] = useState(null); // to know what is being edited
-  const [showPhaseSelect, setShowPhaseSelect] = useState(false); // State to control the visibility of the phases select
+  const [selectedPhase, setSelectedPhase] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedPhaseID, setSelectedPhaseID] = useState(null);
+  const [showPhaseSelect, setShowPhaseSelect] = useState(false);
   const [PL, setPL] = useState([]);
   const [PLPH, setPLPH] = useState([]);
 
@@ -42,10 +40,9 @@ export const ProductionPhase = () => {
     try {
       const transformedData = {
         ...data,
-        phase: data.phase ? data.phase.value : null // Add phase to the transformed data
+        after_phase: data.phase ? data.phase.value : null // Ensure after_phase is correctly included
       };
       if (isEditing) {
-        console.log(transformedData);
         await apiClient.put(`${API_URL_PHASES}${selectedPhaseID}/`, transformedData);
         reset();
         setIsEditing(false);
@@ -63,9 +60,7 @@ export const ProductionPhase = () => {
       await getPhases();
     }
   };
-  
 
-  // get the existing phases
   const getPhases = async () => {
     try {
       const response = await apiClient.get(API_URL_PHASES);
@@ -81,24 +76,23 @@ export const ProductionPhase = () => {
   };
 
   const fetchPL = async () => {
-    try{
+    try {
       const response = await apiClient.get(API_URL_PL);
       setPL(response.data);
-    }catch (error){
-      console.error('Error at fetching PL: ',error);
+    } catch (error) {
+      console.error('Error at fetching PL: ', error);
     }
-  }
+  };
 
   const fetchPLPH = async () => {
-    try{
+    try {
       const response = await apiClient.get(API_URL_PL_PH);
       setPLPH(response.data);
-    }catch (error){
-      console.error('Error at fetching PLPH: ',error);
+    } catch (error) {
+      console.error('Error at fetching PLPH: ', error);
     }
-  }
+  };
 
-  // For the modal of the phases
   const openModal = (name, description, id, status) => {
     setSelectedPhase({ name, description, id, status });
   };
@@ -107,26 +101,21 @@ export const ProductionPhase = () => {
     setSelectedPhase(null);
   };
 
-  // disables the phase
   const disablePhase = async (id) => {
-    // Find all production lines that have this phase
     const filteredPLPH = PLPH.filter(obj => obj.phase === id);
-  
+
     if (filteredPLPH.length > 0) {
-      // Check if any of the linked production lines are active
       const activePLs = filteredPLPH.some(plph => {
         const pl = PL.find(productionLine => productionLine.productionLine_id === plph.productionLine);
         return pl && pl.status === "Active";
       });
-  
+
       if (activePLs) {
-        // If any linked production line is active, show an error message
         message.error("You can't disable this phase right now, it is currently used by an active production line.");
         return;
       }
     }
-  
-    // If no linked active production lines, disable the phase
+
     const disable = { ...phases.find(phase => phase.phase_id === id), status: "Inactive" };
     delete disable.phase_id;
     delete disable.created_at;
@@ -135,7 +124,6 @@ export const ProductionPhase = () => {
     getPhases();
   };
 
-  // enables the phase again
   const enablePhase = async (id) => {
     const enable = { ...phases.find(phase => phase.phase_id === id), status: "Active" };
     delete enable.phase_id;
@@ -145,7 +133,6 @@ export const ProductionPhase = () => {
     getPhases();
   };
 
-  // Enables editing mode
   const startEditing = () => {
     setSelectedPhaseID(selectedPhase.id);
     setIsEditing(true);
@@ -156,7 +143,6 @@ export const ProductionPhase = () => {
     }
   };
 
-  // exits editing mode
   const cancelEdit = () => {
     reset();
     setIsEditing(false);
@@ -198,12 +184,22 @@ export const ProductionPhase = () => {
               )}
             </div>
             <div className="form-control">
-              <Label>Does this phase depend of another?</Label>
+              <Label>Does this phase depend on another?</Label>
               <input type="checkbox" onChange={(e) => setShowPhaseSelect(e.target.checked)} />
             </div>
             {showPhaseSelect && (
-              <div className="form-control" style={{marginBottom:'1rem'}}>
-                <Controller name="phase" control={control} render={({ field }) => (<Select {...field} options={phases.map(phase => ({ value: phase.phase_id, label: phase.name }))} placeholder='Select a Phase...' />)} />
+              <div className="form-control" style={{ marginBottom: '1rem' }}>
+                <Controller
+                  name="phase"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={phases.map(phase => ({ value: phase.phase_id, label: phase.name }))}
+                      placeholder='Select a Phase...'
+                    />
+                  )}
+                />
               </div>
             )}
             <div className="form-control">
@@ -217,10 +213,13 @@ export const ProductionPhase = () => {
           </form>
         </FormContainer>
       </MainContent>
-      {selectedPhase && ( // Show modal only if a phase is selected
+      {selectedPhase && (
         <ModalComponent onClose={closeModal}>
-          {(selectedPhase.status === 'Active' &&
-            <BtnEdit onClick={() => { startEditing() }}>  <FontAwesomeIcon icon={faPenToSquare} /></BtnEdit>)}
+          {selectedPhase.status === 'Active' && (
+            <BtnEdit onClick={() => { startEditing() }}>
+              <FontAwesomeIcon icon={faPenToSquare} />
+            </BtnEdit>
+          )}
           <h2>
             {selectedPhase.name}
           </h2>

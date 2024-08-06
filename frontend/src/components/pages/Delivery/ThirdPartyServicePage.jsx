@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Modal, Form, Input, Space, Button, message } from 'antd';
-import axios from 'axios';
+import { apiClient } from '../../../ApiClient';
 import { API_URL_THIRD_PARTY_SERVICES } from '../../pages/Config'; // Adjust the import path as needed
 import NavBarMenu from './NavBarMenu'; // Ensure the import path is correct
+import { MainContent } from '../../../Styled/Production.styled';
 
 const ThirdPartyServicePage = () => {
     const [thirdPartyServices, setThirdPartyServices] = useState([]);
@@ -15,6 +16,7 @@ const ThirdPartyServicePage = () => {
     const [filteredServices, setFilteredServices] = useState([]);
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [currentServiceId, setCurrentServiceId] = useState(null);
+    const buttonColor = '#97b25e';
 
     useEffect(() => {
         fetchThirdPartyServices();
@@ -27,7 +29,7 @@ const ThirdPartyServicePage = () => {
     const fetchThirdPartyServices = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(API_URL_THIRD_PARTY_SERVICES);
+            const response = await apiClient.get(API_URL_THIRD_PARTY_SERVICES);
             setThirdPartyServices(response.data);
             setFilteredServices(response.data);
         } catch (error) {
@@ -53,10 +55,10 @@ const ThirdPartyServicePage = () => {
         try {
             const values = await form.validateFields();
             if (editMode) {
-                await axios.put(`${API_URL_THIRD_PARTY_SERVICES}${currentService.service_id}/`, values);
+                await apiClient.put(`${API_URL_THIRD_PARTY_SERVICES}${currentService.service_id}/`, values);
                 message.success('Third-party service updated successfully');
             } else {
-                await axios.post(API_URL_THIRD_PARTY_SERVICES, values);
+                await apiClient.post(API_URL_THIRD_PARTY_SERVICES, values);
                 message.success('Third-party service added successfully');
             }
             fetchThirdPartyServices();
@@ -69,7 +71,7 @@ const ThirdPartyServicePage = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${API_URL_THIRD_PARTY_SERVICES}${currentServiceId}/`);
+            await apiClient.delete(`${API_URL_THIRD_PARTY_SERVICES}${currentServiceId}/`);
             fetchThirdPartyServices();
             message.success('Third-party service deleted successfully');
         } catch (error) {
@@ -99,8 +101,8 @@ const ThirdPartyServicePage = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showModal(record)} type="link">Edit</Button>
-                    <Button onClick={() => showDeleteModal(record.service_id)} type="link" danger>Delete</Button>
+                    <Button onClick={() => showModal(record)} type="default">Edit</Button>
+                    <Button onClick={() => showDeleteModal(record.service_id)} type="default" danger>Delete</Button>
                 </Space>
             )
         }
@@ -113,15 +115,16 @@ const ThirdPartyServicePage = () => {
 
     return (
         <div>
-            <NavBarMenu /> {/* Include the NavBarMenu */}
+            <MainContent>
+              <NavBarMenu title={'Delivery'} />
             <div style={{ marginBottom: '16px' }}>
                 <Input
-                    placeholder="Search third-party services..."
+                    placeholder="Search Delivery Services..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: 300, marginRight: '16px' }}
                 />
-                <Button type="primary" onClick={() => showModal()}>Add Third-Party Service</Button>
+                <Button type="primary" style={{ backgroundColor: buttonColor, borderColor: buttonColor }} onClick={() => showModal()}>Add Delivery Service</Button>
             </div>
             <Table
                 columns={columns}
@@ -130,7 +133,7 @@ const ThirdPartyServicePage = () => {
                 loading={loading}
             />
             <Modal
-                title={editMode ? 'Edit Third-Party Service' : 'Add Third-Party Service'}
+                title={editMode ? 'Edit Delivery Service' : 'Add Delivery Service'}
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
@@ -154,15 +157,16 @@ const ThirdPartyServicePage = () => {
                 </Form>
             </Modal>
             <Modal
-                title="Delete Third-Party Service"
+                title="Delete Delivery Service"
                 visible={isDeleteModalVisible}
                 onOk={handleDelete}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 okText="Delete"
                 cancelText="Cancel"
             >
-                <p>Are you sure you want to delete this third-party service?</p>
+                <p>Are you sure you want to delete this delivery service?</p>
             </Modal>
+            </MainContent>
         </div>
     );
 };

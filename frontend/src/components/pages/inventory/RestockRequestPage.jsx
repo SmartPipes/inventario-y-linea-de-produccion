@@ -6,7 +6,7 @@ import { apiClient } from '../../../ApiClient';
 import { useLocation } from 'react-router-dom';
 import NavBarMenu from './NavBarMenu';
 import { API_URL_RAW_MATERIALS, API_URL_SUPPLIERS, API_URL_RESTOCKREQUEST, API_URL_WAREHOUSES, API_URL_INVENTORYSUM, API_URL_INV } from '../Config';
-
+import { useNavigate } from 'react-router-dom';
 const { Option } = Select;
 
 const RestockRequestPage = () => {

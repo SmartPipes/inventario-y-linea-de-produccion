@@ -166,7 +166,8 @@ export const ProductionLine = () => {
           .filter(phase => phase.status === "Active")
           .map(phase => ({
             value: phase.phase_id,
-            label: phase.name
+            label: phase.name,
+            dependency: phase.after_phase
           }));
         setPhases(transformedPhases);
       } else {
@@ -290,6 +291,47 @@ export const ProductionLine = () => {
     }
   };
 
+  const getDependentPhases = (phaseId, phases) => {
+    let dependentPhases = [];
+    let currentPhase = phases.find(phase => phase.value === phaseId);
+    console.log(currentPhase)
+  
+    while (currentPhase && currentPhase.dependency) {
+      const nextPhase = phases.find(phase => phase.value === currentPhase.dependency);
+      console.log(nextPhase)
+      if (nextPhase) {
+        dependentPhases.push(nextPhase);
+        currentPhase = nextPhase;
+      } else {
+        break;
+      }
+    }
+    return dependentPhases;
+  };
+  
+  
+  const handlePhaseChange = (selectedPhases) => {
+    console.log(selectedPhases)
+    let allSelectedPhases = [...selectedPhases];
+  
+    selectedPhases.forEach(phase => {
+      console.log(phase.value, phases);
+      const dependentPhases = getDependentPhases(phase.value, phases);
+      dependentPhases.forEach(depPhase => {
+        if (!allSelectedPhases.find(p => p.value === depPhase.value)) {
+          allSelectedPhases.push(depPhase);
+        }
+      });
+    });
+  
+    allSelectedPhases.sort((a, b) => a.value - b.value); // Sort phases by ID to keep order
+    setValue('phases', allSelectedPhases); // Update form state
+    return allSelectedPhases;
+  };
+  
+
+  
+
   const cancelEdit = () => {
     reset();
     setIsEditing(false);
@@ -345,8 +387,24 @@ export const ProductionLine = () => {
             <div className="form-control">
               <Label>Select the Production Phases in Ascending Order</Label>
               <SelectStyled>
-                <Controller name="phases" control={control} rules={{ required: true }} render={({ field }) => (<Select {...field} isMulti options={phases} />)} />
-              </SelectStyled>
+              <Controller
+  name="phases"
+  control={control}
+  rules={{ required: true }}
+  render={({ field }) => (
+    <Select
+      {...field}
+      isMulti
+      options={phases}
+      value={field.value} // Ensure the selected values are shown
+      onChange={(selected) => {
+        const updatedSelected = handlePhaseChange(selected);
+        field.onChange(updatedSelected);
+      }}
+    />
+  )}
+/>
+          </SelectStyled>
               {errors.phases && (
                 <Error>This is a required field.</Error>
               )}
@@ -391,3 +449,6 @@ export const ProductionLine = () => {
     </OrderContainer>
   );
 }
+
+
+// i want it so that i enter a phase in my selector, it automatically adds all the other ones and i can see them in my selector too

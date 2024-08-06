@@ -14,6 +14,7 @@ import { apiClient } from '../../../ApiClient';
 import { Card, Row, Col, Layout, Table, Space, Button as AntButton, Modal, Flex, Steps, Typography, message, Alert } from 'antd';
 const { Content } = Layout;
 const { Text } = Typography;
+import { useNavigate } from 'react-router-dom';
 
 export const Production = () => {
   const [newOrder, setNewOrder] = useState(false);
@@ -52,6 +53,7 @@ export const Production = () => {
   const [inventoryState, setInventoryState] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
   const [facManagers, setFacManagers] = useState([]);
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     // When selectedWarehousesList changes, update materialsArray
@@ -95,6 +97,10 @@ export const Production = () => {
     return products.filter(product => !selectedProducts.includes(product) || selectedProducts[index] === product);
   };
 
+  const moveToRestock = () => {
+    navigate('../inventory/request-restock');
+  }
+
   const openModal = () => {
     setNewOrder(true);
   };
@@ -113,7 +119,7 @@ export const Production = () => {
     }
   };
 
-  const products_batch = [{ value: 1, label: 50 }, { value: 2, label: 100 }, { value: 3, label: 150 }, { value: 4, label: 200 }, { value: 5, label: 250 }, { value: 6, label: 300 }, { value: 7, label: 2 }, { value: 8, label: 500 }];
+  const products_batch = [{ value: 1, label: 50 }, { value: 2, label: 100 }, { value: 3, label: 150 }, { value: 4, label: 200 }, { value: 5, label: 250 }, { value: 6, label: 300 }, { value: 7, label: 500 }];
 
   useEffect(() => {
     fetchFactoryManagers();
@@ -636,16 +642,17 @@ let arrayRequestRM =[]
     setIsModalVisibleProduction(true);
   };
 
-  function getNextPhase(phases, currentPhase) {
+  function getNextPhase(phases, currentSequence) {
     const sortedPhases = phases.sort((a, b) => a.sequence_number - b.sequence_number);
-    const currentIndex = sortedPhases.findIndex(phase => phase.phase === currentPhase);
-
+    const currentIndex = sortedPhases.findIndex(phase => phase.sequence_number === currentSequence);
+  
     if (currentIndex === -1 || currentIndex === sortedPhases.length - 1) {
-      return 0;
+      return null;
     }
-
+  
     return sortedPhases[currentIndex + 1];
   }
+  
 
   const success = (type) => {
     if (type) {
@@ -664,13 +671,14 @@ let arrayRequestRM =[]
   const ChangePOPhase = async () => {
     try {
       const selfPhases = PLPhases.filter(ph => ph.productionLine === currentPL.productionLine_id);
-      const nextPhase = getNextPhase(selfPhases, stepPLP).phase;
-
-      if (nextPhase != undefined) {
+      const currentSequence = getPhaseCountForOrder(currentPOID, POP); // Get the current sequence number
+      const nextPhase = getNextPhase(selfPhases, currentSequence);
+  
+      if (nextPhase) {
         const PO_phases = {
           exit_phase_date: null,
           production_order: currentPOID,
-          phase: nextPhase
+          phase: nextPhase.phase
         };
         await apiClient.post(API_URL_PO_PHASES, PO_phases);
         await getPLP();
@@ -683,20 +691,20 @@ let arrayRequestRM =[]
           state: "Free"
         };
         delete PLupdState.date_created;
-
+  
         const POfinish = {
           ...(PO.find(po => po.production_order_id === currentPOID)),
           status: "Completed"
         };
         delete POfinish.creation_date;
-
+  
         const productsCreated = PODetails.filter(pro => pro.production_order === currentPOID);
         const WH = PO.find(po => po.production_order_id === currentPOID).warehouse_to_deliver;
-
+  
         for (const product of productsCreated) {
           try {
             let flag = inventoryState.find(wh => wh.warehouse === WH && wh.item_id === product.product);
-
+  
             if (flag) {
               let invJson = {
                 ...flag,
@@ -716,7 +724,7 @@ let arrayRequestRM =[]
             console.error(`Error processing product ${product.product}:`, error);
           }
         }
-
+  
         await apiClient.put(`${API_URL_PL}${currentPL.productionLine_id}/`, PLupdState);
         await apiClient.put(`${API_URL_PRO_ORDERS}${currentPOID}/`, POfinish);
         getPL();
@@ -726,7 +734,7 @@ let arrayRequestRM =[]
       console.error(error);
     }
   };
-
+  
   const columns = [
     { title: 'ID', dataIndex: 'productionLine_id', key: 'productionLine_id' },
     {title: 'Factory', dataIndex: 'factory', key: 'factory', render: (text) => factory.find(factory => factory.value === text)?.label || 'Unknown' },
@@ -826,101 +834,102 @@ let arrayRequestRM =[]
       </Modal>
 
       {newOrder &&
-        <ModalComponent onClose={closeModal} fixedSize>
-          <ModalTitle>Create a New production order</ModalTitle>
-          <FormContainer>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {productFields.map((field, index) => (
-                <div key={index}>
-                  <Label>Product</Label>
-                  <SelectStyled>
-                    <Controller
-                      name={`productFields[${index}].product`}
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <Select
-                          {...field}
-                          options={getFilteredProducts(index)}
-                          formatOptionLabel={formatOptionLabel}
-                          onChange={(value) => {
-                            field.onChange(value);
-                            handleProductChange(value, index);
-                          }}
-                        />
-                      )}
-                    />
-                    {errors.productFields && errors.productFields[index] && errors.productFields[index].product && (
-                      <Error>This is a required field.</Error>
-                    )}
-                  </SelectStyled>
-                  <Label>Size of Batch per Product</Label>
-                  <SelectStyled>
-                    <Controller
-                      name={`productFields[${index}].qty`}
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <Select
-                          {...field}
-                          options={products_batch}
-                        />
-                      )}
-                    />
-                    {errors.productFields && errors.productFields[index] && errors.productFields[index].qty && (
-                      <Error>This is a required field.</Error>
-                    )}
-                  </SelectStyled>
-                  {index > 0 && (
-                    <Button iswarningBtn={true} onClick={() => removeProductField(index)}>Remove</Button>
-                  )}
-                </div>
-              ))}
-              <div className="form-control">
-                <Label>Factory</Label>
-                <SelectStyled>
-                  <Controller
-                    name="factory"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Select {...field} options={factory} />
-                    )}
+<ModalComponent onClose={closeModal} fixedSize>
+  <ModalTitle>Create a New production order</ModalTitle>
+  <FormContainer>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {productFields.map((field, index) => (
+        <div key={index}>
+          <Label>Product</Label>
+          <SelectStyled>
+            <Controller
+              name={`productFields[${index}].product`}
+              control={control}
+              rules={{ required: index === 0 }}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Select
+                    {...field}
+                    options={getFilteredProducts(index)}
+                    formatOptionLabel={formatOptionLabel}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      handleProductChange(value, index);
+                    }}
                   />
-                  {errors.factory && (
-                    <Error>This is a required field.</Error>
-                  )}
-                </SelectStyled>
-              </div>
-              <div className="form-control">
-                <Label>Warehouse to Deliver</Label>
-                <SelectStyled>
-                  <Controller
-                    name="warehouse"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Select {...field} options={warehouse} />
-                    )}
+                  {error && <Error>This is a required field.</Error>}
+                </>
+              )}
+            />
+          </SelectStyled>
+          <Label>Size of Batch per Product</Label>
+          <SelectStyled>
+            <Controller
+              name={`productFields[${index}].qty`}
+              control={control}
+              rules={{ required: index === 0 }}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Select
+                    {...field}
+                    options={products_batch}
                   />
-                  {errors.warehouse && (
-                    <Error>This is a required field.</Error>
-                  )}
-                </SelectStyled>
-              </div>
-              <div>
-                <label></label>
-                <ButtonContainer>
-                  <Button type="submit">Create Order</Button>
-                  <Button iswarningBtn={true} onClick={addProductField}>
-                    <FontAwesomeIcon icon={faPlus} /> Product
-                  </Button>
-                </ButtonContainer>
-              </div>
-            </form>
-          </FormContainer>
-        </ModalComponent>
-      }
+                  {error && <Error>This is a required field.</Error>}
+                </>
+              )}
+            />
+          </SelectStyled>
+          {index > 0 && (
+            <Button iswarningBtn={true} onClick={() => removeProductField(index)}>Remove</Button>
+          )}
+        </div>
+      ))}
+      <div className="form-control">
+        <Label>Factory</Label>
+        <SelectStyled>
+          <Controller
+            name="factory"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <Select {...field} options={factory} />
+            )}
+          />
+          {errors.factory && (
+            <Error>This is a required field.</Error>
+          )}
+        </SelectStyled>
+      </div>
+      <div className="form-control">
+        <Label>Warehouse to Deliver</Label>
+        <SelectStyled>
+          <Controller
+            name="warehouse"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <Select {...field} options={warehouse} />
+            )}
+          />
+          {errors.warehouse && (
+            <Error>This is a required field.</Error>
+          )}
+        </SelectStyled>
+      </div>
+      <div>
+        <label></label>
+        <ButtonContainer>
+          <Button type="submit">Create Order</Button>
+          <Button iswarningBtn={true} onClick={addProductField}>
+            <FontAwesomeIcon icon={faPlus} /> Product
+          </Button>
+        </ButtonContainer>
+      </div>
+    </form>
+  </FormContainer>
+</ModalComponent>
+}
+
 
       {modalWarehouse && (
         <ModalComponent onClose={closeModalWarehouse}>
@@ -997,7 +1006,8 @@ let arrayRequestRM =[]
                 </div>
               </div>
               <ButtonContainer>
-                <Button type="button" isdisabledBtn={true} onClick={() => { closeModalWarehouseToPick(); closeModal() }}>Cancel Order</Button>
+              <Button onClick={moveToRestock} iswarningBtn>Restock From Provider</Button>
+              <Button type="button" isdisabledBtn={true} onClick={() => { closeModalWarehouseToPick(); closeModal() }}>Cancel Order</Button>
                 <Button type="button" onClick={() => { onSubmitWarehousesPicking(selectedWarehousesList) }} disabled={!allItemsFulfilled}>
                   Complete Order
                 </Button>
