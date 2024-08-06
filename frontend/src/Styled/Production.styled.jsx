@@ -6,7 +6,7 @@ background: #97B25E;
 padding: 1rem 2rem;
 position: relative;
 width: 18%;
-height: 87.6vh;
+height: 100vh;
 align-items: center;
 box-shadow: 4px 0 8px 0 rgba(0, 0, 0, 0.2), 6px 0 20px 0 rgba(0, 0, 0, 0.19);
 overflow-y: auto;
