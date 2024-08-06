@@ -20,6 +20,8 @@ const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName }) => {
       setUserRole(null);
       setUserName(null);
       navigate('/');
+    } else if (key === 'show-profile') {
+      navigate('/Profile/Profile');
     }
   };
 
@@ -34,6 +36,9 @@ const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName }) => {
         </div>
       </Menu.Item>
       <Menu.Divider />
+      <Menu.Item key="show-profile">
+        Show Profile
+      </Menu.Item>
       <Menu.Item key="logout">
         Logout
       </Menu.Item>

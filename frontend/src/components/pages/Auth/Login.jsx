@@ -15,8 +15,12 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
 
   const getUserInfo = async (email) => {
     try {
-      const response = await apiClient.get(API_URL_USERS);
-      // Encuentra el usuario actual en la lista
+      const token = localStorage.getItem('access_token');
+      const response = await apiClient.get(API_URL_USERS, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const currentUser = response.data.find(user => user.email === email);
       return currentUser;
     } catch (error) {
@@ -29,14 +33,13 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
     try {
       const response = await login(values.email, values.password);
       if (response.access) {
-        // Fetch user info after login
+        localStorage.setItem('access_token', response.access);
         const userInfo = await getUserInfo(values.email);
-        if (userInfo && userInfo.role) {
+        if (userInfo) {
           if (userInfo.role === 'Client') {
             message.success('Inicio de sesión exitoso!');
-            localStorage.setItem('access_token', response.access);
             localStorage.setItem('user_role', userInfo.role);
-            localStorage.setItem('id', userInfo.id);
+            localStorage.setItem('id', userInfo.id);  // Almacenar ID del usuario en localStorage
             localStorage.setItem('user_name', `${userInfo.first_name} ${userInfo.last_name}`);
             setToken(response.access);
             setUserRole(userInfo.role);
@@ -59,7 +62,7 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
+  const onLoginFinishFailed = (errorInfo) => {
     message.error('Error en el inicio de sesión. Por favor, revisa tus credenciales.');
   };
 
@@ -82,14 +85,9 @@ const Login = ({ setToken, setUserRole, setUserName }) => {
       message.success('Registro exitoso! Ahora puedes iniciar sesión.');
       setIsFlipped(false);
     } catch (error) {
-      console.error('Error during registration:', error);
+      console.error('Error durante el registro:', error);
       message.error('Error en el registro. Por favor, intenta nuevamente.');
     }
-  };
-
-  const onLoginFinishFailed = (errorInfo) => {
-    console.error('Failed:', errorInfo);
-    message.error('Error en el inicio de sesión. Por favor, revisa tus credenciales.');
   };
 
   const onRegisterFinishFailed = (errorInfo) => {

@@ -84,7 +84,7 @@ const Salesdetails = () => {
         setPaymentInProgress('card');
 
         try {
-            const isValidPayment = cardNumber.length === 16 && cvv.length === 3 && expiryDate.length === 5;
+            const isValidPayment = cardNumber.length === 16 && cvv.length === 3 && expiryDate.length === 4;
             if (!isValidPayment) {
                 alert('Por favor, ingresa datos de tarjeta válidos.');
                 setIsProcessing(false);
@@ -316,7 +316,7 @@ const Salesdetails = () => {
                                         value={expiryDate}
                                         onChange={(e) => {
                                             const value = e.target.value.replace(/[^0-9/]/g, '');
-                                            if (/^\d{0,2}(\/\d{0,2})?$/.test(value)) setExpiryDate(value);
+                                            if (/^\d{0,4}(\/\d{0,4})?$/.test(value)) setExpiryDate(value);
                                         }}
                                         maxLength={5}
                                         className="mb-3"
