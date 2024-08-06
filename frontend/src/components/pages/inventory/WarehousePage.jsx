@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Form, Input, Space, Button, Select, message, Tooltip } from 'antd';
+import { Table, Modal, Form, Input, Space, Button, Select, message, Tooltip, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined, UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { API_URL_WAREHOUSES, API_URL_CITIES, API_URL_USERS, API_URL_USER_WARE_ASSIGN } from '../Config';
 import NavBarMenu from './NavBarMenu';
@@ -21,6 +21,8 @@ const WarehousePage = () => {
     const [form] = Form.useForm();
     const [currentWarehouse, setCurrentWarehouse] = useState(null);
     const [searchText, setSearchText] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('All');
+    const [selectedCity, setSelectedCity] = useState('All');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [isAssignModalVisible, setIsAssignModalVisible] = useState(false);
     const [isManageModalVisible, setIsManageModalVisible] = useState(false);
@@ -41,7 +43,7 @@ const WarehousePage = () => {
 
     useEffect(() => {
         handleSearchChange(searchText);
-    }, [searchText, warehouses]);
+    }, [searchText, warehouses, selectedStatus, selectedCity]);
 
     useEffect(() => {
         if (isDeleteModalVisible) {
@@ -148,10 +150,19 @@ const WarehousePage = () => {
 
     const handleSearchChange = (searchText) => {
         setSearchText(searchText);
-        const filtered = warehouses.filter(warehouse =>
+        let filtered = warehouses.filter(warehouse =>
             (warehouse.name && warehouse.name.toLowerCase().includes(searchText.toLowerCase())) ||
             (warehouse.address && warehouse.address.toLowerCase().includes(searchText.toLowerCase()))
         );
+
+        if (selectedStatus !== 'All') {
+            filtered = filtered.filter(warehouse => warehouse.status === selectedStatus);
+        }
+
+        if (selectedCity !== 'All') {
+            filtered = filtered.filter(warehouse => warehouse.city === selectedCity);
+        }
+
         setFilteredWarehouses(filtered);
     };
 
@@ -163,7 +174,7 @@ const WarehousePage = () => {
     const handleAssignManager = async () => {
         try {
             const assignedDate = new Date().toISOString();
-            const response = await apiClient.post(API_URL_USER_WARE_ASSIGN, {
+            await apiClient.post(API_URL_USER_WARE_ASSIGN, {
                 warehouse: currentWarehouseId,
                 manager_user: selectedUser,
                 assigned_date: assignedDate,
@@ -195,7 +206,7 @@ const WarehousePage = () => {
     const handleRemoveManager = async () => {
         try {
             const removedDate = new Date().toISOString();
-            const response = await apiClient.patch(`${API_URL_USER_WARE_ASSIGN}${currentAssignment.user_warehouse_assignment_id}/`, {
+            await apiClient.patch(`${API_URL_USER_WARE_ASSIGN}${currentAssignment.user_warehouse_assignment_id}/`, {
                 removed_date: removedDate
             });
             message.success('Manager removed successfully');
@@ -212,6 +223,17 @@ const WarehousePage = () => {
         }
     };
 
+    const getStatusTag = (status) => {
+        switch (status) {
+            case 'Active':
+                return <Tag color="green">Active</Tag>;
+            case 'Inactive':
+                return <Tag color="red">Inactive</Tag>;
+            default:
+                return <Tag>Unknown</Tag>;
+        }
+    };
+
     const columns = [
         {
             title: 'No.',
@@ -221,7 +243,12 @@ const WarehousePage = () => {
         { title: 'Name', dataIndex: 'name', key: 'name' },
         { title: 'Address', dataIndex: 'address', key: 'address' },
         { title: 'Phone', dataIndex: 'phone', key: 'phone' },
-        { title: 'State', dataIndex: 'status', key: 'status' },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (status) => getStatusTag(status),
+        },
         { title: 'City', dataIndex: 'city', key: 'city', render: (text) => cities.find(city => city.city_id === text)?.city_name || 'Unknown' },
         {
             title: 'Action',
@@ -273,13 +300,34 @@ const WarehousePage = () => {
     return (
         <div>
             <NavBarMenu title="Warehouses" />
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                 <Input
                     placeholder="Search Warehouse..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
-                    style={{ width: 300, marginRight: '16px' }}
+                    style={{ width: 200 }}
                 />
+                <Select
+                    placeholder="Filter by Status"
+                    value={selectedStatus}
+                    onChange={value => setSelectedStatus(value)}
+                    style={{ width: 200 }}
+                >
+                    <Option value="All">All</Option>
+                    <Option value="Active">Active</Option>
+                    <Option value="Inactive">Inactive</Option>
+                </Select>
+                <Select
+                    placeholder="Filter by City"
+                    value={selectedCity}
+                    onChange={value => setSelectedCity(value)}
+                    style={{ width: 200 }}
+                >
+                    <Option value="All">All</Option>
+                    {cities.map(city => (
+                        <Option key={city.city_id} value={city.city_id}>{city.city_name}</Option>
+                    ))}
+                </Select>
                 <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
                     Add Warehouse
                 </Button>
@@ -316,7 +364,7 @@ const WarehousePage = () => {
                     <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="status" label="State" rules={[{ required: true }]}>
+                    <Form.Item name="status" label="Status" rules={[{ required: true }]}>
                         <Select>
                             <Option value="Active">Active</Option>
                             <Option value="Inactive">Inactive</Option>

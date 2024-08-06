@@ -53,6 +53,11 @@ const RawMaterialPage = () => {
     const [removeImage, setRemoveImage] = useState(false);
     const [pageSize, setPageSize] = useState(10);  // Added to handle page size
     const [currentPage, setCurrentPage] = useState(1);  // Added to handle current page
+
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedSupplier, setSelectedSupplier] = useState(null);
+    const [priceOrder, setPriceOrder] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -81,6 +86,10 @@ const RawMaterialPage = () => {
             }, 1000);
         }
     }, [isDeleteModalVisible]);
+
+    useEffect(() => {
+        applyFilters();
+    }, [selectedCategory, selectedSupplier, priceOrder, rawMaterials]);
 
     const fetchRawMaterials = async () => {
         setLoading(true);
@@ -213,6 +222,24 @@ const RawMaterialPage = () => {
         setFilteredRawMaterials(filtered);
     };
 
+    const applyFilters = () => {
+        let filtered = [...rawMaterials];
+
+        if (selectedCategory) {
+            filtered = filtered.filter(material => material.category === parseInt(selectedCategory, 10));
+        }
+
+        if (selectedSupplier) {
+            filtered = filtered.filter(material => material.supplier_name === selectedSupplier);
+        }
+
+        if (priceOrder) {
+            filtered = filtered.sort((a, b) => (priceOrder === 'ascend' ? a.purchase_price - b.purchase_price : b.purchase_price - a.purchase_price));
+        }
+
+        setFilteredRawMaterials(filtered);
+    };
+
     const columns = [
         {
             title: 'No.',
@@ -285,6 +312,38 @@ const RawMaterialPage = () => {
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: '100%', maxWidth: '300px' }}
                 />
+                <Select
+                    placeholder="Select Category"
+                    onChange={(value) => setSelectedCategory(value)}
+                    value={selectedCategory}
+                    allowClear
+                    style={{ width: '100%', maxWidth: '200px' }}
+                >
+                    {categories.map(category => (
+                        <Option key={category.category_id} value={category.category_id.toString()}>{category.name}</Option>
+                    ))}
+                </Select>
+                <Select
+                    placeholder="Select Supplier"
+                    onChange={(value) => setSelectedSupplier(value)}
+                    value={selectedSupplier}
+                    allowClear
+                    style={{ width: '100%', maxWidth: '200px' }}
+                >
+                    {suppliers.map(supplier => (
+                        <Option key={supplier.supplier_id} value={supplier.name}>{supplier.name}</Option>
+                    ))}
+                </Select>
+                <Select
+                    placeholder="Sort by Price"
+                    onChange={(value) => setPriceOrder(value)}
+                    value={priceOrder}
+                    allowClear
+                    style={{ width: '100%', maxWidth: '200px' }}
+                >
+                    <Option value="ascend">Ascending</Option>
+                    <Option value="descend">Descending</Option>
+                </Select>
                 <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
                     Add Raw Material
                 </Button>

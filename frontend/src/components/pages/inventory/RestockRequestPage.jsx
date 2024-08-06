@@ -6,7 +6,6 @@ import { apiClient } from '../../../ApiClient';
 import { useLocation } from 'react-router-dom';
 import NavBarMenu from './NavBarMenu';
 import { API_URL_RAW_MATERIALS, API_URL_SUPPLIERS, API_URL_RESTOCKREQUEST, API_URL_WAREHOUSES, API_URL_INVENTORYSUM, API_URL_INV } from '../Config';
-import { useNavigate } from 'react-router-dom';
 const { Option } = Select;
 
 const RestockRequestPage = () => {
@@ -102,13 +101,14 @@ const RestockRequestPage = () => {
 
     const handleFinish = async (values) => {
         try {
+            const userId = localStorage.getItem('user_id'); // Obtener el user_id desde el localStorage
             const { quantity, request_date } = values;
             const requestData = {
                 quantity,
                 requested_at: request_date.format('YYYY-MM-DD HH:mm:ss'),
                 status: 'Pending',
                 raw_material: selectedRawMaterial.raw_material_id,
-                requested_by: 1,  // Change to the logged-in user ID
+                requested_by: userId, // Usar el user_id del localStorage
                 warehouse: selectedWarehouse  // Change to the appropriate warehouse ID
             };
             const response = await apiClient.post(API_URL_RESTOCKREQUEST, requestData);
@@ -128,7 +128,6 @@ const RestockRequestPage = () => {
     return (
         <div>
             <NavBarMenu title="Restock Request" />
-            
             <Form style={{ padding: '50px' }} form={form} onFinish={handleFinish} layout="vertical">
                 <Row gutter={[16, 16]}>
                     <Col xs={24} md={12}>

@@ -61,6 +61,9 @@ const ProductPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [selectedStatus, setSelectedStatus] = useState('All');
+    const [priceOrder, setPriceOrder] = useState(null);
+
     useEffect(() => {
         fetchProducts();
         fetchRawMaterials();
@@ -87,6 +90,10 @@ const ProductPage = () => {
             }, 1000);
         }
     }, [isDeleteModalVisible]);
+
+    useEffect(() => {
+        applyFilters();
+    }, [selectedStatus, priceOrder, products]);
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -188,10 +195,23 @@ const ProductPage = () => {
 
     const handleSearchChange = (searchText) => {
         setSearchText(searchText);
-        const filtered = products.filter(product =>
+        applyFilters();
+    };
+
+    const applyFilters = () => {
+        let filtered = products.filter(product =>
             (product.name && product.name.toLowerCase().includes(searchText.toLowerCase())) ||
             (product.description && product.description.toLowerCase().includes(searchText.toLowerCase()))
         );
+
+        if (selectedStatus !== 'All') {
+            filtered = filtered.filter(product => product.status === selectedStatus);
+        }
+
+        if (priceOrder) {
+            filtered = filtered.sort((a, b) => (priceOrder === 'ascend' ? a.price - b.price : b.price - a.price));
+        }
+
         setFilteredProducts(filtered);
     };
 
@@ -359,6 +379,26 @@ const ProductPage = () => {
                     onChange={e => handleSearchChange(e.target.value)}
                     style={{ width: '100%', maxWidth: '300px' }}
                 />
+                <Select
+                    placeholder="Select Status"
+                    onChange={(value) => setSelectedStatus(value)}
+                    value={selectedStatus}
+                    style={{ width: '100%', maxWidth: '200px' }}
+                >
+                    <Option value="All">All</Option>
+                    <Option value="Active">Active</Option>
+                    <Option value="Inactive">Inactive</Option>
+                </Select>
+                <Select
+                    placeholder="Sort by Price"
+                    onChange={(value) => setPriceOrder(value)}
+                    value={priceOrder}
+                    allowClear
+                    style={{ width: '100%', maxWidth: '200px' }}
+                >
+                    <Option value="ascend">Ascending</Option>
+                    <Option value="descend">Descending</Option>
+                </Select>
                 <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
                     Add Product
                 </Button>

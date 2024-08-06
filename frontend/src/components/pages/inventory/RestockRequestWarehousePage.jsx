@@ -31,6 +31,8 @@ const RestockRequestWarehousePage = () => {
     const [isPrintModalVisible, setIsPrintModalVisible] = useState(false);
     const [currentPrintRecord, setCurrentPrintRecord] = useState(null);
     const [searchText, setSearchText] = useState('');
+    const [selectedUser, setSelectedUser] = useState('All');
+    const [selectedFactory, setSelectedFactory] = useState('All');
     const [currentDeleteId, setCurrentDeleteId] = useState(null);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -115,14 +117,37 @@ const RestockRequestWarehousePage = () => {
 
     const handleSearchChange = (text) => {
         setSearchText(text);
+        filterData(text, selectedUser, selectedFactory);
+    };
+
+    const handleUserChange = (user) => {
+        setSelectedUser(user);
+        filterData(searchText, user, selectedFactory);
+    };
+
+    const handleFactoryChange = (factory) => {
+        setSelectedFactory(factory);
+        filterData(searchText, selectedUser, factory);
+    };
+
+    const filterData = (text, user, factory) => {
+        let filtered = data;
         if (text) {
-            const filtered = data.filter(item =>
+            filtered = filtered.filter(item =>
                 item.production_order_id.toString().includes(text)
             );
-            setFilteredData(filtered);
-        } else {
-            setFilteredData(data);
         }
+        if (user !== 'All') {
+            filtered = filtered.filter(item =>
+                item.requested_by === user
+            );
+        }
+        if (factory !== 'All') {
+            filtered = filtered.filter(item =>
+                item.to_factory === factory
+            );
+        }
+        setFilteredData(filtered);
     };
 
     const showPrintModal = (record) => {
@@ -232,13 +257,35 @@ const RestockRequestWarehousePage = () => {
     return (
         <div>
             <NavBarMenu title="Restock Requests Warehouse" />
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                 <Input
                     placeholder="Search by Order ID"
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
-                    style={{ width: 300, marginRight: '16px' }}
+                    style={{ width: 200 }}
                 />
+                <Select
+                    placeholder="Filter by User"
+                    value={selectedUser}
+                    onChange={handleUserChange}
+                    style={{ width: 200 }}
+                >
+                    <Option value="All">All</Option>
+                    {users.map(user => (
+                        <Option key={user.id} value={user.id}>{user.first_name} {user.last_name}</Option>
+                    ))}
+                </Select>
+                <Select
+                    placeholder="Filter by Factory"
+                    value={selectedFactory}
+                    onChange={handleFactoryChange}
+                    style={{ width: 200 }}
+                >
+                    <Option value="All">All</Option>
+                    {factories.map(factory => (
+                        <Option key={factory.factory_id} value={factory.factory_id}>{factory.name}</Option>
+                    ))}
+                </Select>
                 <Button type="primary" onClick={() => setIsAddModalVisible(true)} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
                     Add Request
                 </Button>

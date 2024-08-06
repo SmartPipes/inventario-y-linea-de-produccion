@@ -24,6 +24,7 @@ const SupplierPage = () => {
     const [deleteEnabled, setDeleteEnabled] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [selectedRating, setSelectedRating] = useState('All');
 
     useEffect(() => {
         fetchSuppliers();
@@ -31,7 +32,7 @@ const SupplierPage = () => {
 
     useEffect(() => {
         handleSearchChange(searchText);
-    }, [searchText, suppliers]);
+    }, [searchText, suppliers, selectedRating]);
 
     useEffect(() => {
         if (isDeleteModalVisible) {
@@ -123,7 +124,7 @@ const SupplierPage = () => {
 
     const handleSearchChange = (searchText) => {
         setSearchText(searchText);
-        const filtered = suppliers.filter(supplier =>
+        let filtered = suppliers.filter(supplier =>
             (supplier.name && supplier.name.toLowerCase().includes(searchText.toLowerCase())) ||
             (supplier.RFC && supplier.RFC.toLowerCase().includes(searchText.toLowerCase())) ||
             (supplier.email && supplier.email.toLowerCase().includes(searchText.toLowerCase())) ||
@@ -131,6 +132,11 @@ const SupplierPage = () => {
             (supplier.address && supplier.address.toLowerCase().includes(searchText.toLowerCase())) ||
             (supplier.rating && supplier.rating.toString().includes(searchText))
         );
+
+        if (selectedRating !== 'All') {
+            filtered = filtered.filter(supplier => supplier.rating === selectedRating);
+        }
+
         setFilteredSuppliers(filtered);
     };
 
@@ -201,13 +207,26 @@ const SupplierPage = () => {
     return (
         <div>
             <NavBarMenu title="Suppliers" />
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                 <Input
                     placeholder="Search Supplier..."
                     value={searchText}
                     onChange={e => handleSearchChange(e.target.value)}
-                    style={{ width: 300, marginRight: '16px' }}
+                    style={{ width: 300 }}
                 />
+                <Select
+                    placeholder="Filter by Rating"
+                    onChange={(value) => setSelectedRating(value)}
+                    value={selectedRating}
+                    style={{ width: 200 }}
+                >
+                    <Option value="All">All</Option>
+                    <Option value="A">A</Option>
+                    <Option value="B">B</Option>
+                    <Option value="C">C</Option>
+                    <Option value="D">D</Option>
+                    <Option value="E">E</Option>
+                </Select>
                 <Button type="primary" onClick={() => showModal()} style={{ backgroundColor: buttonColor, borderColor: buttonColor }}>
                     Add Supplier
                 </Button>
