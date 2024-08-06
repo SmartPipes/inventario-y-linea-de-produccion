@@ -17,13 +17,13 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName,
 
   switch (division) {
     case '1':
-      divisionName = 'Production';
-      break;
-    case '2':
       divisionName = 'Inventory';
       break;
-    case '3':
+    case '2':
       divisionName = 'Sales';
+      break;
+    case '3':
+      divisionName = 'Production';
       break;
     case '4':
       divisionName = 'Delivery';
