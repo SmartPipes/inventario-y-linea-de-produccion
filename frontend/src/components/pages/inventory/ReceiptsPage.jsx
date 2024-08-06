@@ -20,6 +20,9 @@ const ReceiptsPage = () => {
     const [supplier, setSupplier] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
     useEffect(() => {
         fetchRestockRequests();
         fetchRawMaterials();
@@ -50,19 +53,15 @@ const ReceiptsPage = () => {
             const restockData = response.data;
             setSelectedRestockRequest(restockData);
 
-            // Fetch related raw material
             const rawMaterialResponse = await apiClient.get(`${API_URL_RAW_MATERIALS}${restockData.raw_material}/`);
             setRawMaterial(rawMaterialResponse.data);
 
-            // Fetch related warehouse
             const warehouseResponse = await apiClient.get(`${API_URL_WAREHOUSES}${restockData.warehouse}/`);
             setWarehouse(warehouseResponse.data);
 
-            // Fetch requested by user
             const userResponse = await apiClient.get(`${API_URL_USERS}${restockData.requested_by}/`);
             setRequestedBy(userResponse.data);
 
-            // Fetch supplier details if supplier ID exists in restockData
             if (rawMaterialResponse.data.supplier) {
                 const supplierResponse = await apiClient.get(`${API_URL_SUPPLIERS}${rawMaterialResponse.data.supplier}/`);
                 setSupplier(supplierResponse.data);
@@ -124,6 +123,11 @@ const ReceiptsPage = () => {
         : restockRequests;
 
     const columns = [
+        {
+            title: 'No.',
+            key: 'index',
+            render: (text, record, index) => (currentPage - 1) * pageSize + index + 1,
+        },
         { title: 'ID', dataIndex: 'restock_request_id', key: 'restock_request_id' },
         {
             title: 'State',
@@ -205,6 +209,14 @@ const ReceiptsPage = () => {
                         dataSource={filteredData}
                         rowKey="restock_request_id"
                         scroll={{ x: true }}
+                        pagination={{
+                            current: currentPage,
+                            pageSize: pageSize,
+                            onChange: (page, pageSize) => {
+                                setCurrentPage(page);
+                                setPageSize(pageSize);
+                            }
+                        }}
                     />
                 </Col>
             </Row>

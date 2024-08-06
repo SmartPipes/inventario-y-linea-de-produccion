@@ -29,6 +29,8 @@ const WarehousePage = () => {
     const [currentAssignment, setCurrentAssignment] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
         fetchWarehouses();
@@ -160,7 +162,7 @@ const WarehousePage = () => {
 
     const handleAssignManager = async () => {
         try {
-            const assignedDate = new Date().toISOString(); // Incluir la fecha y hora
+            const assignedDate = new Date().toISOString();
             const response = await apiClient.post(API_URL_USER_WARE_ASSIGN, {
                 warehouse: currentWarehouseId,
                 manager_user: selectedUser,
@@ -192,14 +194,10 @@ const WarehousePage = () => {
 
     const handleRemoveManager = async () => {
         try {
-            const removedDate = new Date().toISOString(); // Incluir la fecha y hora
-            console.log(`PATCH ${API_URL_USER_WARE_ASSIGN}${currentAssignment.user_warehouse_assignment_id}/`, {
-                removed_date: removedDate
-            });
+            const removedDate = new Date().toISOString();
             const response = await apiClient.patch(`${API_URL_USER_WARE_ASSIGN}${currentAssignment.user_warehouse_assignment_id}/`, {
                 removed_date: removedDate
             });
-            console.log('Response:', response.data);
             message.success('Manager removed successfully');
             fetchAssignments();
             setIsManageModalVisible(false);
@@ -215,7 +213,11 @@ const WarehousePage = () => {
     };
 
     const columns = [
-        { title: 'ID', dataIndex: 'warehouse_id', key: 'warehouse_id' },
+        {
+            title: 'No.',
+            key: 'index',
+            render: (text, record, index) => (currentPage - 1) * pageSize + index + 1,
+        },
         { title: 'Name', dataIndex: 'name', key: 'name' },
         { title: 'Address', dataIndex: 'address', key: 'address' },
         { title: 'Phone', dataIndex: 'phone', key: 'phone' },
@@ -288,6 +290,14 @@ const WarehousePage = () => {
                 rowKey="warehouse_id"
                 loading={loading}
                 scroll={{ x: 'max-content' }}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    onChange: (page, pageSize) => {
+                        setCurrentPage(page);
+                        setPageSize(pageSize);
+                    }
+                }}
             />
             <Modal
                 title={editMode ? 'Edit Warehouse' : 'Add Warehouse'}
