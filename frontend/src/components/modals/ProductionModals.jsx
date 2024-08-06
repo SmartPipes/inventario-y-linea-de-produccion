@@ -39,8 +39,15 @@ const CloseButton = styled.button`
 `;
 
 const ModalComponent = ({ onClose, children, fixedSize }) => {
+  const handleOverlayClick = (e) => {
+    // Check if the click is on the overlay (i.e., outside the modal content)
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <ModalOverlay>
+    <ModalOverlay onClick={handleOverlayClick}>
       <ModalContent fixedSize={fixedSize}>
         <CloseButton onClick={onClose}>&times;</CloseButton>
         {children}

@@ -214,7 +214,7 @@ export const ProductionPhase = () => {
         </FormContainer>
       </MainContent>
       {selectedPhase && (
-        <ModalComponent onClose={closeModal}>
+        <ModalComponent onClose={closeModal} fixedSize>
           {selectedPhase.status === 'Active' && (
             <BtnEdit onClick={() => { startEditing() }}>
               <FontAwesomeIcon icon={faPenToSquare} />

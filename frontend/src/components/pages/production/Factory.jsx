@@ -358,7 +358,7 @@ const [PL, setPL] = useState([]);
                               usr => 
                                 usr.is_active === true && 
                                 !managers.some(man => man.manager === usr.id && man.departure_date === null) &&
-                                UserDivision.some(div => div.user === usr.id && div.division === 1)
+                                UserDivision.some(div => div.user === usr.id && div.division === 3) //changed this
                             )
                             .map(op => (
                               <SelectANT.Option key={op.id} value={op.id}>
