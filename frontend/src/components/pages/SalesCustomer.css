@@ -1,0 +1,43 @@
+.order-page {
+    margin: 20px;
+}
+
+.order-page h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.card-subtitle {
+    font-size: 14px;
+}
+
+.list-group-item img {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.list-group-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+}
+
+.list-group-item h5 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.btn-link {
+    font-size: 14px;
+    color: #007bff;
+    padding: 0;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}

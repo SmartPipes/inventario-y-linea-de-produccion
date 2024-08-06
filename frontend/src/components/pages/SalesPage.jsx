@@ -84,9 +84,9 @@ const SalesPage = () => {
                             id="category-dropdown"
                             onSelect={handleCategoryChange}
                         >
-                            <Dropdown.Item eventKey="Todas las categorías">Todas las categorías</Dropdown.Item>
-                            <Dropdown.Item eventKey="Electrónicos">Electrónicos</Dropdown.Item>
-                            <Dropdown.Item eventKey="Hogar y Cocina">Hogar y Cocina</Dropdown.Item>
+                            <Dropdown.Item eventKey="Todas las categorías">All Categories</Dropdown.Item>
+                            <Dropdown.Item eventKey="Electrónicos">Electronics</Dropdown.Item>
+                            <Dropdown.Item eventKey="Hogar y Cocina">Home and Kitchen</Dropdown.Item>
                         </DropdownButton>
                         <Form.Control
                             type="text"
@@ -103,11 +103,11 @@ const SalesPage = () => {
                             id="sort-dropdown"
                             onSelect={handleSortOptionChange}
                         >
-                            <Dropdown.Item eventKey="Relevancia">Relevancia</Dropdown.Item>
-                            <Dropdown.Item eventKey="Precio: menor a mayor">Precio: menor a mayor</Dropdown.Item>
-                            <Dropdown.Item eventKey="Precio: mayor a menor">Precio: mayor a menor</Dropdown.Item>
-                            <Dropdown.Item eventKey="Alfabético: A-Z">Alfabético: A-Z</Dropdown.Item>
-                            <Dropdown.Item eventKey="Alfabético: Z-A">Alfabético: Z-A</Dropdown.Item>
+                            <Dropdown.Item eventKey="Relevancia">Relevance</Dropdown.Item>
+                            <Dropdown.Item eventKey="Precio: menor a mayor">Price: low to high</Dropdown.Item>
+                            <Dropdown.Item eventKey="Precio: mayor a menor">Price: highest to lowest</Dropdown.Item>
+                            <Dropdown.Item eventKey="Alfabético: A-Z">Alphabetical: A-Z</Dropdown.Item>
+                            <Dropdown.Item eventKey="Alfabético: Z-A">Alphabetical: Z-A</Dropdown.Item>
                         </DropdownButton>
                     </InputGroup>
                 </Form>
@@ -128,7 +128,7 @@ const SalesPage = () => {
                                         onClick={() => handleAddToCart(product)}
                                         disabled={product.stock === 0}
                                     >
-                                        {product.stock === 0 ? 'Sin stock' : 'AÑADIR AL CARRITO'}
+                                        {product.stock === 0 ? 'No available' : 'Add to Cart'}
                                     </Button>
                                 </Card.Body>
                             </Card>

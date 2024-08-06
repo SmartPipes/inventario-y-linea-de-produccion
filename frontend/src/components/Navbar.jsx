@@ -47,8 +47,9 @@ const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName }) => {
 
   const links = [
     { page: "Sales", href: "/sales" },
+    { page: "Orders", href: "/sales/Purchases" },
   ];
-
+  
   return (
     <NavbarWrapper>
       <Logo />

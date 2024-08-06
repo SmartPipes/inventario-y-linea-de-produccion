@@ -23,7 +23,10 @@ export const CartProvider = ({ children }) => {
     const handleRemoveFromCart = (productId) => {
         setCartItems(cartItems.filter(item => item.product_id !== productId));
     };
-
+    
+    const handleEmptyCart = () => {
+        setCartItems([]);
+    };
     const handleIncrementQuantity = (productId) => {
         setCartItems(cartItems.map(item => 
             item.product_id === productId ? { ...item, quantity: item.quantity + 1 } : item
@@ -40,7 +43,7 @@ export const CartProvider = ({ children }) => {
     const handleCloseSidebar = () => setShowSidebar(false);
 
     return (
-        <CartContext.Provider value={{ cartItems, handleAddToCart, handleRemoveFromCart, handleIncrementQuantity, handleDecrementQuantity, showSidebar, handleShowSidebar, handleCloseSidebar }}>
+        <CartContext.Provider value={{ cartItems, handleAddToCart, handleRemoveFromCart,handleEmptyCart, handleIncrementQuantity, handleDecrementQuantity, showSidebar, handleShowSidebar, handleCloseSidebar }}>
             {children}
         </CartContext.Provider>
     );

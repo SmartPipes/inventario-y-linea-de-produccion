@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { apiClient } from '../../ApiClient';
 import { useNavigate } from 'react-router-dom';
-
+import Sidebar from '../items/Sidebar';
 import {
     API_URL_PRODUCTS,
     API_URL_DELIVERY_CARTS,
@@ -20,7 +20,7 @@ import {
 } from './Config';
 
 const Salesdetails = () => {
-    const { cartItems, handleRemoveFromCart, handleIncrementQuantity, handleDecrementQuantity, handleAddToCart } = useCart();
+    const { cartItems, handleRemoveFromCart, handleIncrementQuantity, handleDecrementQuantity, handleAddToCart,handleEmptyCart } = useCart();
     const [showModal, setShowModal] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('Debito');
     const [cardNumber, setCardNumber] = useState('');
@@ -34,6 +34,7 @@ const Salesdetails = () => {
     const [product, setProducts] = useState([]);
     const [savePaymentMethod, setSavePaymentMethod] = useState(false);
     const navigate = useNavigate();
+    
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -66,6 +67,8 @@ const Salesdetails = () => {
             const response = await apiClient.post(API_URL_SALE_DELIVERY_DATA, fullPayload);
             console.log("Venta y datos de entrega registrados con éxito:", response.data);
             setShowModal(false);
+            alert('purchase made successfully')
+            handleEmptyCart();
             navigate('/sales');
         } catch (error) {
             console.error('Error sending sale and delivery data:', error);
@@ -107,6 +110,7 @@ const Salesdetails = () => {
             };
 
             await processSale(fullPayload);
+            
         } catch (error) {
             console.error('Error processing card payment:', error);
             setIsProcessing(false);
@@ -129,7 +133,7 @@ const Salesdetails = () => {
             delivery_order: {
                 delivery_date: new Date().toISOString(),
                 status: "pending",
-                delivery_address: address,
+                delivery_address: 'Utt cuervos',
                 notes: "Delivery Details Check",
                 third_party_service: 1,
                 client: id
@@ -143,9 +147,9 @@ const Salesdetails = () => {
         <Container className="mt-4">
             <Row>
                 <Col md={8}>
-                    <h1 className="mb-4">Carrito de Compras</h1>
+                    <h1 className="mb-4">Shopping Cart</h1>
                     {cartItems.length === 0 ? (
-                        <p>No hay artículos en el carrito</p>
+                        <p>No items in the cart</p>
                     ) : (
                         cartItems.map(item => (
                             <Card key={item.product_id} className="mb-3 p-3 shadow-sm border-0">
@@ -168,7 +172,7 @@ const Salesdetails = () => {
                                             onClick={() => handleRemoveFromCart(item.product_id)}
                                             style={{ textDecoration: 'none', fontSize: '1rem' }}
                                         >
-                                            <FaTrashAlt className="mr-2" /> Eliminar
+                                            <FaTrashAlt className="mr-2" /> Eliminate
                                         </Button>
                                     </Col>
                                     <Col xs={3} className="text-right">
@@ -181,18 +185,18 @@ const Salesdetails = () => {
                 </Col>
                 <Col md={4}>
                     <Card className="p-3 mb-3 shadow-sm border-0">
-                        <h4>Subtotal ({cartItems.length} productos): ${subtotal}</h4>
+                        <h4>Subtotal ({cartItems.length} products): ${subtotal}</h4>
                         <Button
                             style={{ backgroundColor: "#5cb85c", borderColor: "#5cb85c" }}
                             className="w-100"
                             onClick={() => setShowModal(true)}
                         >
-                            Proceder al pago
+                            Proceed to payment
                         </Button>
                     </Card>
                     <Card className="p-4 shadow-lg border-0 rounded">
                         <Card.Body>
-                            <Card.Title as="h5" className="mb-4">Empareja con tu carrito</Card.Title>
+                            <Card.Title as="h5" className="mb-4">Match with your cart</Card.Title>
                             {product.slice(0, 4).map(item => (
                                 <div key={item.product_id} className="d-flex align-items-center mb-3 p-2 border rounded">
                                     <Image src={item.image_icon} thumbnail style={{ width: '60px', height: '60px' }} />
@@ -204,7 +208,7 @@ const Salesdetails = () => {
                                             size="sm"
                                             onClick={() => handleAddToCart(item)}
                                         >
-                                            Agregar al carrito
+                                            add to cart
                                         </Button>
                                     </div>
                                     <div className="ml-auto font-weight-bold text-primary">
@@ -219,17 +223,17 @@ const Salesdetails = () => {
 
             <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title className="font-weight-bold">Confirmar Pago</Modal.Title>
+                    <Modal.Title className="font-weight-bold">Confirm payment</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <h5 className="font-weight-bold mb-3">Resumen de la Compra</h5>
+                    <h5 className="font-weight-bold mb-3">Summary of purchase</h5>
                     <Table striped bordered hover variant="light">
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Descripción</th>
-                                <th>Cantidad</th>
-                                <th>Precio Unitario</th>
+                                <th>Product</th>
+                                <th>Description</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
                                 <th>Total</th>
                             </tr>
                         </thead>
@@ -248,70 +252,92 @@ const Salesdetails = () => {
                     <hr />
                     <Form>
                         <Form.Group controlId="formPaymentMethod">
-                            <Form.Label className="font-weight-bold">Método de Pago</Form.Label>
+                            <Form.Label className="font-weight-bold">Payment method</Form.Label>
                             <Form.Control
                                 as="select"
                                 value={paymentMethod}
                                 onChange={(e) => setPaymentMethod(e.target.value)}
                                 className="mb-3"
                             >
-                                <option value="Debito">Débito</option>
-                                <option value="Credito">Crédito</option>
+                                <option value="Debito">Debit</option>
+                                <option value="Credito">Credit</option>
                                 <option value="PayPal">PayPal</option>
                             </Form.Control>
                         </Form.Group>
                         {paymentMethod === 'Debito' || paymentMethod === 'Credito' ? (
                             <>
                                 <Form.Group controlId="formCardNumber">
-                                    <Form.Label className="font-weight-bold">Número de Tarjeta</Form.Label>
+                                    <Form.Label className="font-weight-bold">Card number</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Ingrese el número de tarjeta (16 dígitos)"
+                                        placeholder="Enter card number (16 digits)"
                                         value={cardNumber}
-                                        onChange={(e) => setCardNumber(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            if (value.length <= 16) setCardNumber(value);
+                                        }}
+                                        maxLength={16}
                                         className="mb-3"
                                     />
                                 </Form.Group>
+
                                 <Form.Group controlId="formCardHolder">
-                                    <Form.Label className="font-weight-bold">Nombre del Titular</Form.Label>
+                                    <Form.Label className="font-weight-bold">Name of owner</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Ingrese el nombre del titular"
+                                        placeholder="Type the Name of owner"
                                         value={cardHolder}
-                                        onChange={(e) => setCardHolder(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                            setCardHolder(value);
+                                        }}
+                                        maxLength={50}
                                         className="mb-3"
                                     />
                                 </Form.Group>
-                                <Form.Group controlId="formaddress">
-                                    <Form.Label className="font-weight-bold">Direccion de envio del paqute</Form.Label>
+
+                                <Form.Group controlId="formAddress">
+                                    <Form.Label className="font-weight-bold">Package shipping address</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Ingrese la direccion donde el paquete sera enviado"
+                                        placeholder="Enter the address where the package will be sent"
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
+                                        maxLength={100}
                                         className="mb-3"
                                     />
                                 </Form.Group>
+
                                 <Form.Group controlId="formExpiryDate">
-                                    <Form.Label className="font-weight-bold">Fecha de Expiración</Form.Label>
+                                    <Form.Label className="font-weight-bold">Card Expiration Date</Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="MM/AA"
                                         value={expiryDate}
-                                        onChange={(e) => setExpiryDate(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/[^0-9/]/g, '');
+                                            if (/^\d{0,2}(\/\d{0,2})?$/.test(value)) setExpiryDate(value);
+                                        }}
+                                        maxLength={5}
                                         className="mb-3"
                                     />
                                 </Form.Group>
+
                                 <Form.Group controlId="formCvv">
                                     <Form.Label className="font-weight-bold">CVV</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Ingrese el CVV (3 dígitos)"
+                                        placeholder="Type CVV (3 digits)"
                                         value={cvv}
-                                        onChange={(e) => setCvv(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            if (value.length <= 3) setCvv(value);
+                                        }}
+                                        maxLength={3}
                                         className="mb-3"
                                     />
                                 </Form.Group>
+
                             </>
                         ) : paymentMethod === 'PayPal' ? (
                             <PayPalScriptProvider options={{ "client-id": "AW2rBdOeXNJP62RYmTwawRjhAKssHrieIRwnr8fmpRkOz03yNxPAYxQ8r8aYnXVx8auQ9n70BRVmZYiY" }}>
@@ -328,10 +354,12 @@ const Salesdetails = () => {
                                     onApprove={(data, actions) => {
                                         return actions.order.capture().then((details) => {
                                             handlePayPalApprove(data.orderID);
+                                            console.log(data)
                                             alert("Pago con PayPal completado por " + details.payer.name.given_name);
                                         });
                                     }}
                                     onError={(err) => {
+                                        console.log(data)
                                         console.error("Error con PayPal: ", err);
                                     }}
                                 />
@@ -343,20 +371,23 @@ const Salesdetails = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Cancelar
+                        Cancel
                     </Button>
                     {paymentMethod !== 'PayPal' && (
                         <Button
                             variant="primary"
                             onClick={handleProceedToPayment}
                         >
-                            Confirmar y Proceder al Pago
+                            Confirm and Proceed to Payment
                         </Button>
                     )}
                 </Modal.Footer>
             </Modal>
+            <Sidebar />
         </Container>
+        
     );
+    
 };
 
 export default Salesdetails;

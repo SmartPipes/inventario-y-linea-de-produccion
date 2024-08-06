@@ -13,8 +13,8 @@ const ProductCard = ({ product }) => {
     return (
         <div onClick={handleClick}>
             <Card title={product.name} image={product.image_icon}>
-                <p>Precio: ${product.price}</p>
-                <p>Estado: {product.status}</p>
+                <p>Price: ${product.price}</p>
+                <p>State: {product.status}</p>
             </Card>
         </div>
     );
