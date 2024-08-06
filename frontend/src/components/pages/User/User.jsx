@@ -201,7 +201,7 @@ export const User = () => {
                     <Form.Item name="birthdate" label="Birthdate">
                         <Input type="date" />
                     </Form.Item>
-                    <Form.Item name="division" label="Division" rules={[{ required: true }]}>
+                    <Form.Item name="division" label="Division">
                         <Select>
                             {divisions.map(division => (
                                 <Option key={division.division_id} value={division.division_id}>
