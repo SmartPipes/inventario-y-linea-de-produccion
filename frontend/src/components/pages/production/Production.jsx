@@ -728,6 +728,7 @@ let arrayRequestRM =[]
         await apiClient.put(`${API_URL_PL}${currentPL.productionLine_id}/`, PLupdState);
         await apiClient.put(`${API_URL_PRO_ORDERS}${currentPOID}/`, POfinish);
         getPL();
+        getProductionOrders();// Added this to refresh the order count
         setIsModalVisibleProduction(false);
       }
     } catch (error) {
