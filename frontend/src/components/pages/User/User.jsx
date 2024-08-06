@@ -106,29 +106,37 @@ export const User = () => {
             if (editMode) {
                 console.log('Editing user with ID:', currentUser.id);
                 await apiClient.put(`${API_URL_USERS}${currentUser.id}/`, userData);
+
                 const divisionUser = divisionUsers.find(du => du.user === currentUser.id);
-                const divisionData = {
-                    removed_date: null,
-                    division: values.division,
-                    user: currentUser.id
-                };
-                console.log('Division data to send:', divisionData);
-                if (divisionUser) {
-                    await apiClient.put(`${API_URL_DIVISION_USERS}${divisionUser.division_user_id}/`, divisionData);
-                } else {
-                    await apiClient.post(API_URL_DIVISION_USERS, divisionData);
+                if (values.division) {
+                    const divisionData = {
+                        removed_date: null,
+                        division: values.division,
+                        user: currentUser.id
+                    };
+                    console.log('Division data to send:', divisionData);
+                    if (divisionUser) {
+                        await apiClient.put(`${API_URL_DIVISION_USERS}${divisionUser.division_user_id}/`, divisionData);
+                    } else {
+                        await apiClient.post(API_URL_DIVISION_USERS, divisionData);
+                    }
+                } else if (divisionUser) {
+                    await apiClient.delete(`${API_URL_DIVISION_USERS}${divisionUser.division_user_id}/`);
                 }
+
                 message.success('User updated successfully');
             } else {
                 const response = await apiClient.post(API_URL_USERS, userData);
                 const newUserId = response.data.id;
-                const divisionData = {
-                    removed_date: null,
-                    division: values.division,
-                    user: newUserId
-                };
-                console.log('Division data to send:', divisionData);
-                await apiClient.post(API_URL_DIVISION_USERS, divisionData);
+                if (values.division) {
+                    const divisionData = {
+                        removed_date: null,
+                        division: values.division,
+                        user: newUserId
+                    };
+                    console.log('Division data to send:', divisionData);
+                    await apiClient.post(API_URL_DIVISION_USERS, divisionData);
+                }
                 message.success('User added successfully');
             }
             fetchUsers();
@@ -152,7 +160,7 @@ export const User = () => {
             render: userId => {
                 const divisionUser = divisionUsers.find(du => du.user === userId);
                 const division = divisions.find(div => div.division_id === (divisionUser?.division || ''));
-                return division ? division.name : 'Unknown';
+                return division ? division.name : 'None';
             }
         },
         {
