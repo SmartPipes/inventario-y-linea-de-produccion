@@ -29,6 +29,12 @@ const ResponsiveModal = styled(Modal)`
   }
 `;
 
+const ImagePreviewModal = styled(Modal)`
+  .ant-modal-content {
+    z-index: 1050;
+  }
+`;
+
 const ProductPage = () => {
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -52,6 +58,8 @@ const ProductPage = () => {
     const [deleteEnabled, setDeleteEnabled] = useState(false);
     const [removeImage, setRemoveImage] = useState(false);
     const [newMaterials, setNewMaterials] = useState([]);
+    const [pageSize, setPageSize] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         fetchProducts();
@@ -262,7 +270,11 @@ const ProductPage = () => {
     };
 
     const columns = [
-        { title: 'ID', dataIndex: 'product_id', key: 'product_id' },
+        {
+            title: 'No.',
+            key: 'index',
+            render: (text, record, index) => (currentPage - 1) * pageSize + index + 1,
+        },
         { title: 'Name', dataIndex: 'name', key: 'name' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
         { title: 'Price', dataIndex: 'price', key: 'price' },
@@ -356,6 +368,12 @@ const ProductPage = () => {
                 dataSource={filteredProducts}
                 rowKey="product_id"
                 loading={loading}
+                pagination={{
+                    onChange: (page, pageSize) => {
+                        setCurrentPage(page);
+                        setPageSize(pageSize);
+                    },
+                }}
                 scroll={{ x: '100%' }}
             />
             <ResponsiveModal
@@ -397,14 +415,14 @@ const ProductPage = () => {
                     </Form.Item>
                 </Form>
             </ResponsiveModal>
-            <ResponsiveModal
+            <ImagePreviewModal
                 title="Image Preview"
                 visible={previewVisible}
                 footer={null}
                 onCancel={() => setPreviewVisible(false)}
             >
                 <img alt="Preview" style={{ width: '100%' }} src={previewImage} />
-            </ResponsiveModal>
+            </ImagePreviewModal>
             <ResponsiveModal
                 title="Confirm Deletion"
                 visible={isDeleteModalVisible}

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Space, Button, message, Tag, Row, Col, Select } from 'antd';
-import { 
-    API_URL_OPERATION_LOG, 
-    API_URL_USERS, 
-    API_URL_INV, 
-    API_URL_WAREHOUSES, 
-    API_URL_PRODUCTS, 
-    API_URL_RAW_MATERIALS 
+import { Table, Modal, Space, Button, message, Tag, Row, Col, Select, Tooltip } from 'antd';
+import { PrinterOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+    API_URL_OPERATION_LOG,
+    API_URL_USERS,
+    API_URL_INV,
+    API_URL_WAREHOUSES,
+    API_URL_PRODUCTS,
+    API_URL_RAW_MATERIALS
 } from '../Config';
 import NavBarMenu from './NavBarMenu';
 import { apiClient } from '../../../ApiClient';
@@ -48,6 +49,8 @@ const OperationLogPage = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [selectedOperationType, setSelectedOperationType] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
         fetchOperationLogs();
@@ -207,9 +210,9 @@ const OperationLogPage = () => {
             doc.text(filterDescription, 14, 24);
         }
         doc.autoTable({
-            head: [['ID', 'Quantity', 'Date/Hour', 'Operation Type', 'Article', 'User', 'Warehouse']],
-            body: filteredLogs.map(log => [
-                log.operation_log_id,
+            head: [['No.', 'Quantity', 'Date/Hour', 'Operation Type', 'Article', 'User', 'Warehouse']],
+            body: filteredLogs.map((log, index) => [
+                index + 1,
                 log.quantity,
                 log.datetime,
                 log.type_operation,
@@ -226,8 +229,8 @@ const OperationLogPage = () => {
     };
 
     const downloadExcel = () => {
-        const data = filteredLogs.map(log => ({
-            ID: log.operation_log_id,
+        const data = filteredLogs.map((log, index) => ({
+            No: index + 1,
             Quantity: log.quantity,
             'Date/Hour': log.datetime,
             'Operation Type': log.type_operation,
@@ -249,7 +252,11 @@ const OperationLogPage = () => {
     };
 
     const columns = [
-        { title: 'ID', dataIndex: 'operation_log_id', key: 'operation_log_id' },
+        {
+            title: 'No.',
+            key: 'index',
+            render: (text, record, index) => (currentPage - 1) * pageSize + index + 1,
+        },
         { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
         { title: 'Date/Hour', dataIndex: 'datetime', key: 'datetime' },
         {
@@ -283,7 +290,9 @@ const OperationLogPage = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => showDeleteModal(record.operation_log_id)} type="link" danger>Delete</Button>
+                    <Tooltip title="Delete">
+                        <Button onClick={() => showDeleteModal(record.operation_log_id)} type="link" danger icon={<DeleteOutlined />} />
+                    </Tooltip>
                 </Space>
             )
         }
@@ -346,6 +355,14 @@ const OperationLogPage = () => {
                 rowKey="operation_log_id"
                 loading={loading}
                 scroll={{ x: '100%' }}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    onChange: (page, pageSize) => {
+                        setCurrentPage(page);
+                        setPageSize(pageSize);
+                    }
+                }}
             />
             <ResponsiveModal
                 title="Confirm Deletion"

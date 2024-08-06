@@ -51,6 +51,8 @@ const RawMaterialPage = () => {
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
     const [removeImage, setRemoveImage] = useState(false);
+    const [pageSize, setPageSize] = useState(10);  // Added to handle page size
+    const [currentPage, setCurrentPage] = useState(1);  // Added to handle current page
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -212,7 +214,11 @@ const RawMaterialPage = () => {
     };
 
     const columns = [
-        { title: 'ID', dataIndex: 'raw_material_id', key: 'raw_material_id' },
+        {
+            title: 'No.',
+            key: 'index',
+            render: (text, record, index) => (currentPage - 1) * pageSize + index + 1,
+        },
         { title: 'Name', dataIndex: 'name', key: 'name' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
         { title: 'Purchase Price', dataIndex: 'purchase_price', key: 'purchase_price' },
@@ -288,6 +294,12 @@ const RawMaterialPage = () => {
                 dataSource={filteredRawMaterials}
                 rowKey="raw_material_id"
                 loading={loading}
+                pagination={{
+                    onChange: (page, pageSize) => {
+                        setCurrentPage(page);
+                        setPageSize(pageSize);
+                    }
+                }}
                 scroll={{ x: '100%' }}
             />
             <ResponsiveModal

@@ -40,6 +40,8 @@ const CategoryPage = () => {
     const [currentCategoryId, setCurrentCategoryId] = useState(null);
     const [countdown, setCountdown] = useState(3);
     const [deleteEnabled, setDeleteEnabled] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
         fetchCategories();
@@ -139,7 +141,11 @@ const CategoryPage = () => {
     };
 
     const columns = [
-        { title: 'ID', dataIndex: 'category_id', key: 'category_id' },
+        {
+            title: 'No.',
+            key: 'index',
+            render: (text, record, index) => (currentPage - 1) * pageSize + index + 1,
+        },
         { title: 'Name', dataIndex: 'name', key: 'name' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
         {
@@ -188,6 +194,14 @@ const CategoryPage = () => {
                 rowKey="category_id"
                 loading={loading}
                 scroll={{ x: '100%' }}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    onChange: (page, pageSize) => {
+                        setCurrentPage(page);
+                        setPageSize(pageSize);
+                    }
+                }}
             />
             <ResponsiveModal
                 title={editMode ? 'Edit Category' : 'Add Category'}

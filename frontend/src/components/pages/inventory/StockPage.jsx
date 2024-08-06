@@ -4,7 +4,6 @@ import { apiClient } from '../../../ApiClient';
 import NavBarMenu from './NavBarMenu';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { API_URL_INV, API_URL_WAREHOUSES, API_URL_CATEGORIES, API_URL_RAW_MATERIALS, API_URL_SUPPLIERS } from '../Config';
 
@@ -202,7 +201,7 @@ const StockPage = () => {
                 margin: { top: 5, bottom: 5 } // Adjust the spacing
             });
             doc.autoTable({
-                head: [['ID', 'Name', 'Type', 'Quantity', 'Price']],
+                head: [['No.', 'Name', 'Type', 'Quantity', 'Price']],
                 body: warehouseData.map((item, index) => [index + 1, item.item_name, item.item_type, item.stock, item.item_price]),
                 startY: doc.previousAutoTable.finalY + 2,
                 styles: { overflow: 'linebreak' } // Allow table to break within page
@@ -267,6 +266,10 @@ const StockPage = () => {
                 `}
             </style>
             <NavBarMenu title="Stock" />
+            <Space style={{ marginBottom: 16 }}>
+                <Button onClick={handleDownloadPDF}>Download PDF</Button>
+                <Button onClick={handleDownloadCSV}>Download CSV</Button>
+            </Space>
             <Row gutter={[16, 16]} className="filter-row">
                 <Col xs={24} sm={12} md={6}>
                     <Select
@@ -396,10 +399,6 @@ const StockPage = () => {
             <div style={{ marginTop: 16 }}>
                 <Tag>Total Stock: {totalStock}</Tag>
             </div>
-            <Space style={{ marginTop: 16 }}>
-                <Button onClick={handleDownloadPDF}>Download PDF</Button>
-                <Button onClick={handleDownloadCSV}>Download CSV</Button>
-            </Space>
         </div>
     );
 };

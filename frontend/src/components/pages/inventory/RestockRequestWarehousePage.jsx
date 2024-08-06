@@ -33,6 +33,9 @@ const RestockRequestWarehousePage = () => {
     const [searchText, setSearchText] = useState('');
     const [currentDeleteId, setCurrentDeleteId] = useState(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
     useEffect(() => {
         apiClient.get(API_URL_RESTOCK_WH)
             .then(response => {
@@ -162,6 +165,11 @@ const RestockRequestWarehousePage = () => {
 
     const columns = [
         {
+            title: 'No.',
+            key: 'index',
+            render: (text, record, index) => (currentPage - 1) * pageSize + index + 1,
+        },
+        {
             title: 'From Warehouse',
             dataIndex: 'from_warehouse',
             key: 'from_warehouse',
@@ -240,6 +248,14 @@ const RestockRequestWarehousePage = () => {
                 dataSource={filteredData}
                 rowKey="id"
                 scroll={{ x: 'max-content' }}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    onChange: (page, pageSize) => {
+                        setCurrentPage(page);
+                        setPageSize(pageSize);
+                    }
+                }}
             />
             <Modal
                 title="Restock Request"
