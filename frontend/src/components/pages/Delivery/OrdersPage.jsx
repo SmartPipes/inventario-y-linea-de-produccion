@@ -317,8 +317,9 @@ const OrdersPage = () => {
           >
             Details
           </Button>
-          <Button onClick={() => showModalDeliver(record.delivery_order_id, record.third_party_service)} type="default">Deliver</Button>
-          <Button onClick={() => showModal(record)} type="default">Edit</Button>
+          {record.status != 'delivered' &&
+       (   <Button onClick={() => showModalDeliver(record.delivery_order_id, record.third_party_service)} type="default">Deliver</Button>)}
+         {record.status !== 'delivered' &&( <Button onClick={() => showModal(record)} type="default">Edit</Button>)}
           <Button onClick={() => showDeleteModal(record.delivery_order_id)} type="default" danger>Delete</Button>
         </Space>
       )
