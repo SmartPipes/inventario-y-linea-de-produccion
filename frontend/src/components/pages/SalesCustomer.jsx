@@ -4,7 +4,6 @@ import { apiClient } from '../../ApiClient';
 import { Card, Button, ListGroup, Badge } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './SalesCustomer.css';
-import { useCart } from '../../context/CartContext';
 import Sidebar from '../items/Sidebar';
 
 const SalesCustomer = () => {
@@ -43,7 +42,7 @@ const SalesCustomer = () => {
     }, [id]);
 
     if (orders.length === 0 || products.length === 0) {
-        return <div>No has comprado ningun articulo</div>;
+        return <div>You havent bought anything yet, go to buy something!!</div>;
     }
 
     return (
