@@ -89,10 +89,10 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName,
       const division = divisions.find(d => d.division_id === userDivision);
       if (division) {
         const notAllowedPaths = {
-          1: ["/sales", "/production", "/delivery"], // Inventory
-          2: ["/inventory", "/production", "/delivery"], // Sales
-          3: ["/inventory", "/sales", "/delivery"], // Production
-          4: ["/inventory", "/sales", "/production"] // Delivery
+          1: ["/sales", "/production",'/production/production-lines','/production/production-phases','/production/orders', "/delivery",'/delivery/orders','/delivery/ThirdPartyService'], // Inventory
+          2: ["/inventory",'/inventory/operation-log','/inventory/stock','/inventory/new-item','/inventory/categories','/inventory/warehouses','/inventory/suppliers','/inventory/operation-log','/inventory/products','/inventory/receipts','/inventory/raw-materials', "/production",'/production/factories','/production/orders', "/delivery","/delivery/orders","/delivery/ThirdPartyService"], // Sales
+          3: ["/inventory", "/sales", "/delivery","/delivery/orders","/delivery/ThirdPartyService",'/inventory/operation-log','/inventory/stock','/inventory/new-item','/inventory/categories','/inventory/warehouses','/inventory/suppliers','/inventory/operation-log','/inventory/products','/inventory/receipts','/inventory/raw-materials'], // Production
+          4: ["/inventory",'/inventory/operation-log','/inventory/stock','/inventory/new-item','/inventory/categories','/inventory/warehouses','/inventory/suppliers','/inventory/operation-log','/inventory/products','/inventory/receipts','/inventory/raw-materials', "/sales", "/production",'/production/factories','/production/orders'] // Delivery
         };
         if (notAllowedPaths[division.division_id].includes(location.pathname)) {
           navigate('/home');
