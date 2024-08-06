@@ -34,15 +34,15 @@ export const Navbar = ({ userRole, userName, setToken, setUserRole, setUserName,
   }
 
   let links = [];
-  if (division === '2') {
+  if (division === '1') {
     links = [
       { page: "Inventory", href: "/inventory" },
     ];
-  } else if (division === '1') {
+  } else if (division === '3') {
     links = [
       { page: "Production", href: "/production" }
     ];
-  } else if (division === '3') {
+  } else if (division === '2') {
     links = [
       { page: "Sales", href: "/sales" },
     ];
