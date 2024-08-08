@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Table, Modal, Form, Input, Button, Space, message, Select } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { API_URL_USERS, API_URL_DIVISIONS, API_URL_DIVISION_USERS } from '../Config';
 import NavBarMenu from '../inventory/NavBarMenu';
 import { apiClient } from '../../../ApiClient';
@@ -16,6 +17,10 @@ export const User = () => {
     const [form] = Form.useForm();
     const [currentUser, setCurrentUser] = useState(null);
     const [originalPassword, setOriginalPassword] = useState('');
+    const [searchText, setSearchText] = useState('');
+    const [searchedColumn, setSearchedColumn] = useState('');
+    const [roleFilter, setRoleFilter] = useState(null);
+    const searchInput = useRef(null);
 
     useEffect(() => {
         fetchUsers();
@@ -86,6 +91,7 @@ export const User = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
+            const role = values.division ? 'User' : 'Admin'; // Set role based on division selection
             const userData = {
                 last_login: null,
                 first_name: values.first_name,
@@ -93,7 +99,7 @@ export const User = () => {
                 birthdate: values.birthdate,
                 email: values.email,
                 phone: values.phone,
-                role: 'Admin',
+                role: role,
                 status: 'Active',
                 is_staff: false,
                 is_superuser: false,
@@ -149,10 +155,69 @@ export const User = () => {
         }
     };
 
+    const getColumnSearchProps = dataIndex => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    style={{ marginBottom: 8, display: 'block' }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Search
+                    </Button>
+                    <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+                        Reset
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+        onFilter: (value, record) =>
+            record[dataIndex]
+                ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+                : '',
+        onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+                setTimeout(() => searchInput.current.select(), 100);
+            }
+        },
+    });
+
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+    };
+
+    const handleReset = clearFilters => {
+        clearFilters();
+        setSearchText('');
+    };
+
+    const handleRoleFilterChange = value => {
+        setRoleFilter(value);
+    };
+
+    const filteredUsers = roleFilter
+        ? users.filter(user => user.role === roleFilter)
+        : users;
+
     const columns = [
-        { title: 'First Name', dataIndex: 'first_name', key: 'first_name' },
-        { title: 'Last Name', dataIndex: 'last_name', key: 'last_name' },
-        { title: 'Email', dataIndex: 'email', key: 'email' },
+        { title: 'First Name', dataIndex: 'first_name', key: 'first_name', ...getColumnSearchProps('first_name') },
+        { title: 'Last Name', dataIndex: 'last_name', key: 'last_name', ...getColumnSearchProps('last_name') },
+        { title: 'Email', dataIndex: 'email', key: 'email', ...getColumnSearchProps('email') },
+        { title: 'Role', dataIndex: 'role', key: 'role', ...getColumnSearchProps('role') },
         {
             title: 'Division',
             dataIndex: 'id',
@@ -160,7 +225,7 @@ export const User = () => {
             render: userId => {
                 const divisionUser = divisionUsers.find(du => du.user === userId);
                 const division = divisions.find(div => div.division_id === (divisionUser?.division || ''));
-                return division ? division.name : 'None';
+                return division ? division.name : '';
             }
         },
         {
@@ -177,10 +242,22 @@ export const User = () => {
     return (
         <div>
             <NavBarMenu title="User Management" />
-            <Button type="primary" onClick={() => showModal()} style={{ marginBottom: 16 }}>Add User</Button>
+            <Space style={{ marginBottom: 16 }}>
+                <Button type="primary" onClick={() => showModal()}>Add User</Button>
+                <Select
+                    placeholder="Filter by role"
+                    onChange={handleRoleFilterChange}
+                    allowClear
+                    style={{ width: 200 }}
+                >
+                    <Option value="Admin">Admin</Option>
+                    <Option value="User">User</Option>
+                    <Option value="Client">Client</Option>
+                </Select>
+            </Space>
             <Table
                 columns={columns}
-                dataSource={users}
+                dataSource={filteredUsers}
                 rowKey="id"
                 loading={loading}
             />
@@ -200,7 +277,7 @@ export const User = () => {
                     <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="password" label="Password">
+                    <Form.Item name="password" label="Password" rules={[{ required: !editMode }]}>
                         <Input type="password" />
                     </Form.Item>
                     <Form.Item name="phone" label="Phone">

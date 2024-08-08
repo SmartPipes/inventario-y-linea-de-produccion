@@ -14,6 +14,7 @@ const { Title } = Typography;
 
 export const Home = React.memo(() => {
   const [productionData, setProductionData] = useState([]);
+  const [completedProductionCount, setCompletedProductionCount] = useState(0);
   const [inventoryData, setInventoryData] = useState([]);
   const [salesData, setSalesData] = useState([]);
   const [deliveryData, setDeliveryData] = useState([]);
@@ -45,6 +46,7 @@ export const Home = React.memo(() => {
           return acc;
         }, {});
         const productionStats = Object.values(adaptedProductionData);
+        const completedCount = productionResp.data.filter(item => item.status === 'Completed').length;
 
         const adaptedInventoryData = inventoryResp.data.map(item => ({
           name: item.item_type,
@@ -74,6 +76,7 @@ export const Home = React.memo(() => {
         const totalInventorySum = inventorySumResp.data.reduce((acc, item) => acc + item.total_stock, 0);
 
         setProductionData(productionStats);
+        setCompletedProductionCount(completedCount);
         setInventoryData(adaptedInventoryData);
         setSalesData(adaptedSalesData);
         setDeliveryData(deliveryStats);
@@ -113,7 +116,7 @@ export const Home = React.memo(() => {
               <FaCogs style={{ marginRight: '8px'}} />
               Total Production
             </Title>
-            <p className="card-value">{productionData.length} Orders</p>
+            <p className="card-value">Completed: {completedProductionCount}</p>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={8} lg={6}>
